@@ -1,2 +1,7 @@
-# low-code-front-end
-a low-code-system to evaluate the health state of components from high speed trains
+# Vue 3 + Vite
+去除多余元素
+## Recommended IDE Setup
+### 安装依赖
+npm install
+### 启动
+npm run dev

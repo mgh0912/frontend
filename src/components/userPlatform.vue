@@ -154,7 +154,7 @@
           <!-- 选择自定义的模型，或者预定义的模型 -->
             <div style="height: 40px; width: 100%; background-color: #d5e0de; border-bottom: #CDCFD0 1px solid">
               <a-radio-group v-model:value="modelSelection" button-style="solid" size="large" style=" padding: 0px; width: 100%; height: 100%">
-                <a-radio-button value="customModel" style="width: 50%; border: none; border-radius: 0; font-weight: bolder; font-size: large">自定义建模</a-radio-button>
+                <a-radio-button value="customModel" style="width: 50%; border: none; border-radius: 0; font-weight: bolder; font-size: large">基础组件</a-radio-button>
                 <a-radio-button value="templateModel" style="width: 50%; border: none; border-radius: 0; font-weight: bolder; font-size: large">用户模型</a-radio-button>
               </a-radio-group>
             </div>
@@ -167,7 +167,7 @@
                 line-height: 30px; 
                 text-align: center;
                 border-bottom: solid 1px #CDCFD0;
-                height: 30px;" v-if="modelSelection === 'customModel'">选择算法进行建模</div>
+                height: 30px;" v-if="modelSelection === 'customModel'">选择组件进行建模</div>
               <!-- 算法选择区中算法展开结构 -->
               <el-scrollbar v-if="modelSelection === 'customModel'" height="600px" :min-size="35" style="margin-left: 10px;">
                              
@@ -185,7 +185,7 @@
                             <!--  #75acc3 -->
                                 <el-button style="width: 150px; margin-top: 7px; background-color: #72A1DB; border: 0px; background-image: linear-gradient(#1A9BE0, #A0C8BE);"
                                 type="info" @click="clickAtSecondMenu(option)">
-                                  <span><img :src="setIcon(option.label)" alt="" style="position:absolute; left: 5px; top: 12px; width: 20px; height: auto;"></span>
+                                  <span><img :src="setIconOfAlgorithms(option.label)" alt="" style="position:absolute; left: 5px; top: 12px; width: 20px; height: auto;"></span>
                                   <el-text style="width: 105px; font-size: 14px; color: white; font-weight: 600;" truncated>{{ option.label }}</el-text></el-button>
                             </el-row>
                             <div style="margin-left: 20px;border-left: solid 2px #CDCFD0;">
@@ -285,7 +285,7 @@
               
             </div>
             <div style="padding: 10px;">
-              <p style="padding-bottom: 5px">上传私有算法</p>
+              <p style="padding-bottom: 5px">上传增值服务组件</p>
               <uploadPrivateAlgorithmFiless />
               
             </div>
@@ -422,11 +422,11 @@
                 <!-- <el-tooltip effect="dark" content="通过节点中心的附着点拖拽节点，或右击打开参数配置" :teleported="false"> -->
                   <span>
                     <!-- 右键点击可视化建模区中的算法节点弹出对应的参数配置对话框 -->
-                    <el-popover placement="bottom" :title="item.label+'参数配置'" 
+                    <el-popover placement="bottom" :title="item.label + '参数配置'" 
                     @show="getPrivateAlgorithm(item)" :teleported="true" :width="400" trigger="contextmenu" popper-style="height: 210px; display: flex; flex-direction: column; align-content: left;">
                       <!-- 调整算法参数 -->
                       <!-- 可视化建模区中的各节点所具有的参数与代码中menuList2中的参数是相对应的 -->
-                      <el-row v-if="item.use_algorithm != null && item.id != '1.2' && item.id != '1.3' && item.id != '1.5' && (item.use_algorithm.indexOf('private')==-1)" 
+                      <el-row v-if="item.use_algorithm != null && item.id != '1.2' && item.id != '1.3' && item.id != '1.5' && (item.use_algorithm.indexOf('private')==-1) && (item.use_algorithm.indexOf('extra')==-1)" 
                         v-for="(value, key) in item.parameters[item.use_algorithm]"
                         :key="item.parameters[item.use_algorithm].keys" style="margin-bottom: 20px">
                         
@@ -443,7 +443,7 @@
                           </el-select>
                         </el-col>
                       </el-row>
-                      <div v-if="item.use_algorithm != null && !item.optional && (String(item.label_display).indexOf('私有') === -1)">目前暂无可调参数</div>
+                      <div v-if="item.use_algorithm != null && !item.optional && (String(item.label_display).indexOf('增值服务组件') === -1)">目前暂无可调参数</div>
                       <!-- <div v-if="item.id === '4'">对数据源的配置请在数据源区域进行</div> -->
                       <!-- 特征提取选择要显示的特征 -->
                       <el-row v-if="item.id == '1.2'">
@@ -576,7 +576,7 @@
                       </div>
 
                       <!-- 选择特征选择的规则以及设定规则的阈值 -->
-                      <div v-if="item.id == '1.3'">
+                      <div v-if="item.id == '1.3' && item.use_algorithm !== 'extra_feature_selection'">
                         <el-radio-group v-model="item.parameters[item.use_algorithm]['rule']">
                           <el-radio :value="1" size="large">规则一</el-radio>
                           <el-radio :value="2" size="large">规则二</el-radio>
@@ -589,7 +589,7 @@
 
                           <el-form>
                             <el-form-item label="阈值" >
-                              <el-select v-model="item.parameters[item.use_algorithm]['threshold1']" size='large' placeholder="请输入阈值" style="width: 250px;" :teleported="false">
+                              <!-- <el-select v-model="item.parameters[item.use_algorithm]['threshold1']" size='large' placeholder="请输入阈值" style="width: 250px;" :teleported="false">
                                 <el-option 
                                 v-for="item in recommendParams['threshold1'][item.use_algorithm]"
                                 :key="item.value"
@@ -597,7 +597,8 @@
                                 :value="item.value"
                                 style="width: 200px; height: auto; background-color: white;" 
                                 />
-                              </el-select>
+                              </el-select> -->
+                              <el-input-number v-model="item.parameters[item.use_algorithm]['threshold1']" :precision="2" :step="0.05" :max="1" :min="0"/>
                             </el-form-item>
                           </el-form>
                         </div>
@@ -614,7 +615,7 @@
 
                           <el-form>
                             <el-form-item label="阈值" >
-                              <el-select v-model="item.parameters[item.use_algorithm]['threshold2']" size='large' placeholder="请输入阈值" style="width: 250px;" :teleported="false">
+                              <!-- <el-select v-model="item.parameters[item.use_algorithm]['threshold2']" size='large' placeholder="请输入阈值" style="width: 250px;" :teleported="false">
                                 <el-option 
                                 v-for="item in recommendParams['threshold2'][item.use_algorithm]"
                                 :key="item.value"
@@ -622,7 +623,8 @@
                                 :value="item.value"
                                 style="width: 200px; height: auto; background-color: white;" 
                                 />
-                              </el-select>
+                              </el-select> -->
+                              <el-input-number v-model="item.parameters[item.use_algorithm]['threshold2']" :precision="2" :step="0.05" :max="1" :min="0"/>
                             </el-form-item>
                           </el-form>
                         </div>
@@ -653,11 +655,21 @@
                           >{{ option.label }}</a-select-option>
                         </a-select>
                       </div> -->
-                      <!-- 私有算法的参数设置 -->
-                      <div v-if="String(item.label_display).indexOf('私有') != -1" >
+                      <!-- 专有算法的参数设置 -->
+                      <div v-if="String(item.label_display).indexOf('增值服务组件') != -1" >
                         <el-form>
                           <el-form-item :label="item.label_display" prop="algorithmType" >
-                            <el-select v-model="item.parameters[item.use_algorithm]" placeholder="请选择算已上传的私有算法" :teleported="false" style="width: 250px;">
+
+                            <el-select v-if="item.label_display != '增值服务组件（无量纲化）'" v-model="item.parameters[item.use_algorithm]" placeholder="请选择算已上传的私有算法" :teleported="false" style="width: 250px;">
+                              <el-option v-for="item in privateAlgorithmList" 
+                              :key="item.label" 
+                              :label="item.label" 
+                              :value="item.label" 
+                              style="width: 200px; height: auto; background-color: white;" />
+                            </el-select>
+
+                            <!-- 无量纲化的专有算法相较于其他不需要额外参数设置的算法要进行更多参数设定，因此绑定的参数也不一样 -->
+                            <el-select v-if="item.label_display == '增值服务组件（无量纲化）'" v-model="item.parameters[item.use_algorithm]['algorithm']" placeholder="请选择算已上传的私有算法" :teleported="false" style="width: 250px;">
                               <el-option v-for="item in privateAlgorithmList" 
                               :key="item.label" 
                               :label="item.label" 
@@ -674,7 +686,7 @@
                           <div class="node-info-label font-style: italic;" :id=item.id>
                             <!-- <span>{{ item.label_display }}</span> -->
                             <!-- 节点的拖拽动作的识别点 -->
-                            <img :src="setIcon(item.label)" alt="icon" width="50px" height="50px" />
+                            <img :src="setIconOfAlgorithms(item.label)" alt="icon" width="50px" height="50px" />
                             <div style="
                             position: absolute; left: 55px; top: 50%; width: 6px; height: 6px;
                             border: 2px solid #80a5ba; 
@@ -731,7 +743,7 @@
                   保存模型
                 </el-button>
               
-                <el-button type="success" round style="width: 125px; font-size: 17px; " @click="run"
+                <el-button type="success" round style="width: 125px; font-size: 17px; " @click="startProcedure"
                   icon="SwitchButton" :disabled="canStartProcess || processIsShutdown" @mouseover="startModeling" class="operation-button">
                   开始运行
                 </el-button>
@@ -1221,22 +1233,19 @@ import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../utils/api.js'
 import { labelsForAlgorithms, plainIntroduction, labelsForParams, contrastOfAlgorithm, predefinedModel } from '../components/constant.ts'
-import { EllipsisOutlined, BulbOutlined } from '@ant-design/icons-vue';
+import { EllipsisOutlined} from '@ant-design/icons-vue';
 import * as echarts from 'echarts';
 import { UploadOutlined } from "@ant-design/icons-vue";
 import { message } from "ant-design-vue";
 import type { UploadProps } from "ant-design-vue";
 import { Rule } from "ant-design-vue/es/form";
-import type { SelectProps } from 'ant-design-vue';
 import uploadPrivateAlgorithmFiless from '../components/uploadPrivateAlgorithmFiles.vue'
-
 import { FolderOutlined, FolderOpenOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue';
-import { ObjectType } from 'typescript';
+
 
 
 // 建模区中各个算法节点的图标url
-
-const setIcon = (label: string) => {
+const setIconOfAlgorithms = (label: string) => {
 
   let iconName ;
   switch (label){
@@ -1268,7 +1277,9 @@ const setIcon = (label: string) => {
       iconName = 'custom-module-icon.svg'
       break
     case '层次分析模糊综合评估':
+    case '层次逻辑回归评估':
     case '层次朴素贝叶斯评估':
+    case '专有健康评估':
       iconName = 'health-evaluation-icon.svg'
   }
   return new URL(`../assets/${iconName}`, import.meta.url).href
@@ -1463,10 +1474,10 @@ const privateAlgorithmList = ref([
 
 const getPrivateAlgorithm = (item: any) =>{
 
-  let algorithmTypeMapping = {'插值处理': "private_interpolation", '特征选择': 'private_feature_selection',
+  let algorithmTypeMapping = {'插值处理': "private_interpolation", '特征选择': 'extra_feature_selection',
                               '特征提取': 'private_feature_extraction', '无量纲化': 'private_scale',
-                              '小波变换': 'private_wavelet_transform', '故障诊断': 'private_fault_diagnosis',
-                              '故障预测': 'private_fault_prediction', '健康评估': 'private_health_evaluation'}
+                              '小波变换': 'extra_wavelet_transform', '故障诊断': 'private_fault_diagnosis',
+                              '故障预测': 'private_fault_prediction', '专有健康评估': 'extra_health_evaluation'}
 
   
   //获取私有算法列表
@@ -1601,24 +1612,24 @@ const menuList2 = ref([{
         'z-score': {useLog: false},
         'robust_scaler': {useLog: false},
         'max_abs_scaler': {useLog: false},
-        'private_scaler': {useLog: false}
+        'private_scaler': {useLog: false, algorithm: ''}
       }, tip_show: false, tip: '对输入数据进行无量纲化处理', optional: true
     },
     {
       label: '特征选择', id: '1.3', use_algorithm: null, parameters: {
-        'feature_imp': {rule: 1, threshold1: null, threshold2: null},
-        'mutual_information_importance': {rule: 1, threshold1: null, threshold2: null},
-        'correlation_coefficient_importance': {rule: 1, threshold: 0.005},
-        'feature_imp_multiple': {rule: 1, threshold: 0.005},
-        'mutual_information_importance_multiple': {rule: 1, threshold: 0.005},
-        'correlation_coefficient_importance_multiple': {rule: 1, threshold: 0.005},
-        'private_feature_selection': {rule: 1, threshold: 0.005 }
+        'feature_imp': {rule: 1, threshold1: 0.1, threshold2: 0.1},
+        'mutual_information_importance': {rule: 1, threshold1: 0.1, threshold2: 0.1},
+        'correlation_coefficient_importance': {rule: 1, threshold1: 0.1, threshold2: 0.1},
+        'feature_imp_multiple': {rule: 1, threshold1: 0.1, threshold2: 0.1},
+        'mutual_information_importance_multiple': {rule: 1, threshold1: 0.1, threshold2: 0.1},
+        'correlation_coefficient_importance_multiple': {rule: 1, threshold1: 0.1, threshold2: 0.1},
+        'extra_feature_selection': {rule: 1, threshold1: 0.1, threshold2: 0.1}
       }, tip_show: false, tip: '对提取到的特征进行特征选择', optional: true
     },
     {
       label: '小波变换', id: '1.4', use_algorithm: null, parameters: {
-        'wavelet_trans_denoise': {'wavelet': '',
-        'wavelet_level': ''}
+        'wavelet_trans_denoise': {'wavelet': '', 'wavelet_level': ''},
+        'extra_wavelet_transform': ''
       }, tip_show: false, tip: '对输入信号进行小波变换', optional: true
     }
   ], tip_show: false, tip: '包含添加噪声、插值以及特征提取等'
@@ -1670,8 +1681,24 @@ const menuList2 = ref([{
         'AHP': {},
         'AHP_multiple': {},
       }, tip_show: false, tip: '使用层次逻辑回归方法的评价方法', optional: false
-    }
-    ]
+    },
+    {
+      label: '专有健康评估', id: '3.4', use_algorithm: null, parameters: {
+        'extra_health_evaluation': ''
+      }, tip_show: false, tip: '使用专有健康评估的评价方法', optional: false
+    },
+    // {
+    //   label: '层次分析评估法', id: '3.1', use_algorithm: null, parameters: {
+    //     'FAHP': {},
+    //     'FAHP_multiple': {},
+    //     'BHM': {},
+    //     'BHM_multiple': {},
+    //     'AHP': {},
+    //     'AHP_multiple': {},
+    //   }, tip_show: false, tip: '使用层次分析评估方法的评价方法', optional: false
+    // }
+
+  ]
 },
   // {
   //   label: '语音处理', id: '2', options: [{ label: '音频分离', id: '2.1', use_algorithm: null, parameters: { 'conformer': { num_workers: 8, layers: 64 }, 'sepformer': { num_workers: 16, layers: 64 } }, tip_show: false, tip: '可对输入的一维音频信号进行噪声分离' },
@@ -1681,25 +1708,14 @@ const menuList2 = ref([{
 ]);
 
 
-// 私有算法选择列表
-const privateAlgorithms = ref<SelectProps['options']>([
-  {label: 'private_interpolation',value: 'private_interpolation', type:'插值处理'},
-  {label: 'private_fault_diagnosis_machine_learning', value: 'private_fault_diagnosis_machine_learning', type:'故障诊断'},
-  {label: 'private_fault_diagnosis_deeplearning', value: 'private_fault_diagnosis_deeplearning', type: '故障诊断'}
-])
-
-// 特征选择使用的规则
-const featureSelectionRule = ref('')
-
-
-// 该方法用于判断是否显示背景图片
+// 该方法用于判断是否显示可视化建模区的背景图片
 const background_IMG = () => {
   if (nodeList.value.length == 0) {
-    document.querySelector('.el-main').classList.add('has-background');
+    document.querySelector('.el-main')?.classList.add('has-background');
 
   }
   if (nodeList.value.length >= 1) {
-    document.querySelector('.el-main').classList.remove('has-background');
+    document.querySelector('.el-main')?.classList.remove('has-background');
     document.querySelector('.el-main').style.backgroundImage = ''
 
   }
@@ -1709,6 +1725,7 @@ const background_IMG = () => {
 const recommendParams = {
   'wavelet': [{value: 'db1', label: 'db1'}, {value: 'db2', label: 'db2'}, {value: 'sym1', label: 'sym1'}, {value: 'sym2', label: 'sym2'}, {value: 'coif1', label: 'coif1'}],
   'wavelet_level': [{value: 1, label: '1'}, {value: 2, label: '2'}, {value: 3, label: '3'}],
+  // 规则一的各算法的阈值推荐值
   'threshold1': {'feature_imp': [{value: 0.005, label: '0.005'}, {value: 0.01, label: '0.01'}, {value: 0.02, label: '0.02'}, {value: 0.03, label: '0.03'}, {value: 0.04, label: '0.04'}, {value: 0.05, label: 0.05}, {value: 0.1, label: 0.1}],
   'mutual_information_importance': [{value: 0.1, label: '0.1'}, {value: 0.2, label: '0.2'}, {value: 0.3, label: '0.3'}, {value: 0.4, label: '0.4'}, {value: 0.5, label: '0.5'}, {value: 0.6, label: '0.6'}, ], 
   'mutual_information_importance_multiple': [{value: 0.3, label: '0.3'}, {value: 0.35, label: '0.35'}, {value: 0.4, label: '0.4'}, {value: 0.45, label: '0.45'}, {value: 0.5, label: '0.5'}], 
@@ -1716,6 +1733,7 @@ const recommendParams = {
   'correlation_coefficient_importance_multiple': [{value: 0.58, label: '0.58'}, {value: 0.6, label: '0.6'}, {value: 0.62, label: '0.62'}, {value: 0.64, label: '0.64'}],
   'correlation_coefficient_importance': [{value: 0.1, label: '0.1'}, {value: 0.2, label: '0.2'}, {value: 0.3, label: '0.3'}, {value: 0.4, label: '0.4'}, {value: 0.5, label: '0.5'}, {value: 0.6, label: '0.6'}, ]},
   
+  // 规则二的各算法的阈值推荐值
   'threshold2': {'feature_imp': [{value: 0.3, label: '0.3'}, {value: 0.4, label: '0.4'}, {value: 0.5, label: '0.5'}, {value: 0.6, label: '0.6'}, {value: 0.7, label: '0.7'}, {value: 0.8, label: '0.8'}, {value: 1, label: 1}],
 'mutual_information_importance': [{value: 0.3, label: '0.3'}, {value: 0.4, label: '0.4'}, {value: 0.5, label: '0.5'}, {value: 0.6, label: '0.6'}, {value: 0.7, label: '0.7'}, {value: 0.8, label: '0.8'}, {value: 1, label: 1}],
 'feature_imp_multiple': [{value: 0.3, label: '0.3'}, {value: 0.4, label: '0.4'}, {value: 0.5, label: '0.5'}, {value: 0.6, label: '0.6'}, {value: 0.7, label: '0.7'}, {value: 0.8, label: '0.8'}, {value: 1, label: 1}],
@@ -1740,7 +1758,7 @@ const showPlainIntroduction = ref(false)
 // }
 
 // 算法介绍，点击算法选择区内的具体算法，将其算法介绍展示在可视化建模区
-const showIntroduction = (algorithm) => {
+const showIntroduction = (algorithm: string) => {
   resultsViewClear()
   showStatusMessage.value = false
   showPlainIntroduction.value = true
@@ -2247,7 +2265,7 @@ const checkModel = () => {
     console.log('algorithmStr: ', algorithmStr)
     // 首先判断模型中是否存在除了数据源之外的1个以上的模块，如果模型中只有一个模块，判断其是否可以独立地运行而不需要其他模块的支持
     if (nodeList.value.length == 2) {
-      if (!moduleStr.match('插值处理') && !moduleStr.match('特征提取') && !algorithmStr.match('GRU的故障诊断') && !algorithmStr.match('LSTM的故障诊断') && !algorithmStr.match('小波变换降噪')
+      if (!moduleStr.match('插值处理') && !moduleStr.match('特征提取') && !algorithmStr.match('GRU的故障诊断') && !algorithmStr.match('LSTM的故障诊断') && !algorithmStr.match('小波变换')
     && !algorithmStr.match('一维卷积深度学习模型的故障诊断') && !algorithmStr.match('基于时频图的深度学习模型的故障诊断') && !moduleStr.match('无量纲化') && !algorithmStr.match('私有深度学习故障诊断算法')) {
         let tip
         if (moduleStr.match('故障诊断')) {
@@ -2953,7 +2971,7 @@ cancel = source.cancel; // 暴露cancel函数
 
 
 //上传文件后，点击开始运行以运行程序
-const run = () => {
+const startProcedure = () => {
 
   if (!usingDatafile.value){
     ElMessage({
@@ -3323,7 +3341,6 @@ const checkModelParams = () => {
 
     if (!dict.use_algorithm) 
     {
-      console.log('')
       return false
     } 
     else 
@@ -3339,12 +3356,24 @@ const checkModelParams = () => {
         if (!threshold){
           return false
         }
-      }
-      else if (dict.id == '1.2'){
+      } else if (dict.id == '1.2'){
+        // 检查特征提取参数设置
         if (!features.value.length) {
           return false
         }
-      } 
+      } else {
+        // 检查一般算法模块的参数设置，参数设置不能为空
+        let parameters = dict.parameters[dict.use_algorithm]
+        if (!parameters){
+          return false
+        }else{
+          for (let key in parameters){
+            console.log("key....", key)
+            if (parameters[key] == '' || parameters[key] === null)
+                return false
+          }
+        }
+      }
     }
   }
 
@@ -3873,7 +3902,7 @@ const resultShow = (item) => {
         return
       }
       if (item.label != '层次逻辑回归评估' && item.label != '层次分析模糊综合评估' && item.label != '层次朴素贝叶斯评估' && item.label != '特征提取' && item.label != '特征选择' && item.label != '故障诊断'
-        && item.label != '故障预测' && item.label != '特征提取' && item.label != '插值处理' && item.label != '无量纲化' && item.label != '小波变换'
+        && item.label != '故障预测' && item.label != '特征提取' && item.label != '插值处理' && item.label != '无量纲化' && item.label != '小波变换' && item.label != '专有健康评估'
       ) {
         showPlainIntroduction.value = false
         showStatusMessage.value = false
@@ -3931,6 +3960,9 @@ const resultShow = (item) => {
           healthEvaluationDisplay(results_to_show)
         } else if (item.label == '层次逻辑回归评估') {
           let results_to_show = responseResults.层次逻辑回归评估
+          healthEvaluationDisplay(results_to_show)
+        } else if (item.label == '专有健康评估') {
+          let results_to_show = responseResults.专有健康评估
           healthEvaluationDisplay(results_to_show)
         }
         else {

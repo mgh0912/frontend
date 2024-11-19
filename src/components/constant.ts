@@ -40,19 +40,21 @@ export const labelsForAlgorithms = {
     neighboring_values_interpolation: "邻近值插值",
     linear_regression: "单传感器线性回归故障预测",
     linear_regression_multiple: "多传感器线性回归故障预测",
-    deeplearning_interpolation: '深度学习插值算法',
+    deeplearning_interpolation: '深度学习插值',
     ulcnn: '单传感器一维卷积深度学习模型的故障诊断',
     ulcnn_multiple: '多传感器一维卷积深度学习模型的故障诊断',
     spectrumModel: '单传感器基于时频图的深度学习模型的故障诊断',
     spectrumModel_multiple: '多传感器基于时频图的深度学习模型的故障诊断',
     dataSource: '数据源',
     customModule: '自定义模块',
-    private_interpolation: '私有插值算法',
-    private_fault_diagnosis_deeplearning: '私有深度学习故障诊断算法',
-    private_fault_diagnosis_machine_learning: '私有机器学习故障诊断算法',
-    private_fault_prediction: '私有故障预测算法',
-    private_feature_selection: '私有特征选择算法',
-    private_scaler: '私有标准化算法'
+    private_interpolation: '增值服务组件（插值）',
+    private_fault_diagnosis_deeplearning: '增值服务组件（深度学习故障诊断）',  // 私有深度学习故障诊断算法
+    private_fault_diagnosis_machine_learning: '增值服务组件（机器学习故障诊断）',  // 私有机器学习故障诊断算法
+    private_fault_prediction: '增值服务组件（故障预测）',  // 私有故障预测算法
+    extra_feature_selection: '增值服务组件（特征选择）',  // 私有特征选择算法
+    private_scaler: '增值服务组件（无量纲化）',   // 私有标准化算法
+    extra_health_evaluation: '增值服务组件（健康评估）',  // 私有健康评估算法
+    extra_wavelet_transform: '增值服务组件（小波变换）',
 };
 
 // 算法介绍
@@ -107,7 +109,6 @@ export const contrastOfAlgorithm = {
         "| 时域特征    | 由时序信号直接得到，相对直观。计算简单，可反映总体状态。   | 作为故障诊断的依据，缺乏早期报警能力，易受噪声干扰。          |\n" +
         "| 频域特征    | 能够精确地反映信号的频率成分，能察觉微小的故障。       | 计算相对复杂。作为故障诊断的依据时，对于非平稳信号的诊断结果可能不准确。 |\n" +
         "| 时域和频域特征 | 结合时域特征和频域特征各自的特点，提供更全面的故障诊断依据。 | 计算复杂。                     |\n",
-    '特征选择': "",
     '无量纲化':
         "### 无量纲化模块中不同标准化方法的比较 \n" +
         "| 标准化方法      | 定义                                    | 特点                                             |\n" +
@@ -127,9 +128,13 @@ export const contrastOfAlgorithm = {
         "| GRU的故障诊断        | 时序建模能力强，泛化能力好         | 计算量大，对超参数敏感 |\n"+
         "| LSTM的故障诊断       | 能有效捕捉长序列语义关联          | 计算复杂度高      |\n"+
         "| 一维卷积的故障诊断       | 对序列数据中的局部模式敏感，计算复杂度较低 | 泛化能力较差      |\n"+
-        "| 对于时频图的二维卷积的故障诊断 | 相较于一维卷积的故障诊断准确率较高     | 计算复杂度较高     |\n"
-
-      
+        "| 对于时频图的二维卷积的故障诊断 | 相较于一维卷积的故障诊断准确率较高     | 计算复杂度较高     |\n",
+    '特征选择':
+        "| 特征选择方法     | 优点                                              | 缺点                                                 |\n" +
+        "|------------|-------------------------------------------------|----------------------------------------------------|\n" +
+        "| 基于树模型的特征选择 | 预测逻辑易于理解，能够处理连续数据、离散数据以及缺失值等                    | 使用贪婪启发式方法进行训练，可能导致树不是全局最优的                         |\n" +
+        "| 互信息法       | 互信息可以同时考虑特征与目标变量之间的相关性和特征之间的相关性，从而选择出具有较高区分度的特征 | 需要计算特征与目标变量之间的联合概率分布，计算复杂度较高。其次互信息法对数据集中的噪声和冗余特征敏感 |\n" +
+        "| 相关系数法      | 相关系数是衡量两个变量之间线性关系强弱的指标，计算相对简单                   | 相关系数只能检测特征的线性关系，无法检测非线性关系                          |\n",
 
 }
 

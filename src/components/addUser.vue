@@ -18,8 +18,9 @@
       </el-form-item>
       <el-form-item prop="role" label="角色权限" :label-width="formLabelWidth">
         <el-radio-group v-model="form.role" style="padding-left: 10px">
-          <el-radio label="user" size="large">用户</el-radio>
-          <el-radio label="admin" size="large">管理员</el-radio>
+          <el-radio label="user" size="large">普通用户</el-radio>
+          <el-radio label="admin" size="large">管理员用户</el-radio>
+          <el-radio label="superuser" size="large">系统用户</el-radio>
         </el-radio-group>
       </el-form-item>
       

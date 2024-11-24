@@ -1,3 +1,4 @@
+// 登录界面
 <template>
   <el-container>
     <el-main style="height: 93vh;">
@@ -40,8 +41,9 @@
                   size="large"
                   placeholder="请选择角色"
                 >
-                  <a-select-option value="user">用户</a-select-option>
-                  <a-select-option value="admin">管理员</a-select-option>
+                  <a-select-option value="user">普通用户</a-select-option> 
+                  <a-select-option value="admin">管理员用户</a-select-option>
+                  <a-select-option value="superuser">系统用户</a-select-option>
                 </a-select>
               </a-form-item>
               <a-form-item label="">
@@ -144,8 +146,11 @@ const login = () => {
             // 保存用户名到 localStorage
             window.localStorage.setItem("username", formState.username);
 
-            // 根据返回数据跳转到主页或者后台
-            if (formState.role == "user") {
+            // 保存用户角色到 localStorage
+            window.localStorage.setItem("role", formState.role);
+
+            // 根据用户登录时所选择的角色跳转到用户界面或者管理员界面
+            if (formState.role == "user" || formState.role == "superuser") {
               router.push("/UserPlatform");
             } else {
               router.push("/admin");

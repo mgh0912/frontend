@@ -1,5 +1,6 @@
 <template>
-  <a-button type="primary" ghost @click="uploadPrivateAlgorithmFiles()">上传增值服务组件</a-button>
+  <a-button style="background-color: #ffd541; color: #566f4f; font-size: 17px;font-weight: 600; border: 1px solid #789b6e" ghost @click="uploadPrivateAlgorithmFiles()">
+  <span>上传增值服务组件</span></a-button>
   <a-modal v-model:open="dialogVisible" title="上传增值服务组件" 
   cancelText="取消" :ok-button-props="{ style:{display: 'none' } }" :cancel-button-props="{ style:{display: 'none' } }">
     <div style="display: flex; flex-direction: row; padding: 10px">

@@ -55,6 +55,7 @@ export const labelsForAlgorithms = {
     private_scaler: '增值服务组件（无量纲化）',   // 私有标准化算法
     extra_health_evaluation: '增值服务组件（健康评估）',  // 私有健康评估算法
     extra_wavelet_transform: '增值服务组件（小波变换）',
+    private_feature_extraction: '增值服务组件（特征提取）',
 };
 
 // 算法介绍

@@ -1004,10 +1004,10 @@
                 <el-tabs tab-position="left" type="border-card" v-model="featuresExtractionRawData">
                   <el-tab-pane v-for="item in rawDataList" :key="item.snesor_no" :label="item.sensor_no" :name="item.sensor_no">
                     <div :id="item.sensor_no" style="width: 1300px; height: 400px"></div>
+                    <div style="padding-left: 10px;text-align: left; font-size: 25px; color:darkgrey;">由原始信号提取特征：</div>
+                    <!-- 对应特征提取结果 -->
+                    <div :id="item.sensor_no + 'features'" style="width: 1300px; height: 400px"></div>
                   </el-tab-pane>
-                  <div style="padding-left: 10px;text-align: left; font-size: 25px; color:darkgrey;">由原始信号提取特征：</div>
-                  <!-- 对应特征提取结果 -->
-                  <div :id="item.sensor_no + 'features'" style="width: 1300px; height: 400px"></div>
                 </el-tabs>
                 <!-- <div id="rawDataFigure" style="width: 900px; height: 400px"></div> -->
                 <!-- <el-table :data="transformedData" style="width: 96%; margin-top: 20px;"
@@ -3756,10 +3756,11 @@ const healthEvaluationDisplay = (results_object) => {
 
 // 特征提取结果展示
 const displayFeatureExtraction = ref(false)
-const transformedData = ref([])
-const columns = ref([])
-const num_sensors = ref<number>(0)
+// const transformedData = ref([])
+// const columns = ref([])
+const numOfSensors = ref<number>(0)
 const rawDataList = ref<Object[]>([])
+const featuresSeriesList = ref<Object[]>([])
 const featuresExtractionRawData = ref('传感器 1')
 
 const featureExtractionDisplay = (resultsObject) => {
@@ -3768,44 +3769,71 @@ const featureExtractionDisplay = (resultsObject) => {
   // 获取后端传回的提取的特征
   let featuresWithName = Object.assign({}, resultsObject.features_with_name)
   let featuresName = featuresWithName.features_name.slice()
-  let featuresGroupBySensor = Object.assign(featuresWithName.features_extracted_group_by_sensor)
-  let datas = []        // 表格中每一行的数据
-  featuresName.unshift('传感器')  // 表格的列名
-  for (const sensor in featuresGroupBySensor) {
-    let featuresOfSensor = featuresGroupBySensor[sensor].slice()
-    featuresOfSensor.unshift(sensor)
-    datas.push(featuresOfSensor)
+  let featuresToDrawLineChart = Object.assign({}, resultsObject.featuresToDrawLineChart)
+  // let featuresGroupBySensor = Object.assign(featuresWithName.features_extracted_group_by_sensor)
+
+  console.log("featuresToDrawLineChart: ", featuresToDrawLineChart)
+
+  let num_frames = resultsObject.num_examples
+  // 根据帧数num_frames生成x坐标的坐标轴
+  let x_axis = []
+  for (let i = 0; i < num_frames; i++) {
+    x_axis.push('样本'+(i+1)+`(${i*2048}~${(i+1)*2048-1})`)
   }
-  columns.value.length = 0
+
+  // let datas = []        // 表格中每一行的数据
+  // featuresName.unshift('传感器')  // 表格的列名
+  // for (const sensor in featuresGroupBySensor) {
+  //   let featuresOfSensor = featuresGroupBySensor[sensor].slice()
+  //   featuresOfSensor.unshift(sensor)
+  //   datas.push(featuresOfSensor)
+  // }
+  // console.log("........datas: ", datas)
+
+  // datas是每个传感器的每一帧样本所提取到的特征
+
+
+  // 特征表格
+  // columns.value.length = 0
   // 将特征名作为列名
-  featuresName.forEach(element => {
-    columns.value.push({ prop: element, label: element, width: 180 })
-  });
+  // featuresName.forEach(element => {
+  //   columns.value.push({ prop: element, label: element, width: 180 })
+  // });
 
   // 转换各特征值数据为对象数组，以作为表格数据进行显示
-  datas.forEach(data => {
-    transformedData.value = data.map((row, index) => {
-      const obj = {};
-      columns.value.forEach((column, colIndex) => {
-        obj[column.prop] = row[colIndex];
-      });
-      return obj;
-    });
-  });  
+  // datas.forEach(data => {
+  //   transformedData.value = data.map((row, index) => {
+  //     const obj = {};
+  //     columns.value.forEach((column, colIndex) => {
+  //       obj[column.prop] = row[colIndex];
+  //     });
+  //     return obj;
+  //   });
+  // });  
 
   let rawDataSeries: any =  resultsObject.raw_data
-  num_sensors.value = rawDataSeries.length
+  numOfSensors.value = rawDataSeries.length
   // console.log('rawDataSeries: ', rawDataSeries)
   // 原始信号波形图显示
-  let sensor_no = 1
+  let sensorNo = 1
   rawDataList.value.length = 0  
   for(let series of rawDataSeries){
     rawDataList.value.push({
-      'sensor_no': '传感器 '+sensor_no,
+      'sensor_no': '传感器 '+sensorNo,
       'data': series,
     })
-    sensor_no += 1
+    sensorNo += 1
   }
+  sensorNo = 1
+  featuresSeriesList.value.length = 0
+  for(let features of Object.values(featuresToDrawLineChart)){
+    featuresSeriesList.value.push({
+      'sensor_no': '传感器 '+sensorNo,
+      'data': features,
+    })
+    sensorNo += 1
+  }
+  console.log('featuresSeriesList: ', featuresSeriesList.value)
   featuresExtractionRawData.value = rawDataList.value[0].sensor_no  //默认显示第一个传感器的原始信号
 
   displayFeatureExtraction.value = true  // 显示特征提取结果
@@ -3841,61 +3869,64 @@ const featureExtractionDisplay = (resultsObject) => {
       }
       chart.setOption(option)
     })
+    featuresSeriesList.value.forEach(object => {
+      // 使用echarts绘制特征提取的特征折线图
+      type EChartsOption = echarts.EChartsOption;
+      let dataSeries = object.data
+      var lineChartDom = document.getElementById(object.sensor_no+'features')
+      var lineChart = echarts.init(lineChartDom);
+      var lineChartOption: EChartsOption;
 
-    // 使用echarts绘制特征提取的特征折线图
-    type EChartsOption = echarts.EChartsOption;
-    var lineChartDom = document.getElementById('indicatorVaryingFigure')!;
-    var lineChart = echarts.init(lineChartDom);
-    var lineChartOption: EChartsOption;
+      lineChartOption = {
+        title: {
+          text: '连续样本指标变化曲线图'
+        },
+        tooltip: {
+          trigger: 'axis'
+        },
+        legend: {
+          // data: ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine']
+          left: 'center',
+          top: '5%',
+          bottom: '6%',
+          data: featuresName
+        },
+        grid: {
+          left: '5%',
+          right: '5%',
+          bottom: '3%',
+          containLabel: true
+        },
+        toolbox: {
+          feature: {
+            saveAsImage: {}
+          }
+        },
+        xAxis: {
+          type: 'category',
+          boundaryGap: false,
+          // data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          data: x_axis
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [
+        
+        ]
+      };
 
-    lineChartOption = {
-      title: {
-        text: '连续样本指标变化曲线图'
-      },
-      tooltip: {
-        trigger: 'axis'
-      },
-      legend: {
-        // data: ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine']
-        left: 'center',
-        top: '5%',
-        bottom: '6%',
-        data: indicatorKeys
-      },
-      grid: {
-        left: '5%',
-        right: '5%',
-        bottom: '3%',
-        containLabel: true
-      },
-      toolbox: {
-        feature: {
-          saveAsImage: {}
-        }
-      },
-      xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        // data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-        data: x_axis
-      },
-      yAxis: {
-        type: 'value'
-      },
-      series: [
-      
-      ]
-    };
-
-    for (let key in indicator){
-      lineChartOption.series.push({
-        name: key,
-        type: 'line',
-        stack: 'Total',
-        data: indicator[key]
-      })
-    }
-    lineChart.setOption(lineChartOption);
+      for (let key in featuresName){
+        lineChartOption.series.push({
+          name: key,
+          type: 'line',
+          stack: 'Total',
+          data: dataSeries[key]
+        })
+      }
+      lineChart.setOption(lineChartOption);
+    })
+    
   })
       // for (let object of rawDataList.value){
       //   nextTick(()=>{

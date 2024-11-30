@@ -42,7 +42,7 @@
                   placeholder="请选择角色"
                 >
                   <a-select-option value="user">普通用户</a-select-option> 
-                  <a-select-option value="admin">管理员用户</a-select-option>
+                  <a-select-option value="admin">系统管理员</a-select-option>
                   <a-select-option value="superuser">系统用户</a-select-option>
                 </a-select>
               </a-form-item>
@@ -68,7 +68,7 @@
       <div style="color: black; width: 400px; height: 100%; line-height: 20px;"
       >
         © 2024 国家高速列车青岛技术创新中心 <br/>
-        联系我们：nthic@163.com  | 电话：123456 <br/>
+        联系我们：nichst@163.com  | 电话：123456 <br/>
         西南交通大学研制
         
       </div>
@@ -170,7 +170,7 @@ const login = () => {
 
 <style lang="scss" scoped>
 .login-body {
-  background: url("../assets/login-background.jpg") no-repeat center center;
+  background: url("../assets/login-background-2.jpg") no-repeat center center;
   height: 100%;
   width: 100%;
   background-size: cover;

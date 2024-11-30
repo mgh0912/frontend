@@ -2164,7 +2164,7 @@ const userRole = ref('');  // 用户登录时所选择的角色，用于区分�
 const linkedList = new LinkedList()
 onMounted(() => {
   username.value = window.localStorage.getItem('username') || '用户名未设置'
-  userRole.value = window.localStorage.getItem('role') || 'superuser'
+  userRole.value = window.localStorage.getItem('role') || '无效的用户'
   // console.log('username: ', username.value)
   console.log('userRole: ', userRole.value)
   // 当进行建模的时候隐藏可视化建模区的背景文字

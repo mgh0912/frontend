@@ -1005,15 +1005,17 @@
                   <el-tab-pane v-for="item in rawDataList" :key="item.snesor_no" :label="item.sensor_no" :name="item.sensor_no">
                     <div :id="item.sensor_no" style="width: 1300px; height: 400px"></div>
                   </el-tab-pane>
+                  <div style="padding-left: 10px;text-align: left; font-size: 25px; color:darkgrey;">由原始信号提取特征：</div>
+                  <!-- 对应特征提取结果 -->
+                  <div :id="item.sensor_no + 'features'" style="width: 1300px; height: 400px"></div>
                 </el-tabs>
                 <!-- <div id="rawDataFigure" style="width: 900px; height: 400px"></div> -->
-                <div style="padding-left: 10px;text-align: left; font-size: 25px; color:darkgrey;">由原始信号提取特征：</div>
-                <el-table :data="transformedData" style="width: 96%; margin-top: 20px;"
+                <!-- <el-table :data="transformedData" style="width: 96%; margin-top: 20px;"
                  >
                   <el-table-column v-for="column in columns" :key="column.prop" :prop="column.prop" :label="column.label"
                   >
                   </el-table-column>
-                </el-table>
+                </el-table> -->
               </div>
               
               <!-- 特征选择可视化 -->
@@ -1532,7 +1534,7 @@ const fileNameRules: Record<string, Rule[]> = {
 // 确认上传文件
 const handleUploadDataFile = () => {
 
-  // formRef.value.validate().then(() => {
+  formRef.value.validate().then(() => {
   // console.log('formRef: ', formRef.value)
   // const validation = await formRef.value?.validate();
   // if (!validation){
@@ -1573,12 +1575,12 @@ const handleUploadDataFile = () => {
         }
 
     })
-  //   .catch((error:any) => {
-  //     uploading.value = false;
-  //     uploadconfirmLoading.value = false;
-  //     message.error("上传失败, "+error);
-  //   });
-  // });
+    .catch((error:any) => {
+      uploading.value = false;
+      uploadconfirmLoading.value = false;
+      message.error("上传失败, "+error);
+    });
+  });
 }
 
 
@@ -3775,24 +3777,28 @@ const featureExtractionDisplay = (resultsObject) => {
     datas.push(featuresOfSensor)
   }
   columns.value.length = 0
+  // 将特征名作为列名
   featuresName.forEach(element => {
     columns.value.push({ prop: element, label: element, width: 180 })
   });
 
-  // 转换数据为对象数组  
-  transformedData.value = datas.map((row, index) => {
-    const obj = {};
-    columns.value.forEach((column, colIndex) => {
-      obj[column.prop] = row[colIndex];
+  // 转换各特征值数据为对象数组，以作为表格数据进行显示
+  datas.forEach(data => {
+    transformedData.value = data.map((row, index) => {
+      const obj = {};
+      columns.value.forEach((column, colIndex) => {
+        obj[column.prop] = row[colIndex];
+      });
+      return obj;
     });
-    return obj;
-  });
+  });  
 
   let rawDataSeries: any =  resultsObject.raw_data
   num_sensors.value = rawDataSeries.length
   // console.log('rawDataSeries: ', rawDataSeries)
+  // 原始信号波形图显示
   let sensor_no = 1
-  rawDataList.value.length = 0
+  rawDataList.value.length = 0  
   for(let series of rawDataSeries){
     rawDataList.value.push({
       'sensor_no': '传感器 '+sensor_no,
@@ -3800,13 +3806,13 @@ const featureExtractionDisplay = (resultsObject) => {
     })
     sensor_no += 1
   }
-  featuresExtractionRawData.value = rawDataList.value[0].sensor_no
+  featuresExtractionRawData.value = rawDataList.value[0].sensor_no  //默认显示第一个传感器的原始信号
 
-  displayFeatureExtraction.value = true
+  displayFeatureExtraction.value = true  // 显示特征提取结果
 
   // console.log('length: ', num_sensors.value)
-  // 使用echarts绘制特征提取的原始信号波形图s
   nextTick(()=>{
+    // 使用echarts绘制特征提取的原始信号波形图
     rawDataList.value.forEach(object => {
       let chart = echarts.init(document.getElementById(object.sensor_no))
       let dataSeries = object.data
@@ -3835,6 +3841,61 @@ const featureExtractionDisplay = (resultsObject) => {
       }
       chart.setOption(option)
     })
+
+    // 使用echarts绘制特征提取的特征折线图
+    type EChartsOption = echarts.EChartsOption;
+    var lineChartDom = document.getElementById('indicatorVaryingFigure')!;
+    var lineChart = echarts.init(lineChartDom);
+    var lineChartOption: EChartsOption;
+
+    lineChartOption = {
+      title: {
+        text: '连续样本指标变化曲线图'
+      },
+      tooltip: {
+        trigger: 'axis'
+      },
+      legend: {
+        // data: ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine']
+        left: 'center',
+        top: '5%',
+        bottom: '6%',
+        data: indicatorKeys
+      },
+      grid: {
+        left: '5%',
+        right: '5%',
+        bottom: '3%',
+        containLabel: true
+      },
+      toolbox: {
+        feature: {
+          saveAsImage: {}
+        }
+      },
+      xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        // data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        data: x_axis
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [
+      
+      ]
+    };
+
+    for (let key in indicator){
+      lineChartOption.series.push({
+        name: key,
+        type: 'line',
+        stack: 'Total',
+        data: indicator[key]
+      })
+    }
+    lineChart.setOption(lineChartOption);
   })
       // for (let object of rawDataList.value){
       //   nextTick(()=>{

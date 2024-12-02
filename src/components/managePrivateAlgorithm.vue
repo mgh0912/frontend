@@ -1,26 +1,59 @@
 // 管理系统用户上传的增值服务组件
 <template>
-    <div>
-        <a-button class="private-algorithm-button" ghost @click="showExtraModules"
-        >管理组件</a-button>
-    </div>
-    <!-- 管理增值服务组件的弹窗 -->
-    <a-modal v-model:open="dialogVisible" :ok-button-props="{ style:{display: 'none' } }" 
-    :cancel-button-props="{ style:{display: 'none' } }" title="管理增值服务组件">
-      <el-table :data="fetchedExtraAlgorithm" height="500" stripe style="width: 100%">
-        <!-- <el-table-column :width="100" property="author" label="模型作者" /> -->
-        <el-table-column :width="200" property="algorithmType" label="组件类型" show-overflow-tooltip/>
-        <el-table-column :width="200" property="algorithmName" label="组件名称" show-overflow-tooltip/>
-        <el-table-column :width="260" label="操作">
-          <template #default="scope">
-            <!-- <el-button size="small" type="primary" style="width: 50px;" @click="useModel(scope.row)">
+  <div>
+    <a-button class="private-algorithm-button" ghost @click="showExtraModules"
+      >管理组件</a-button
+    >
+  </div>
+  <!-- 管理增值服务组件的弹窗 -->
+  <a-modal
+    v-model:open="dialogVisible"
+    :ok-button-props="{ style: { display: 'none' } }"
+    :cancel-button-props="{ style: { display: 'none' } }"
+    title="管理增值服务组件"
+    width="800px"
+  >
+    <el-table :data="fetchedExtraAlgorithm" height="500" stripe>
+      <!-- <el-table-column :width="100" property="author" label="模型作者" /> -->
+      <el-table-column
+        :width="120"
+        property="algorithmType"
+        label="组件类型"
+        show-overflow-tooltip
+      />
+      <el-table-column
+        :width="180"
+        property="alias"
+        label="组件名称"
+        show-overflow-tooltip
+      />
+      <el-table-column
+        :width="180"
+        property="statement"
+        label="组件描述"
+        show-overflow-tooltip
+      />
+      <el-table-column
+        :width="200"
+        property="algorithmName"
+        label="组件源文件"
+        show-overflow-tooltip
+      />
+
+      <el-table-column :width="260" label="操作">
+        <template #default="scope">
+          <!-- <el-button size="small" type="primary" style="width: 50px;" @click="useModel(scope.row)">
               使用
             </el-button> -->
-            <el-button size="small" type="danger" style="width: 50px;"
-              @click="deleteModule(scope.$index, scope.row)">
-              删除组件
-            </el-button>
-            <!-- <el-popover placement="bottom" :width='500' trigger="click">
+          <el-button
+            size="small"
+            type="danger"
+            style="width: 50px"
+            @click="deleteModule(scope.$index, scope.row)"
+          >
+            删除组件
+          </el-button>
+          <!-- <el-popover placement="bottom" :width='500' trigger="click">
               <el-descriptions :title="modelName" :column="3" direction="vertical"
               >
                 <el-descriptions-item label="使用模块" :span="3">
@@ -36,17 +69,17 @@
                 </el-button>
               </template>
             </el-popover> -->
-          </template>
-        </el-table-column>
-      </el-table>
-    </a-modal>
+        </template>
+      </el-table-column>
+    </el-table>
+  </a-modal>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import api from '../utils/api.js';
-import { ElMessage, ElMessageBox } from 'element-plus';
-import { useRouter } from 'vue-router';
+import { onMounted, ref } from "vue";
+import api from "../utils/api.js";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { useRouter } from "vue-router";
 
 const dialogVisible = ref(false);
 const router = useRouter();
@@ -56,89 +89,86 @@ const fetchedExtraAlgorithm = ref([]);
 const showExtraModules = () => {
   dialogVisible.value = true;
   getExtraAlgorithm();
-}
+};
 // 获取已上传的增值服务组件
 const getExtraAlgorithm = () => {
-  api.get('/user/user_fetch_extra_algorithm/').then((response: any) => {
-    if (response.data.code == 401){
-      ElMessageBox.alert('登录状态失效，请重新登陆', '提示',
-        {
-          confirmButtonText: '确定',
-          callback: () => {
-            router.push('/')
-          }
-        }
-      )
-   }
-   if (response.data.code == 200){
-    fetchedExtraAlgorithm.value = response.data.data
-   }
-  })
-}
+  api.get("/user/user_fetch_extra_algorithm/").then((response: any) => {
+    if (response.data.code == 401) {
+      ElMessageBox.alert("登录状态失效，请重新登陆", "提示", {
+        confirmButtonText: "确定",
+        callback: () => {
+          router.push("/");
+        },
+      });
+    }
+    if (response.data.code == 200) {
+      fetchedExtraAlgorithm.value = response.data.data;
+    }
+  });
+};
 
 // 删除增值服务组件
 const deleteModule = (index: number, row: any) => {
   // 发送删除请求到后端，row 是要删除的数据行
-  api.get('/user/delete_extra_algorithm/?row_id=' + row.id).then((response: any) => {
-    if (response.data.code == 401){
-      ElMessageBox.alert('登录状态失效，请重新登陆', '提示',
-        {
-          confirmButtonText: '确定',
+  api
+    .get("/user/delete_extra_algorithm/?row_id=" + row.id)
+    .then((response: any) => {
+      if (response.data.code == 401) {
+        ElMessageBox.alert("登录状态失效，请重新登陆", "提示", {
+          confirmButtonText: "确定",
           callback: () => {
-            router.push('/')
-          }
-        }
-      )
-    }
-    if (response.data.code == 200) {
-      // 如果被删除的模型已经被加载，则需要取消加载
-      // if (modelLoaded.value == row.model_name) {
-      //   modelLoaded.value = '无'
-      //   modelHasBeenSaved = false
-      //   canStartProcess.value = true
-      //   handleClear()
-      // }
-      if (index !== -1) {
-        // 删除前端表中数据
-        fetchedExtraAlgorithm.value.splice(index, 1)
-        
-        ElMessage({
-          message: '删除组件成功',
-          type: 'success'
-        })
+            router.push("/");
+          },
+        });
       }
-      
-    } else {
-      if (response.data.code == 404){
-        ElMessage({
-          message: '没有权限删除该组件',
-          type: 'error'
-        })
-      } else {
-        ElMessage({
-          message: '删除组件失败，请稍后重试',
-          type: 'error'
-        })
-      }
-    }
-  }).catch((error: any) => {
-    // 处理错误
-    console.error(error);
-    ElMessage({
-      message: '删除组件失败,' + error ,
-      type: 'error'
-    })
-  });
-}
+      if (response.data.code == 200) {
+        // 如果被删除的模型已经被加载，则需要取消加载
+        // if (modelLoaded.value == row.model_name) {
+        //   modelLoaded.value = '无'
+        //   modelHasBeenSaved = false
+        //   canStartProcess.value = true
+        //   handleClear()
+        // }
+        if (index !== -1) {
+          // 删除前端表中数据
+          fetchedExtraAlgorithm.value.splice(index, 1);
 
+          ElMessage({
+            message: "删除组件成功",
+            type: "success",
+          });
+        }
+      } else {
+        if (response.data.code == 404) {
+          ElMessage({
+            message: "没有权限删除该组件",
+            type: "error",
+          });
+        } else {
+          ElMessage({
+            message: "删除组件失败，请稍后重试",
+            type: "error",
+          });
+        }
+      }
+    })
+    .catch((error: any) => {
+      // 处理错误
+      console.error(error);
+      ElMessage({
+        message: "删除组件失败," + error,
+        type: "error",
+      });
+    });
+};
 </script>
 
 <style scoped>
 .private-algorithm-button {
-  background-color: #ffd541; 
-  color: #566f4f; 
+  background-color: #ffd541;
+  color: #566f4f;
   font-size: 17px;
-  font-weight: 600; 
+  font-weight: 600;
   border: 1px solid #789b6e;
 }
 

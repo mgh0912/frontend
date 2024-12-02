@@ -165,7 +165,7 @@
           <!-- #eff3f6 -->
           <div class="algorithms-selection">
           <!-- 选择自定义的模型，或者预定义的模型 -->
-            <div style="height: 40px; width: 100%; background-color: white; border-bottom: #CDCFD0 1px solid">
+            <div style="width: 100%; background-color: white; border-bottom: #CDCFD0 1px solid">
               <!-- 系统用户可以自由选择自定义模型或者使用历史模型 -->
               <a-radio-group v-if="userRole === 'superuser' || userRole === 'user'" v-model:value="modelSelection" button-style="solid" size="large" style=" padding: 0px; width: 100%; height: 100%">
                 <!-- <a-radio-button value="customModel" style="width: 50%; border: none; border-radius: 0; font-weight: bolder; font-size: large; color:#558b48">基础组件</a-radio-button>
@@ -184,7 +184,7 @@
                 <p style="font-size: 20px; font-weight: bolder; color: #699a60; background-color: #fff; padding: 5px; border-radius: 5px;">使用系统的内置模型</p>
               </div> -->
             </div>
-            <div >
+            <div style="height: 85%">
               <!-- 系统用户可以使用基础组件定义模型 -->
               <div 
                 style="background-color: white; 
@@ -198,21 +198,21 @@
                 border-bottom-right-radius: 29px;
                 width: 100%;
                 height: 30px;" v-if="((userRole === 'superuser' || userRole === 'user') )">选择组件进行建模</div>
-              <div style="height: 70px; border-top: 1px solid #527b96; display: flex; flex-direction: column ;justify-content: center; align-items: center;">
+              <div style="height: 50px; display: flex; flex-direction: column ;justify-content: center; align-items: center;">
                 <!-- 数据源节点 -->
                 <div style="font-size: 20px; color: #343655; font-weight: 600">数据源组件</div>
                 <a-tooltip title="拖拽数据源节点至可视化建模区" >
                   <div :draggable="true" @dragend="handleDragend($event, 'dataSource', dataSourceNode)" class="item"
                        @click="showIntroduction('dataSource'.replace(/_multiple/g, ''))"
-                       style="background-color: #7cbbe4; margin-top: 7px; width: 145px; height: 30px; margin-bottom: 10px; padding: 0px; border-radius: 5px; align-content: center;">
+                       style="background-color: #7cbbe4; ; width: 165px; height: 35px; margin-bottom: 0px; padding: 0px; border-radius: 5px; border: 1px solid black ; align-content: center;">
                     <el-text style="width: 105px; font-size: 16px; font-weight: 600; color: white; font-size: 18px" truncated>
                       {{ labelsForAlgorithms['dataSource'] }}</el-text>
                   </div>
                 </a-tooltip>
               </div>
               <!-- 算法选择区中算法展开结构，只对系统用户可见 -->
-              <div v-if="((userRole === 'superuser' || userRole === 'user') )" style="width: 248px; background-color: white; border: 1px solid #527b96; border-radius: 15px; margin-top: 25px; padding-top: 10px">
-                <el-scrollbar height="400px" :min-size="35" style="margin-left: 10px;">
+              <div v-if="((userRole === 'superuser' || userRole === 'user') )" style="width: 248px; height: 250px;background-color: white; border: 1px solid #527b96; border-radius: 15px; margin-top: 15px; padding-top: 10px">
+                <el-scrollbar height="100%" :min-size="35" style="margin-left: 10px;">
                   <el-col v-for="item in menuList2">
                     <!-- #4599be #5A87F8 -->
                     <!-- 此为一级目录，点击展开二级目录 -->
@@ -277,7 +277,7 @@
 <!--                  </a-tooltip>-->
 <!--                </div>-->
               </div>
-
+              <!-- 选择系统模型库 -->
               <div style="height: 40px; width: 100%; background-color: white; border-bottom: #CDCFD0 1px solid">
                 <!-- 系统用户可以自由选择自定义模型或者使用历史模型 -->
                 <a-radio-group v-if="userRole === 'superuser' || userRole === 'user'" v-model:value="modelSelection" button-style="solid" size="large" style=" padding: 0px; width: 100%; height: 100%">
@@ -304,8 +304,8 @@
               </div>
               
               <div  v-if="((userRole === 'superuser' || userRole === 'user') )"
-              style="position: relative; width: 248px; height: 30%; background-color: #FCFDFF; display: flex;
-              justify-content: center; align-items: center; border-radius: 15px; margin-top: 25px; border: 1px solid #527b96">
+              style="position: relative; width: 248px; height: 200px; background-color: #FCFDFF; display: flex;
+              justify-content: center; align-items: center; border-radius: 15px; margin-top: 5px; border: 1px solid #527b96">
                 <a-button style="width: 165px; height: 35px; font-size: 16px; position:absolute;
                 top: 55px; left: 40px; display:flex; justify-content: center; align-items: center; 
                 background-image: linear-gradient(to bottom right, #a1a2b1, #edf4f6); color: #3c93f8;
@@ -318,7 +318,7 @@
                   </template>
                   打开模型库
                 </a-button>
-                <div class="highlight" :style="{bottom: '55px', color: getColor(modelLoaded)}" :title="modelLoaded">已加载模型：{{ modelLoaded }}</div>
+                <div class="highlight" :style="{bottom: '35px', color: getColor(modelLoaded)}" :title="modelLoaded"><p>已加载模型</p>{{ modelLoaded }}</div>
                 
                 <!-- 供普通用户上传数据文件 -->
                 <!-- <div v-if="userRole === 'user'"
@@ -407,7 +407,7 @@
               </a-space>
             </a-modal> -->
             <!-- 上传增值服务组件，只对系统用户可见 -->
-            <div style="padding: 10px; position:absolute; bottom: 10px; border: 4px solid #ffd541; width: 200px;" v-if="userRole === 'superuser'">
+            <div style="padding: 10px; position:absolute; bottom: 10px; border: 4px solid #ffd541; width: 200px; height: auto" v-if="userRole === 'superuser'">
               <!-- <p style="padding-bottom: 5px">上传增值服务组件</p> -->
               
               <div style="height: 20%; width: 100%; color: #343655; font-size: 20px; font-weight: 600; ">增值服务组件</div>
@@ -832,6 +832,11 @@
                             </el-select>
                           </el-form-item>
                         </el-form>
+                        <!-- 专有算法的算法描述 -->
+                        <div>
+                          <span>算法描述：</span>
+                          <div>{{ extraAlgorithmStatement[item.parameters[item.use_algorithm]] }}</div>
+                        </div>
                       </div>
                       <template #reference>
 
@@ -842,7 +847,7 @@
                             <!-- 节点的拖拽动作的识别点 -->
                             <img :src="setIconOfAlgorithms(item.label)" alt="icon" width="50px" height="50px" />
                             <div style="
-                            position: absolute; left: 55px; top: 50%; width: 6px; height: 6px;
+                            position: absolute; left: 88px; top: 50%; width: 6px; height: 6px;
                             border: 2px solid #80a5ba; 
                             border-radius: 50%; 
                             background-color: transparent;
@@ -911,20 +916,25 @@
           </div>
           <!-- 模型运行结果展示区 -->
           <div class="resultsContainer" style="background-color: white;">
+            <!-- 显示程序运行的进度条 -->
+            <div v-if="processing"  style="display: flex; justify-content: center; align-items: center; padding-top: 120px;">
+              <span style="font-weight: 700; font-size: 22px">程序正在运行中</span>
+              <el-progress :percentage="percentage" :indeterminate="true" />
+            </div>
 
             <!-- 点击在可视化建模区展示算法的具体介绍 -->
-            <div style="width: 100%; height: 100%; background-color: white;" v-if="showPlainIntroduction || showStatusMessage"> 
+            <div style="width: 100%; height: 100%; background-color: white;" v-if="(showPlainIntroduction || showStatusMessage) && !processing"> 
               <el-scrollbar height="480px" style="background-color: white;">
                 <a-button type="text" style="position: absolute; top: 5px; right: 5px" v-if="showPlainIntroduction" @click="showPlainIntroduction = false">关闭</a-button>
                 <v-md-preview v-if="showPlainIntroduction" :text="introductionToShow"
                 style="text-align: left;"></v-md-preview>
                 <v-md-preview v-if="showStatusMessage" :text="statusMessageToShow"
-                  style="text-align: center;"></v-md-preview>
+                  style="text-align: center; padding-top: 80px"></v-md-preview>
               </el-scrollbar>
             </div>
 
             <!-- 结果可视化区默认为自定义建模或是预定义模型的使用介绍 -->
-            <div v-if="!showPlainIntroduction && !showStatusMessage && !canShowResults && !contrastVisible" style="background-color: white; height: 100%; width: auto">
+            <div v-if="!showPlainIntroduction && !showStatusMessage && !canShowResults && !contrastVisible && !processing" style="background-color: white; height: 100%; width: auto">
               
               <el-scrollbar height="100%">
               <!-- 自定义建模 -->
@@ -951,7 +961,7 @@
             </div>
 
             <!-- 当点击二级目录后，展示二级目录下各个算法的优劣比较 -->
-            <div v-if="contrastVisible" style="background-color: white; height: 100%; width: auto; position: relative;"> 
+            <div v-if="contrastVisible && !processing" style="background-color: white; height: 100%; width: auto; position: relative;"> 
               
               <el-scrollbar height="570px" style="background-color: white;">
                 <a-button type="text" style="position: absolute; top: 5px; right: 5px" @click="contrastVisible = false">关闭</a-button>
@@ -959,11 +969,10 @@
               </el-scrollbar>
             </div>
             
-            <!-- 显示程序运行的进度条 -->
-            <el-progress v-if="processing" :percentage="percentage" :indeterminate="true" />
+            
 
             <!-- 显示结果 -->
-            <el-scrollbar height="600px" v-if="canShowResults" style="background-color: white;">
+            <el-scrollbar height="600px" v-if="canShowResults && !processing" style="background-color: white;">
               <!-- 健康评估可视化 -->
               <el-tabs class="demo-tabs" type="border-card" v-model="activeName1" v-if="displayHealthEvaluation">
                 <el-tab-pane label="层级有效指标" name="first">
@@ -1022,7 +1031,7 @@
                 <el-tabs tab-position="left" type="border-card" v-model="featuresExtractionRawData">
                   <el-tab-pane v-for="item in rawDataList" :key="item.snesor_no" :label="item.sensor_no" :name="item.sensor_no">
                     <div :id="item.sensor_no" style="width: 1300px; height: 400px"></div>
-                    <div style="padding-left: 10px;text-align: left; font-size: 25px; color:darkgrey;">由原始信号提取特征：</div>
+                    <!-- <div style="padding-left: 10px;text-align: left; font-size: 25px; color:darkgrey;">由原始信号提取特征：</div> -->
                     <!-- 对应特征提取结果 -->
                     <div :id="item.sensor_no + 'features'" style="width: 1300px; height: 400px"></div>
                   </el-tab-pane>
@@ -1426,7 +1435,7 @@ const getRadioButtonStyle = (value) => {
     border: 'none',
     borderRadius: 0,
     fontWeight: 'bolder',
-    fontSize: 'large'
+    fontSize: '22px'
   };
 
   if (modelSelection.value === value) {
@@ -1682,6 +1691,11 @@ const privateAlgorithmList = ref([
   
 ])
 
+const extraAlgorithmStatement = ref({})
+
+
+// 额外算法的描述
+// const extraAlgorithmStatement = ref('')
 
 const getPrivateAlgorithm = (item: any) =>{
 
@@ -1708,9 +1722,19 @@ const getPrivateAlgorithm = (item: any) =>{
   api.get('/user/user_fetch_private_algorithm?algorithm_type='+ algorithmType).then((response) => {
     if (response.data.code == 200){
       // 将字符串数组转换为对象数组
-      const algorithms = response.data.message.map(item => ({ label: item }))
+      const algorithmList = response.data.algorithmList
+      console.log("algorithmList: ", algorithmList)
+      const algorithms = algorithmList.map(item => ({ label: item.algorithmAlias }))
+      // extraAlgorithmStatement.value = algorithmList.map(item => ( { 'item.algorithmAlias': item.algorithmStatement }))
+      
+      algorithmList.forEach(element => {
+        extraAlgorithmStatement.value[element.algorithmAlias] = element.algorithmStatement
+      });
+
+      console.log(extraAlgorithmStatement.value)
       privateAlgorithmList.value.length = 0
       privateAlgorithmList.value = algorithms
+
     }
     if (response.data.code == 401){
       ElMessageBox.alert('登录状态已失效，请重新登陆', '提示',
@@ -3565,8 +3589,8 @@ const handleMouseup = (ev, data) => { // 在图表中拖拽节点时，设置他
         //   data.nodeContainerStyle.left = ev.clientX - 290 
         //   data.nodeContainerStyle.top = ev.clientY - 80 
         // }, 2)
-        nodeList.value[i].nodeContainerStyle.left = ev.clientX - 300 + 'px'
-        nodeList.value[i].nodeContainerStyle.top = ev.clientY - 100 + 'px'
+        nodeList.value[i].nodeContainerStyle.left = ev.clientX - 340 + 'px'
+        nodeList.value[i].nodeContainerStyle.top = ev.clientY - 105 + 'px'
       }
     }
   }
@@ -3810,7 +3834,7 @@ const featureExtractionDisplay = (resultsObject) => {
   
   // 获取后端传回的提取的特征
   let featuresWithName = Object.assign({}, resultsObject.features_with_name)
-  let featuresName = featuresWithName.features_name.slice()
+  let featuresName = featuresWithName.features_name
   let featuresToDrawLineChart = Object.assign({}, resultsObject.featuresToDrawLineChart)
   // let featuresGroupBySensor = Object.assign(featuresWithName.features_extracted_group_by_sensor)
 
@@ -3834,7 +3858,6 @@ const featureExtractionDisplay = (resultsObject) => {
 
   // datas是每个传感器的每一帧样本所提取到的特征
 
-
   // 特征表格
   // columns.value.length = 0
   // 将特征名作为列名
@@ -3855,7 +3878,7 @@ const featureExtractionDisplay = (resultsObject) => {
 
   let rawDataSeries: any =  resultsObject.raw_data
   numOfSensors.value = rawDataSeries.length
-  // console.log('rawDataSeries: ', rawDataSeries)
+  console.log('rawDataSeries: ', rawDataSeries)
   // 原始信号波形图显示
   let sensorNo = 1
   rawDataList.value.length = 0  
@@ -3921,7 +3944,7 @@ const featureExtractionDisplay = (resultsObject) => {
 
       lineChartOption = {
         title: {
-          text: '连续样本指标变化曲线图'
+          text: '连续信号样本提取特征'
         },
         tooltip: {
           trigger: 'axis'
@@ -3957,8 +3980,7 @@ const featureExtractionDisplay = (resultsObject) => {
         
         ]
       };
-
-      for (let key in featuresName){
+      for (let key of featuresName){
         lineChartOption.series.push({
           name: key,
           type: 'line',
@@ -3968,39 +3990,7 @@ const featureExtractionDisplay = (resultsObject) => {
       }
       lineChart.setOption(lineChartOption);
     })
-    
   })
-      // for (let object of rawDataList.value){
-      //   nextTick(()=>{
-          
-      //     let chart = echarts.init(document.getElementById(object.sensor_no))
-      //     let dataSeries = object.data
-      //     let option = {
-      //       title: {
-      //         text: '原始信号'
-      //       },
-      //       xAxis: {
-      //         type: 'value',
-      //         data: Array.from({ length: dataSeries.length }),
-      //         name: '采样点'
-      //       },
-      //       yAxis: {
-      //         type: 'value',
-      //         name: '采样值'
-      //       },
-      //       series: [
-      //         {
-      //           name: '信号',
-      //           type: 'line',
-      //           symbol: 'circle',
-      //           symbolSize: 2,
-      //           data: dataSeries.map((value, index) => [index, value])
-      //         }
-      //       ] 
-      //     }
-      //     chart.setOption(option)
-      //   })
-      // }
 }
 
 // 特征选择结果可视化
@@ -4348,6 +4338,8 @@ const browseDataset = (row: { dataset_name: any; }) => {
   })
 }
 
+// 当前显示的算法模块结果
+let currentDisplayedItem = ''
 
 // 点击可视化建模区中的算法模块显示对应的结果
 const showResult = (item) => {
@@ -4393,12 +4385,30 @@ const showResult = (item) => {
           let results_to_show = responseResults.层次分析模糊综合评估
           healthEvaluationDisplay(results_to_show)
         } else if (item.label == '特征提取') {
+          if(currentDisplayedItem != '特征提取'){
+            currentDisplayedItem = '特征提取'
+          }else{
+            displayFeatureExtraction.value = true  // 显示特征提取结果
+            return
+          }
           let results_to_show = responseResults.特征提取
           featureExtractionDisplay(results_to_show)
         } else if (item.label == '特征选择') {
+          if(currentDisplayedItem != '特征选择'){
+            currentDisplayedItem = '特征选择'
+          }else{
+            displayFeatureSelection.value = true  // 显示特征选择结果
+            return
+          }
           let results_to_show = responseResults.特征选择
           featuresSelectionDisplay(results_to_show)
         } else if (item.label == '故障诊断') {
+          if(currentDisplayedItem != '故障诊断'){
+            currentDisplayedItem = '故障诊断'
+          }else{
+            displayFaultDiagnosis.value = true
+            return
+          }
           let results_to_show = responseResults.故障诊断
           faultDiagnosisDisplay(results_to_show)
         } else if (item.label == '故障预测') {
@@ -4920,8 +4930,8 @@ body {
 
 .deleteButton {
   position: absolute;
-  top: 0px;
-  right: 47px;
+  top: 2px;
+  right: 2px;
 }
 
 #source {
@@ -4974,10 +4984,10 @@ ul>li {
   /* font-style: italic; */
   padding: 4px;
   position: relative;
-  width: 112px;
-  height: 112px;
+  width: 180px;
+  height: 70px;
   /* line-height: 36px; */
-  font-size: 16px;
+  font-size: 12px;
   text-align: center;
   border: 1px solid #e5e7eb;
   background: #fff;
@@ -5003,7 +5013,7 @@ ul>li {
   border: 1px solid #ccc;
   position: absolute;
   right: -10px;
-  top: 55px;
+  top: 35px;
 }
 
 .node-drag:hover {
@@ -5224,7 +5234,7 @@ body {
 }
 
 .module-name {
-  width: 100px; /* 设置固定的宽度 */
+  width: 100%; /* 设置固定的宽度 */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5232,5 +5242,6 @@ body {
 
 .custom-radio-button:hover{
   background-color: #c4e8ba;
+  
 }
 </style>

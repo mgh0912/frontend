@@ -211,7 +211,7 @@
                 </a-tooltip>
               </div>
               <!-- 算法选择区中算法展开结构，只对系统用户可见 -->
-              <div v-if="((userRole === 'superuser' || userRole === 'user') )" style="width: 248px; height: 250px;background-color: white; border: 1px solid #527b96; border-radius: 15px; margin-top: 15px; padding-top: 10px">
+              <div v-if="((userRole === 'superuser' || userRole === 'user') )" style="width: 248px; height: 300px;background-color: white; border: 1px solid #527b96; border-radius: 15px; margin-top: 20px;">
                 <el-scrollbar height="100%" :min-size="35" style="margin-left: 10px;">
                   <el-col v-for="item in menuList2">
                     <!-- #4599be #5A87F8 -->
@@ -304,10 +304,10 @@
               </div>
               
               <div  v-if="((userRole === 'superuser' || userRole === 'user') )"
-              style="position: relative; width: 248px; height: 200px; background-color: #FCFDFF; display: flex;
+              style="position: relative; width: 248px; height: 170px; background-color: #FCFDFF; display: flex;
               justify-content: center; align-items: center; border-radius: 15px; margin-top: 5px; border: 1px solid #527b96">
                 <a-button style="width: 165px; height: 35px; font-size: 16px; position:absolute;
-                top: 55px; left: 40px; display:flex; justify-content: center; align-items: center; 
+                top: 25px; left: 40px; display:flex; justify-content: center; align-items: center; 
                 background-image: linear-gradient(to bottom right, #a1a2b1, #edf4f6); color: #3c93f8;
                 border: 2px solid #484a66; font-size: 18px; border-radius: 15px;
                 font-weight: 550; "
@@ -318,7 +318,7 @@
                   </template>
                   打开模型库
                 </a-button>
-                <div class="highlight" :style="{bottom: '35px', color: getColor(modelLoaded)}" :title="modelLoaded"><p>已加载模型</p>{{ modelLoaded }}</div>
+                <div class="highlight" :style="{bottom: '15px', color: getColor(modelLoaded)}" :title="modelLoaded"><p>已加载模型</p>{{ modelLoaded }}</div>
                 
                 <!-- 供普通用户上传数据文件 -->
                 <!-- <div v-if="userRole === 'user'"
@@ -969,8 +969,6 @@
               </el-scrollbar>
             </div>
             
-            
-
             <!-- 显示结果 -->
             <el-scrollbar height="600px" v-if="canShowResults && !processing" style="background-color: white;">
               <!-- 健康评估可视化 -->
@@ -1100,7 +1098,33 @@
                       faultDiagnosis }}</span>
                 </div> -->
                 <v-md-preview style="padding: 0px; margin: 0px":text="faultDiagnosisResultsText"></v-md-preview>
-
+                <span><a-button circle :icon="h(EditOutlined)" @click="feedBackDialogVisible = true"></a-button> 反馈</span>
+                <!-- 用户填写反馈的对话框 -->
+                <a-modal  v-model:open="feedBackDialogVisible" title="用户反馈" cancelText="取消" okText="确定">
+                  <div style="font-weight: 600; font-size: 14px">
+                    <p>当前使用的模型：{{ modelLoaded }}</p>
+                    <p>当前使用的数据：{{ usingDatafile }}</p>
+                  </div>
+                  <a-form>
+                    <a-form-item label="当前模型中存在疑问的模块">
+                      <!-- <a-radio-group v-model="">
+                        <a-radio value="1">正常</a-radio>
+                        <a-radio value="2">异常</a-radio>
+                        <a-radio></a-radio>
+                      </a-radio-group> -->
+                      <a-select>
+                        <a-select-option v-for="item in contentJson.modules" :value="item">
+                          {{ item }}
+                        </a-select-option>
+                      </a-select>
+                    </a-form-item>
+                    <a-form-item>
+                      <div>问题描述</div>
+                      <a-input>
+                      </a-input>
+                    </a-form-item>
+                  </a-form>
+                </a-modal>
                 <el-tabs v-model="faultDiagnosisResultOption" tab-position="top">
                   <el-tab-pane key="1" label="连续样本指标变化">
                     <!-- 连续样本指标变化的折线图 -->
@@ -1418,7 +1442,7 @@ import { useRouter } from 'vue-router';
 import api from '../utils/api.js'
 import { labelsForAlgorithms, plainIntroduction, labelsForParams, contrastOfAlgorithm, predefinedModel } from '../components/constant.ts'
 import * as echarts from 'echarts';
-import { UploadOutlined } from "@ant-design/icons-vue";
+import { EditOutlined, UploadOutlined } from "@ant-design/icons-vue";
 import { message } from "ant-design-vue";
 import type { UploadProps } from "ant-design-vue";
 import { Rule } from "ant-design-vue/es/form";
@@ -1882,7 +1906,7 @@ const menuList2 = ref([{
         'ulcnn_multiple': {},
         'spectrumModel': {},
         'spectrumModel_multiple': {},
-        'private_fault_diagnosis_deeplearning': '',
+        // 'private_fault_diagnosis_deeplearning': '',
       }, tip_show: false, tip: '根据提取特征对输入信号作故障诊断', optional: false
     },
     {
@@ -2046,7 +2070,11 @@ const clickAtSecondMenu = (option: any) => {
   menuDetailsThird.value[option.label] = !menuDetailsThird.value[option.label]
 
   // 在结果可视化区域显示对应二级目录功能下所有算法的优劣比较
-  contrastToShow.value = contrastOfAlgorithm[option.label]
+  let secondAlgorithm = option.label
+  if (secondAlgorithm === '层次分析模糊综合评估' || secondAlgorithm === '层次朴素贝叶斯评估' || secondAlgorithm === '层次逻辑回归评估'){
+    secondAlgorithm = '层次分析健康评估'
+  }
+  contrastToShow.value = contrastOfAlgorithm[secondAlgorithm]
 
   resultsViewClear()
   contrastVisible.value = true
@@ -3319,28 +3347,29 @@ const startProgram = () => {
         })
         responseResults = response.data.results
         missionComplete.value = true
-
-        clearInterval(fastTimerId);
-        clearInterval(slowTimerId);
-        setTimeout(function () { processing.value = false }, 700)
-        percentage.value = 100;
-        canShutdown.value = true
         statusMessageToShow.value = statusMessage.success
-        resultsViewClear()
-
-        showStatusMessage.value = true
-        showPlainIntroduction.value = false
+        
       } else {
         processIsShutdown.value = false
       }
     }
     else if(response.data.code == 404){
+      statusMessageToShow.value = statusMessage.error
       ElMessage({
         message: response.data.message,
         type: 'warning'
-      })
-      
+      }) 
     }
+    clearInterval(fastTimerId);
+    clearInterval(slowTimerId);
+    setTimeout(function () { processing.value = false }, 700)
+    percentage.value = 100;
+    canShutdown.value = true
+    
+    resultsViewClear()
+
+    showStatusMessage.value = true
+    showPlainIntroduction.value = false
   })
   .catch(error => {
   
@@ -4015,6 +4044,12 @@ const featuresSelectionDisplay = (resultsObject) => {
 }
 
 
+// 用户对于故障诊断结果准确性
+const feedBackDialogVisible = ref(false)  
+
+const feedBack = () => { 
+}
+
 // 故障诊断结果展示
 const displayFaultDiagnosis = ref(false)
 const faultDiagnosis = ref('')
@@ -4303,6 +4338,10 @@ const resultsViewClear = () => {
   displayNormalization.value = false
   displayDenoise.value = false
   displayRawDataWaveform.value = false
+
+  if( !done.value ){
+    currentDisplayedItem = ''
+  }
 }
 
 
@@ -5009,11 +5048,12 @@ ul>li {
   width: 10px;
   height: 10px;
   border-radius: 10px;
-  background-color: red;
+  background-color: gray;
   border: 1px solid #ccc;
   position: absolute;
-  right: -10px;
-  top: 35px;
+  right: -7px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .node-drag:hover {

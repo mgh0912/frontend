@@ -117,7 +117,8 @@
           <div
             style="display: flex; flex-direction: row; margin-top: 20px"
             v-if="
-              canUploadModelFile || (unknownform.algorithmType === '无量纲化' && unknownform.useLog)
+              canUploadModelFile ||
+              (unknownform.algorithmType === '无量纲化' && unknownform.useLog)
             "
           >
             <span><span style="color: red">*</span>选择所要使用的模型文件：</span>
@@ -126,6 +127,7 @@
               :before-upload="beforeUploadModelFile"
               @remove="removeModelFile"
               :maxCount="1"
+              :auto-upload="false"
             >
               <a-button class="upload-button">
                 <upload-outlined></upload-outlined>
@@ -143,7 +145,7 @@
           "
         >
           <a-form
-            :model="algorithmFileFormState"
+            :model="extraAlgorithmFileFormState"
             name="basic"
             ref="algorithmFileFormRef"
             :rules="rules"
@@ -157,7 +159,7 @@
               :rules="[{ required: true, message: '请输入增值组件算法名称!' }]"
             >
               <a-input
-                v-model:value="algorithmFileFormState.algorithmName"
+                v-model:value="extraAlgorithmFileFormState.algorithmName"
                 placeholder="请输入增值组件名称"
               />
             </a-form-item>
@@ -168,7 +170,7 @@
               :rules="[{ required: true, message: '请输入增值组件描述' }]"
             >
               <a-input
-                v-model:value="algorithmFileFormState.statement"
+                v-model:value="extraAlgorithmFileFormState.statement"
                 placeholder="请输入增值算法描述"
               />
             </a-form-item>
@@ -177,23 +179,58 @@
               <a-checkbox v-model:checked="formState.remember">Remember me</a-checkbox>
             </a-form-item> -->
 
-            <a-form-item :wrapper-col="{ offset: 0, span: 24 }">
-              <!-- <a-button type="primary" html-type="submit">Submit</a-button> -->
+            <!-- <a-button type="primary" html-type="submit">Submit</a-button> -->
+            <span style="width: 350px"
+              >选择一个已上传文件作为测试样本，在上传组件后对该组件进行完整性校验：</span
+            >
+            <a-space>
+              <!-- <a-button type="primary" @click="extraModuleValidate">完整性校验</a-button> -->
+              <!-- 显示校验结果 -->
+              <div style="width: 160px">
+                <a-select
+                  v-model:value="validateExtraAlgorithmUsingFileName"
+                  style="width: 100%"
+                >
+                  <a-select-option
+                    v-for="item in fetchedDataFiles"
+                    :key="item.dataset_name"
+                    :value="item.dataset_name"
+                  >
+                    {{ item.dataset_name }}
+                  </a-select-option>
+                </a-select>
+              </div>
+
               <a-button
                 type="primary"
                 :disabled="
                   (canUploadModelFile &&
                     (modelFileList?.length === 0 || pythonFileList?.length === 0)) ||
-                  (!canUploadModelFile && pythonFileList?.length === 0)
+                  (!canUploadModelFile && pythonFileList?.length === 0) ||
+                  validateExtraAlgorithmUsingFileName === ''
                 "
                 :loading="uploading"
-                @click="uploadExtraModuleWithName"
+                @click="extraModuleUploadAndValidate"
                 class="upload-button"
-                style="width: 160px; margin-left: 140px; margin-top: 30px"
+                style="margin-left: 10px"
               >
-                {{ uploading ? "上传中" : "开始上传增值组件" }}
+                {{ uploading ? "正在进行完整性校验" : "上传增值组件" }}
               </a-button>
-            </a-form-item>
+              <span style="font-size: 20px" v-if="canShowValidationResult">
+                <!-- <a-icon v-if="extraModuleValidationResult === 'success'" type="check-circle" theme="twoTone" twoToneColor="#52c41a" /> -->
+                <span v-if="extraModuleValidationResult === true">
+                  <CheckCircleOutlined style="color: green" />
+                  <!-- <span style="font-size: 12px">校验通过，上传成功</span> -->
+                </span>
+
+                <span v-else>
+                  <CloseCircleOutlined style="color: red" />
+                  <!-- <span style="font-size: 12px">校验失败</span> -->
+                </span>
+
+                <!-- <a-icon v-else type="close-circle" theme="twoTone" twoToneColor="#ff4d4f" /> -->
+              </span>
+            </a-space>
           </a-form>
         </div>
       </span>
@@ -226,9 +263,6 @@
         </div>
       </span> -->
     </div>
-
-    <!-- 管理 -->
-    <div></div>
   </a-modal>
 
   <!-- 私有算法参考模版 -->
@@ -327,7 +361,6 @@
           <a-image :width="500" src="src/assets/fault-diagnosis-outline.png"></a-image>
           <h3>其中故障诊断的模型结构需要在该python源文件之中定义</h3>
           <br />
-          
         </div>
       </div>
       <div v-if="templateName === '故障预测'">
@@ -467,7 +500,7 @@
           </code> -->
 
           <h2>4. 私有算法代码模板示例</h2>
-          
+
           <a-image :width="500" src="src/assets/health-evaluation-outline-1.png" />
           <a-image :width="500" src="src/assets/health-evaluation-outline-2.png" />
           <a-image :width="500" src="src/assets/health-evaluation-outline-3.png" />
@@ -512,7 +545,12 @@
 </template>
 
 <script setup lang="ts">
-import { UploadOutlined, QuestionOutlined } from "@ant-design/icons-vue";
+import {
+  UploadOutlined,
+  QuestionOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+} from "@ant-design/icons-vue";
 import { message } from "ant-design-vue";
 import type { UploadProps } from "ant-design-vue";
 import type { Rule } from "ant-design-vue/es/form";
@@ -525,7 +563,8 @@ interface algorithmFormState {
   algorithmName: string;
   statement: string;
 }
-const algorithmFileFormState = reactive<algorithmFormState>({
+// 增值服务组件的组件名以及组件的描述
+const extraAlgorithmFileFormState = reactive<algorithmFormState>({
   algorithmName: "",
   statement: "",
 });
@@ -572,75 +611,399 @@ const unknownform = reactive({
   useLog: false, // 是否使用训练模型时的标准化方法，为true时，使用训练模型时的标准化方法，为false时，使用当前数据集的标准化方法
 });
 
+const fetchedDataFiles = ref([]);
+// 从数据库获取用户已上传的数据文件
+const fetchDataFiles = () => {
+  let url = "user/fetch_datafiles/";
+  api.get(url).then((response: any) => {
+    let datasetInfo = response.data;
+    // modelsDrawer.value = false;
+
+    fetchedDataFiles.value = [];
+
+    for (let item of datasetInfo) {
+      fetchedDataFiles.value.push(item);
+    }
+  });
+};
+
 const dialogVisible = ref(false);
 const uploadPrivateAlgorithmFiles = () => {
   dialogVisible.value = true;
+  fetchDataFiles();
 };
 
+const emit = defineEmits(["validateExtraModule"]);
 
-const uploadExtraModuleWithName = () => {
-  console.log("algorithmFileFormState.value", algorithmFileFormState.value)
-  algorithmFileFormRef.value
-    .validate()
-    .then(() => {
-      // 上传算法组件
-      let formData = new FormData();
-      // formData.append("algorithmFile", algorithmFileFormState.value.algorithmFile);
-      formData.append("algorithmName", algorithmFileFormState.algorithmName)
-      formData.append("statement", algorithmFileFormState.statement)
-      //   // 发送文件上传请求
-      formData.append("algorithm_type", unknownform.algorithmType)
-      formData.append("faultDiagnosisType", unknownform.faultDiagnosisType)
+// 校验组件时向父组件传递的模型运行信息
+let contentJson = {
+  modules: [],
+  algorithms: {},
+  parameters: {},
+  schedule: [],
+  multipleSensor: false, // 是否为多传感器数据
+};
 
-      // 将pythonFileList和modelFileList中的文件添加到formData中
-      for (let i = 0; i < pythonFileList.value.length; i++) {
-        formData.append("algorithmFile", pythonFileList.value[i])
-      }
-      for (let i = 0; i < modelFileList.value.length; i++) {
-        formData.append("modelParamsFile", modelFileList.value[i])
-      }
-      api
-        .post("/user/upload_user_private_algorithm/", formData)
-        .then((response: any) => {
-          if (response.data.code == 200) {
-            pythonFileList.value = [];
-            modelFileList.value = [];
-            message.success("算法文件上传成功");
-            dialogVisible.value = true;
-            ruleOfFDA = 0;
-          } else {
-            uploading.value = false;
-            message.error("算法文件上传失败, " + response.data.message);
-          }
-          if (response.data.code == 401) {
-            ElMessageBox.alert("登录状态已失效，请重新登陆", "提示", {
-              confirmButtonText: "确定",
-              callback: (action: Action) => {
-                router.push("/");
-              },
-            });
-          }
-        })
-        .catch((error: any) => {
-          uploading.value = false;
-          message.error("上传失败, 请重试");
-        });
-      uploading.value = false;
-      //
+// 校验插值处理增值组件
+let contentJsonForInterpolation = {
+  modules: ["插值处理"],
+  algorithms: { 插值处理: "private_interpolation" },
+  parameters: { private_interpolation: "" },
+  schedule: ["数据源", "插值处理"],
+  multipleSensor: false, // 是否为多传感器数据
+};
+
+// 校验小波变换增值组件
+let contentJsonForWaveletTrans = {
+  modules: ["小波变换"],
+  algorithms: { 小波变换: "extra_wavelet_transform" },
+  parameters: { extra_wavelet_transform: "" },
+  schedule: ["数据源", "小波变换"],
+  multipleSensor: false, // 是否为多传感器数据
+};
+
+// 校验无量纲化增值组件
+let contentJsonForDimensionless = {
+  modules: ["无量纲化"],
+  algorithms: { 无量纲化: "private_scaler" },
+  parameters: { private_scaler: { useLog: false, algorithm: "" } },
+  schedule: ["数据源", "无量纲化"],
+  multipleSensor: false, // 是否为多传感器数据
+};
+
+// 校验故障诊断增值组件
+let contentJsonForFaultDiagnosisDL = {
+  modules: ["故障诊断"],
+  algorithms: { 故障诊断: "private_fault_diagnosis_deeplearning" },
+  parameters: {
+    private_fault_diagnosis_deeplearning: '',
+  },
+  schedule: ["数据源", "故障诊断"],
+  mutipleSensor: false,
+};
+
+// 校验基于机器学习的故障诊断增值服务组件
+let contentJsonForFaultDiagnosisML = {
+  modules: ["故障诊断", "特征提取", "特征选择"],
+  algorithms: {
+    特征提取: "time_frequency_domain_features",
+    特征选择: "correlation_coefficient_importance",
+    故障诊断: "private_fault_diagnosis_machine_learning",
+  },
+  parameters: {
+    time_frequency_domain_features: {
+      均值: true,
+      方差: true,
+      标准差: true,
+      峰度: true,
+      偏度: true,
+      四阶累积量: true,
+      六阶累积量: true,
+      最大值: true,
+      最小值: true,
+      中位数: true,
+      峰峰值: true,
+      整流平均值: true,
+      均方根: true,
+      方根幅值: true,
+      波形因子: true,
+      峰值因子: true,
+      脉冲因子: true,
+      裕度因子: true,
+      重心频率: true,
+      均方频率: true,
+      均方根频率: true,
+      频率方差: true,
+      频率标准差: true,
+      谱峭度的均值: true,
+      谱峭度的峰度: true,
+    },
+    correlation_coefficient_importance: {'rule': 1, 'threshold1': 0.45, 'threshold2': 0.1},
+    private_fault_diagnosis_machine_learning: '',
+  },
+  schedule: ["数据源", "特征提取", "特征选择", "故障诊断"],
+  mutipleSensor: false,
+};
+
+// 校验小波变换增值组件
+// let contentJsonForWaveletTrans = {
+//   modules: ["小波变换"],
+//   algorithms: { 小波变换: "extra_wavelet_transform" },
+//   parameters: { extra_wavelet_transform: "" },
+//   schedule: ["数据源", "小波变换"],
+//   multipleSensor: false, // 是否为多传感器数据
+// };
+
+// const validateExtraModuleUsingFileName = ref('')
+// 增值服务组件完整性校验结果
+const extraModuleValidationResult = ref(false);
+const canShowValidationResult = ref(false);
+//上传文件后，点击开始运行以运行程序
+const startValidating = () => {
+  const data = new FormData();
+  data.append("file_name", validateExtraAlgorithmUsingFileName.value); // 所使用的数据文件
+  data.append("params", JSON.stringify(contentJson)); // 模型信息
+
+  return api
+    .post("user/run_with_datafile_on_cloud/", data, {
+      headers: { "Content-Type": "multipart/form-data" },
     })
-    .catch((error) => {
-      console.log("error", error);
-      message.error("请填写完整的组件信息");
-      return false;
+    .then((response: any) => {
+      if (response.data.code == 401) {
+        ElMessageBox.alert("登录状态已失效，请重新登陆", "提示", {
+          confirmButtonText: "确定",
+          callback: () => {
+            router.push("/");
+          },
+        });
+      }
+      if (response.data.code === 200) {
+        message.success("组件校验成功！");
+        extraModuleValidationResult.value = true;
+      } else {
+        extraModuleValidationResult.value = false;
+        message.error("组件校验失败，" + response.data.message);
+      }
+      uploading.value = false;
+    })
+    .catch((error: any) => {
+      if (error.response) {
+        // 请求已发出，服务器响应了状态码，但不在2xx范围内
+        console.log(error.response.status); // HTTP状态码
+        console.log(error.response.statusText); // 状态消息
+      } else if (error.request) {
+        // 请求已发起，但没有收到响应
+        console.log(error.request);
+      } else {
+        // 设置请求时触发了错误
+        console.error("Error", error.message);
+      }
+      uploading.value = false;
+      extraModuleValidationResult.value = false;
+      message.error("校验程序运行出错，请检查上传的文件是否符合模板规范");
     });
 };
 
+// 删除增值服务组件
+const deleteExtraModule = () => {
+  // 发送删除请求到后端，row 是要删除的数据行
+  api
+    .get(
+      "/user/delete_extra_algorithm/?algorithmAlias=" +
+        extraAlgorithmFileFormState.algorithmName
+    )
+    .then((response: any) => {
+      if (response.data.code == 401) {
+        ElMessageBox.alert("登录状态失效，请重新登陆", "提示", {
+          confirmButtonText: "确定",
+          callback: () => {
+            router.push("/");
+          },
+        });
+      }
+      if (response.data.code == 200) {
+        console.log("组件已删除成功");
+      } else {
+        console.log("删除组件失败，请稍后重试");
+        // if (response.data.code == 404) {
+        //   ElMessage({
+        //     message: "没有权限删除该组件",
+        //     type: "error",
+        //   });
+        // } else {
+        //   ElMessage({
+        //     message: "删除组件失败，请稍后重试",
+        //     type: "error",
+        //   });
+        // }
+      }
+    })
+    .catch((error: any) => {
+      // 处理错误
+      console.error(error);
+      // ElMessage({
+      //   message: "删除组件失败," + error,
+      //   type: "error",
+      // });
+    });
+};
+
+// 校验增值服务组件所使用的用户样本
+const validateExtraAlgorithmUsingFileName = ref("");
+// 提交上传组件并进行校验
+const extraModuleUploadAndValidate = async () => {
+  // extraModuleValidationResult.value = true
+  // 首先上传增值服务组件然后进行校验，校验通过再保存上传的结果
+  try {
+    await uploadExtraModuleWithName();
+    console.log("上传成功");
+    // 进行后续操作
+  } catch (error) {
+    console.error("上传失败:", error);
+    // message.error("组件上传失败");
+    return;
+  }
+  let algorithmName = extraAlgorithmFileFormState.algorithmName;
+  if (unknownform.algorithmType == "小波变换") {
+    contentJsonForWaveletTrans.parameters["extra_wavelet_transform"] = algorithmName;
+    // 将contentJsonForWaveletTrans的值复制给contentJson
+    Object.assign(contentJson, contentJsonForWaveletTrans);
+  } else if (unknownform.algorithmType == "插值处理") {
+    contentJsonForInterpolation.parameters["private_interpolation"] = algorithmName;
+    Object.assign(contentJson, contentJsonForInterpolation);
+  } else if (unknownform.algorithmType == "无量纲化") {
+    contentJsonForDimensionless.parameters["private_scaler"]["algorithm"] = algorithmName;
+    contentJsonForDimensionless.parameters["private_scaler"]["useLog"] = unknownform.useLog;
+    Object.assign(contentJson, contentJsonForDimensionless);
+  } else if (unknownform.algorithmType == '故障诊断') {
+    if (unknownform.faultDiagnosisType == 'machineLearning'){
+      contentJsonForFaultDiagnosisML.parameters['private_fault_diagnosis_machine_learning'] = algorithmName;
+      Object.assign(contentJson, contentJsonForFaultDiagnosisML)
+    }
+  }
+  // emit("validateExtraModule", {
+  //   contentJson: contentJson,
+  //   usingFileName: validateExtraAlgorithmUsingFileName.value,
+  // });
+  try {
+    // 运行校验程序进行完整性校验
+    await startValidating();
+    canShowValidationResult.value = true;
+    if (extraModuleValidationResult.value === true) {
+      // message.success("组件校验通过");
+    } else {
+      // 组件校验失败，删除已上传的组件
+      deleteExtraModule();
+      // message.error("组件校验失败");
+      // removeModelFile(algorithmName);
+    }
+  } catch (error) {
+    message.error("校验过程中发生错误");
+    // message.error("校验失败");
+  }
+};
+
+// const uploadExtraModuleWithName = () => {
+//   // console.log("algorithmFileFormState.value", algorithmFileFormState.value);
+//   algorithmFileFormRef.value
+//     .validate()
+//     .then(() => {
+//       // 上传算法组件
+//       let formData = new FormData();
+//       // formData.append("algorithmFile", algorithmFileFormState.value.algorithmFile);
+//       formData.append("algorithmName", algorithmFileFormState.algorithmName);
+//       formData.append("statement", algorithmFileFormState.statement);
+//       //   // 发送文件上传请求
+//       formData.append("algorithm_type", unknownform.algorithmType);
+//       formData.append("faultDiagnosisType", unknownform.faultDiagnosisType);
+
+//       // 将pythonFileList和modelFileList中的文件添加到formData中
+//       for (let i = 0; i < pythonFileList.value.length; i++) {
+//         formData.append("algorithmFile", pythonFileList.value[i]);
+//       }
+//       for (let i = 0; i < modelFileList.value.length; i++) {
+//         formData.append("modelParamsFile", modelFileList.value[i]);
+//       }
+//       return api
+//         .post("/user/upload_user_private_algorithm/", formData)
+//         .then((response: any) => {
+//           if (response.data.code == 200) {
+//             pythonFileList.value = [];
+//             modelFileList.value = [];
+//             message.success("算法文件上传成功");
+//             dialogVisible.value = true;
+//             ruleOfFDA = 0;
+//             // 进行算法组件完整性的校验
+//           } else {
+//             uploading.value = false;
+//             message.error("算法文件上传失败, " + response.data.message);
+//           }
+//           if (response.data.code == 401) {
+//             ElMessageBox.alert("登录状态已失效，请重新登陆", "提示", {
+//               confirmButtonText: "确定",
+//               callback: (action: Action) => {
+//                 router.push("/");
+//               },
+//             });
+//           }
+//         })
+//         .catch((error: any) => {
+//           uploading.value = false;
+//           message.error("上传失败, 请重试");
+//         });
+//       //
+//     })
+//     .catch((error) => {
+//       console.log("error", error);
+//       message.error("请填写完整的组件信息");
+//       return false;
+//     });
+// };
+
+const uploadExtraModuleWithName = () => {
+  return new Promise((resolve, reject) => {
+    algorithmFileFormRef.value
+      .validate()
+      .then(() => {
+        // 上传算法组件
+        let formData = new FormData();
+        formData.append("algorithmName", extraAlgorithmFileFormState.algorithmName);
+        formData.append("statement", extraAlgorithmFileFormState.statement);
+        formData.append("algorithm_type", unknownform.algorithmType);
+        formData.append("faultDiagnosisType", unknownform.faultDiagnosisType);
+
+        // 将pythonFileList和modelFileList中的文件添加到formData中
+        for (let i = 0; i < pythonFileList.value.length; i++) {
+          formData.append("algorithmFile", pythonFileList.value[i]);
+        }
+        for (let i = 0; i < modelFileList.value.length; i++) {
+          formData.append("modelParamsFile", modelFileList.value[i]);
+        }
+        uploading.value = true;
+        return api
+          .post("/user/upload_user_private_algorithm/", formData)
+          .then((response) => {
+            if (response.data.code == 200) {
+              pythonFileList.value = [];
+              modelFileList.value = [];
+              message.success("算法文件上传成功");
+              dialogVisible.value = true;
+              ruleOfFDA = 0;
+              // 进行算法组件完整性的校验
+              resolve(true); // 成功上传，resolve
+            } else {
+              uploading.value = false;
+              message.error("算法文件上传失败, " + response.data.message);
+              reject(new Error("上传失败: " + response.data.message)); // 失败，reject
+            }
+            if (response.data.code == 401) {
+              ElMessageBox.alert("登录状态已失效，请重新登陆", "提示", {
+                confirmButtonText: "确定",
+                callback: (action) => {
+                  router.push("/");
+                },
+              });
+            }
+          })
+          .catch((error) => {
+            uploading.value = false;
+            message.error("上传失败, 请重试");
+            reject(error); // 捕获错误，reject
+          });
+      })
+      .catch((error) => {
+        console.log("error", error);
+        message.error("请填写完整的组件信息");
+        reject(new Error("验证失败: 请填写完整的组件信息")); // 验证失败，reject
+      });
+  });
+};
 const removePythonFile: UploadProps["onRemove"] = (file) => {
   // 在删除文件列表中文件的同时，重新计算ruleOfDFA，以保证用户上传私有故障诊断算法时，同时包含用于故障诊断的模型以及模型参数文件。
-  const isFaultDiagnosis = unknownform.value.algorithmType === "故障诊断";
-  const isFaultPrediction = unknownform.value.algorithmType === "故障预测";
-  const isNormalization = unknownform.value.algorithmType === "无量纲化";
-  const isHealthEvaluation = unknownform.value.algorithmType === "健康评估";
+  const isFaultDiagnosis = unknownform.algorithmType === "故障诊断";
+  const isFaultPrediction = unknownform.algorithmType === "故障预测";
+  const isNormalization = unknownform.algorithmType === "无量纲化";
+  const isHealthEvaluation = unknownform.algorithmType === "健康评估";
   const isPyFile = file.type === "application/x-python-code" || file.name.endsWith(".py");
   const isPklFile = file.name.endsWith(".pkl");
   const isPthFile = file.name.endsWith(".pth");
@@ -683,7 +1046,7 @@ const algorithmTypeChange = (value: string, label: any, extra: any) => {
     value === "无量纲化"
   ) {
     if (value === "无量纲化") {
-      if (!unknownform.value.useLog) {
+      if (!unknownform.useLog) {
         canUploadModelFile.value = false;
       }
       return;
@@ -788,11 +1151,13 @@ const beforeUploadAlgorithmFile = (file: any) => {
     }
     // 将文件加入到文件列表
     pythonFileList.value = [...(pythonFileList.value || []), file]; //将文件添加到fileList中
+    return false;
   }
 };
 
 // 删除模型文件
 const removeModelFile: UploadProps["onRemove"] = (file) => {
+  console.log("file: ", file);
   // 删除文件列表中用户上传的文件
   if (modelFileList.value) {
     const index = modelFileList.value.indexOf(file);
@@ -820,13 +1185,13 @@ const beforeUploadModelFile = (file: any) => {
     if (faultDiagnosisType === "machineLearning") {
       if (!isPklFile) {
         message.warning("上传基于机器学习的算法，请上传.pkl的模型文件");
-        return;
+        return false;
       }
       uploadModelFileType = "pkl";
     } else {
       if (!isPthFile) {
         message.warning("上传基于深度学习的算法，请上传.pth的模型文件");
-        return;
+        return false;
       }
       uploadModelFileType = "pth";
     }
@@ -835,7 +1200,7 @@ const beforeUploadModelFile = (file: any) => {
   if (isHealthEvaluation) {
     if (!isPklFile) {
       message.warning("上传健康评估算法，请上传.pkl的模型文件");
-      return;
+      return false;
     }
   }
 
@@ -843,7 +1208,7 @@ const beforeUploadModelFile = (file: any) => {
     if (unknownform.useLog) {
       if (!isPklFile) {
         message.warning("上传对于所提取特征的无量纲化算法，请上传.pkl的模型文件");
-        return;
+        return false;
       }
     }
   }
@@ -855,24 +1220,25 @@ const beforeUploadModelFile = (file: any) => {
         removeModelFile(file);
         modelFileList.value = [...(modelFileList.value || []), file]; //将文件添加到fileList中
         message.warning("最多只能上传一个.pkl类型的模型文件");
-        return;
+        return false;
       }
       message.warn("上传该类型算法时，最多只能上传一个.pkl类型的文件");
-      return;
+      return false;
     } else {
       if (isPthFile) {
         removeModelFile(file);
         modelFileList.value = [...(modelFileList.value || []), file]; //将文件添加到fileList中
         message.warning("最多只能上传一个.pth类型的模型文件");
-        return;
+        return false;
       }
       message.warn("上传该类型算法时，最多只能上传一个.pth类型的文件");
-      return;
+      return false;
     }
   }
 
   // 将文件添加到modelFileList中
   modelFileList.value = [...(modelFileList.value || []), file];
+  return false;
 };
 // const beforeUpload = (file: any) => {
 //   const algorithmType = form.value.algorithmType;
@@ -1160,7 +1526,6 @@ const beforeUploadModelFile = (file: any) => {
 
 //   pythonFileList.value = [...(pythonFileList.value || []), file]; //将文件添加到fileList中
 //
-
 
 // const uploadExtraModule = () => {
 //   let isFaultDiagnosis = form.value.algorithmType == "故障诊断" ? true : false;

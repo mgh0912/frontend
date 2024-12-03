@@ -40,19 +40,36 @@
         show-overflow-tooltip
       />
 
-      <el-table-column :width="260" label="操作">
+      <el-table-column :width="100" label="操作">
         <template #default="scope">
           <!-- <el-button size="small" type="primary" style="width: 50px;" @click="useModel(scope.row)">
               使用
             </el-button> -->
-          <el-button
-            size="small"
-            type="danger"
-            style="width: 50px"
-            @click="deleteModule(scope.$index, scope.row)"
-          >
-            删除组件
-          </el-button>
+            <el-popconfirm title="你确定要删除该增值服务组件吗" @confirm="deleteModule(scope.$index, scope.row)">
+              <template #reference>
+                <el-button
+                  size="small"
+                  type="danger"
+                  style="width: 50px"
+                >
+                  删除组件
+                </el-button>
+              </template>
+              <template #actions="{ confirm, cancel }">
+                <el-row>
+                  <el-col :span="12"><el-button size="small" @click="cancel">取消</el-button></el-col>
+                  <el-col :span="12">
+                    <el-button
+                      type="primary"
+                      size="small"
+                      @click="confirm"
+                    >
+                      确定
+                    </el-button>
+                  </el-col>
+                </el-row>  
+              </template> 
+            </el-popconfirm>
           <!-- <el-popover placement="bottom" :width='500' trigger="click">
               <el-descriptions :title="modelName" :column="3" direction="vertical"
               >
@@ -111,7 +128,7 @@ const getExtraAlgorithm = () => {
 const deleteModule = (index: number, row: any) => {
   // 发送删除请求到后端，row 是要删除的数据行
   api
-    .get("/user/delete_extra_algorithm/?row_id=" + row.id)
+    .get("/user/delete_extra_algorithm/?algorithmAlias=" + row.alias)
     .then((response: any) => {
       if (response.data.code == 401) {
         ElMessageBox.alert("登录状态失效，请重新登陆", "提示", {

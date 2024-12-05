@@ -471,7 +471,8 @@
               </div>
             </div>
           </div>
-        </el-aside>
+          </div>
+         </el-aside>
 
         <!-- 可视化建模区以及结果可视化区 -->
         <!-- <el-main @dragover.prevent ref="efContainerRef" id="efContainer "
@@ -1583,7 +1584,7 @@ function updateOptionsWithBackendData(data) {
 
 
 //获取用户的增值组件列表
-const getExtraAlgorithm = () => {
+const getExtraAlgorithms = () => {
   api.get("/user/user_fetch_extra_algorithm/").then((response: any) => {
     if (response.data.code == 401) {
       ElMessageBox.alert("登录状态失效，请重新登陆", "提示", {
@@ -2453,7 +2454,7 @@ onMounted(() => {
   // console.log('username: ', username.value)
   console.log('userRole: ', userRole.value)
   //获取用户上传的增值组件并构造对应的目录结构体
-  getExtraAlgorithm()
+  getExtraAlgorithms()
   // 当进行建模的时候隐藏可视化建模区的背景文字
   document.querySelector('.el-main').classList.add('has-background');
   plumbIns = jsPlumb.getInstance()

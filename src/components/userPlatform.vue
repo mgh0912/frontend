@@ -471,7 +471,8 @@
               </div>
             </div>
           </div>
-        </el-aside>
+          </div>
+         </el-aside>
 
         <!-- 可视化建模区以及结果可视化区 -->
         <!-- <el-main @dragover.prevent ref="efContainerRef" id="efContainer "

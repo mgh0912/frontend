@@ -6,51 +6,64 @@
   <div style="height: 100vh; overflow:hidden" @mouseover="background_IMG">
     <el-container class="fullscreen_container">
     <!-- 头部栏目 -->
-      <el-header style="height: 60px; text-align: center; line-height: 60px; position: relative;">
-        <img src="../assets/system-logo.png" alt="" style="width: 130px; height: auto; position: absolute; left: 5px; top: 5px; color: white;">
-        <!-- <h2 style="font-size: 26px; color: white">车轮状态分析与健康评估软件</h2>    -->
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-          <h2 style="font-size: 29px;
-            border: 1px solid #000;
-            color: #003e50;
-            padding-left: 50px;
-            padding-right: 50px;
-            border-radius:  0px 0px 70px 70px;
-            background-color: #fff;">
-            车轮状态分析与健康评估软件
-          </h2>
+      <el-header class="header">
+        <!-- 左侧的 Logo 区域 -->
+        <div class="logo">
+          <img src="../assets/system-logo.png" alt="Logo"/>
         </div>
-        
-        <!-- <h2 style="font-size: 26px;">智能运维通用算法与工具软件</h2>   -->
-        <div class="user-info-container" id="userInfo" style="position: absolute; right: 10px; top: 5px; color: white;">
-          
-          <a-dropdown :trigger="['click']" class="clickable" placement="bottomLeft">
-            <a  @click.prevent>
-              帮助
-            </a>
-            <template #overlay>
-              <a-menu>
-                <a-menu-item @click="operationHelpDialogVisible=true">
-                  <!-- <span @click="operationHelpDialogVisible=true">操作指南</span> -->
-                  操作指南
-                </a-menu-item>
-                <a-menu-item @click="userHelpDialogVisible=true">
-                  <!-- <span @click="userHelpDialogVisible=true">使用教程</span> -->
-                  使用教程
-                </a-menu-item>
-              </a-menu>
-            </template>
-          </a-dropdown>
-          <span style="margin-right: 18px; margin-left: 18px">欢迎！ {{ username }}</span>
-          <span @click="logout" class="clickable">退出登录</span>
-          <span @click="toggleFullscreen()" class="clickable" style="margin-left: 12px; top:9px;" >
-            <el-icon><FullScreen /></el-icon>
-          </span>
-          <!-- <span class="clickable" style="margin-left: 10px" @click="helpDialogVisible=true">帮助</span> -->
+
+        <!-- 中间的标题 -->
+        <div class="title">
+          <h1>轨道车辆智能运维通用算法和工具软件</h1>
+        </div>
+
+        <!-- 右侧的用户操作区 -->
+        <div class="user-actions">
+          <!-- 欢迎信息 -->
+          <span class="welcome-message">{{
+              username === '用户名未设置' ? '用户名未设置' : ('欢迎' + username + '！')
+            }}</span>
+
+          <!-- 帮助 -->
+          <div class="clickable action-item">
+            <el-dropdown :trigger="['click']" class="clickable" placement="bottom-end">
+              <div style="display: flex; align-items: center; justify-content: center;">
+                <el-icon style="margin: 5px;" class="action-icon">
+                  <QuestionFilled/>
+                </el-icon>
+                <a @click.prevent>
+                  <span class="action-text">帮助</span>
+                </a>
+              </div>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="operationHelpDialogVisible=true">操作指南</el-dropdown-item>
+                  <el-dropdown-item @click="userHelpDialogVisible=true">使用教程</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
+
+          <!-- 退出 -->
+          <div @click="logout" class="clickable action-item">
+            <el-icon style="margin: 5px;" class="action-icon">
+              <SwitchButton/>
+            </el-icon>
+            <span class="action-text">退出</span>
+          </div>
+
+          <!-- 全屏 -->
+          <div @click="toggleFullscreen()" class="clickable action-item" style="margin-right: 0;">
+            <el-icon style="margin: 5px;" class="action-icon">
+              <FullScreen/>
+            </el-icon>
+            <span class="action-text">全屏</span>
+          </div>
         </div>
 
         <!-- 操作指南 -->
-        <el-dialog v-model="operationHelpDialogVisible" title="操作指南" width="810" draggable :close-on-click-modal="false" :center="false">
+        <el-dialog v-model="operationHelpDialogVisible" title="操作指南" width="810" draggable
+                   :close-on-click-modal="false" :center="false">
           <div style="text-align: left;">
             <el-scrollbar height="500px">
               <h1>1、选择算法</h1>
@@ -72,22 +85,27 @@
         </el-dialog>
 
         <!-- 使用教程 -->
-        <el-dialog v-model="userHelpDialogVisible" title="使用教程" width="810" draggable :close-on-click-modal="false" :center="false">
+        <el-dialog v-model="userHelpDialogVisible" title="使用教程" width="810" draggable :close-on-click-modal="false"
+                   :center="false">
           <div style="text-align: left;">
             <el-scrollbar height="500px" ref="userHelpDialogScrollbar">
               <h2>常见问题</h2>
-               
+
               <div id="howToUseThisApp">
                 <h2>1、如何使用本软件？</h2>
                 <h3>本软件分为五个部分：①算法选择区、②数据加载区、③可视化建模区、④结果可视化区、⑤加载模型区。</h3>
                 <img src="../assets/system-outline.png" alt="" style="width: 700px; height: auto">
-                <h3>①<span style="color: red;">数据加载区</span>用于上传数据文件，查看用户的历史文件以及加载数据文件。</h3>
-                <h3>②<span style="color: red;">算法选择区</span>中包含本系统支持的算法模块，可以选择其中的算法模块并拖入到可视化建模区进行建模。</h3>
-                <h3>③<span style="color: red;">可视化建模区</span>是进行建模的区域，其中包含所有已经建立流程的算法模块，可以拖拽模块进行位置调整，也可以右击模块进行参数调整。</h3>
-                <h3>④<span style="color: red;">结果可视化区</span>用于查看模型运行结果，包括模型运行结果图、模型运行结果表格。</h3>
+                <h3>①<span style="color: red;">数据加载区</span>用于上传数据文件，查看用户的历史文件以及加载数据文件。
+                </h3>
+                <h3>②<span style="color: red;">算法选择区</span>中包含本系统支持的算法模块，可以选择其中的算法模块并拖入到可视化建模区进行建模。
+                </h3>
+                <h3>③<span style="color: red;">可视化建模区</span>是进行建模的区域，其中包含所有已经建立流程的算法模块，可以拖拽模块进行位置调整，也可以右击模块进行参数调整。
+                </h3>
+                <h3>④<span style="color: red;">结果可视化区</span>用于查看模型运行结果，包括模型运行结果图、模型运行结果表格。
+                </h3>
                 <h3>⑤<span style="color: red;">加载模型区</span>用于查看用户曾经保存的历史模型，和加载已保存的模型。</h3>
               </div>
-              
+
               <div>
                 <h2>2、如何在算法选择区中选择对应算法？</h2>
                 <h3>在算法选择区中，每个模块都有三级展开结构，</h3>
@@ -101,7 +119,8 @@
 
               <div>
                 <h2>3、如何建立模型并保存？</h2>
-                <h3>在算法选择区中选择对应算法拖入到可视化建模区后，通过点击可视化建模区中算法模块上右侧的红色附着点，可以拉取一条连线并可连接到另一个算法模块上，以此来表示模型的运行顺序。</h3>
+                <h3>
+                  在算法选择区中选择对应算法拖入到可视化建模区后，通过点击可视化建模区中算法模块上右侧的红色附着点，可以拉取一条连线并可连接到另一个算法模块上，以此来表示模型的运行顺序。</h3>
                 <img src="../assets/line.gif" alt="" style="width: 700px; height: auto">
                 <h3>在建立好模型后，点击完成建模，此时可以点击检查模型进行模型检查，具体操作步骤如下。</h3>
                 <h3>第一步，点击完成建模</h3>
@@ -109,10 +128,11 @@
                 <h3>第二步，点击检查模型。如果模型中存在错误，会呈现错误提示。</h3>
                 <img src="../assets/modeling-finish-2.png" alt="" style="width: 700px; height: auto">
                 <img src="../assets/check-model-tip.png" alt="" style="width: 700px; height: auto">
-                
+
                 <h3>第三步，如果模型中存在错误，点击修改模型并根据提示对模型进行修改，</h3>
                 <img src="../assets/rectify-model-1.png" alt="" style="width: 700px; height: auto">
-                <h3>点击修改模型，此时提示正在修改模型，标红的连线表示该处存在逻辑错误，可以点击模块右上方红色的删除按钮删除报错模块，</h3>
+                <h3>
+                  点击修改模型，此时提示正在修改模型，标红的连线表示该处存在逻辑错误，可以点击模块右上方红色的删除按钮删除报错模块，</h3>
                 <img src="../assets/rectify-model-2.png" alt="" style="width: 700px; height: auto">
                 <h3>删除报错模块后，正确建立模型流程，然后重复上述过程，直到通过模型检查，</h3>
                 <img src="../assets/rectify-model-3.png" alt="" style="width: 700px; height: auto">
@@ -124,14 +144,15 @@
 
                 <h3>其中建模时的模型检查遵循如下流程图中的规则，</h3>
                 <img src="../assets/modeling-processing.png" alt="" style="width: 300px; height: auto">
-                
+
               </div>
 
               <div>
                 <h2>4、如何查看历史模型？</h2>
                 <h3>在加载模型区中，点击用户历史模型，</h3>
                 <img src="../assets/browser-saved-models-1.png" alt="" style="width: 700px; height: auto">
-                <h3>此时左侧弹窗中显示的就是用户保存过的历史模型，并且可以点击使用复现历史模型，点击删除历史模型，或是点击查看历史模型信息，</h3>
+                <h3>
+                  此时左侧弹窗中显示的就是用户保存过的历史模型，并且可以点击使用复现历史模型，点击删除历史模型，或是点击查看历史模型信息，</h3>
                 <img src="../assets/browser-saved-models-2.png" alt="" style="width: 700px; height: auto">
                 </img>
               </div>
@@ -140,15 +161,16 @@
                 <h2>5、如何上传文件到服务器？</h2>
                 <h3>第一步，在数据加载区中，点击本地文件，</h3>
                 <img src="../assets/upload-data-1.png" alt="" style="width: 700px; height: auto">
-              
-                <h3>点击选择文件，选择本地文件，使其加载到文件列表中，每次只可以上传一个文件，并且可以点击文件列表中的删除图标要上传的文件，</h3>
+
+                <h3>
+                  点击选择文件，选择本地文件，使其加载到文件列表中，每次只可以上传一个文件，并且可以点击文件列表中的删除图标要上传的文件，</h3>
                 <img src="../assets/upload-data-3.png" alt="" style="width: 300px; height: auto">
                 <h3>第二步，点击上传至服务器，根据提示输入文件名与文件描述，点击确定进行上传</h3>
                 <img src="../assets/upload-data-2.png" alt="" style="width: 700px; height: auto">
               </div>
 
               <!-- <a href="javascript:void(0);" @click="scrollTo('howToUseThisApp')">1、如何使用本软件？</a>  -->
-              
+
             </el-scrollbar>
           </div>
         </el-dialog>
@@ -158,92 +180,132 @@
       <el-container>
 
         <!-- 左侧菜单栏 -->
-        <el-aside width="250" style="border-right:1px solid #dcdfe6 !important;">
+        <el-aside width="250"
+                  style="border: rgb(95,117,154) 1px solid;margin: 3px;border-radius: 8px;box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);background: white;">
           <!-- #80a5ba -->
-          <div class="aside-title" style="border-bottom: solid 1px rgba(0, 0, 0, 0.2); border-top: 0px; font-size: 25px; color: #56a4e4">
-            <img src="../assets/algorithms-icon.svg" style="width: 40px; height: auto; color: #34374f"/><span>构建模型</span></div>
+          <div class="aside-title"
+               style="font-size: 25px; color: #56a4e4;border: rgb(95,117,154) 2px solid;padding: 1px;">
+            <img src="../assets/algorithms-icon.svg"
+                 style="width: 40px; height: auto; color: #34374f"/><span>模型构建</span>
+          </div>
+          <el-divider style="height: 20px;background: #CDCFD0;margin-top: 0;margin-bottom: 0;"/>
           <!-- #eff3f6 -->
-          <div class="algorithms-selection">
-          <!-- 选择自定义的模型，或者预定义的模型 -->
-            <div style="width: 100%; background-color: white; border-bottom: #CDCFD0 1px solid">
-              <!-- 系统用户可以自由选择自定义模型或者使用历史模型 -->
-              <a-radio-group v-if="userRole === 'superuser' || userRole === 'user'" v-model:value="modelSelection" button-style="solid" size="large" style=" padding: 0px; width: 100%; height: 100%">
-                <!-- <a-radio-button value="customModel" style="width: 50%; border: none; border-radius: 0; font-weight: bolder; font-size: large; color:#558b48">基础组件</a-radio-button>
-                <a-radio-button value="templateModel" style="width: 50%; border: none; border-radius: 0; font-weight: bolder; font-size: large">历史模型</a-radio-button> -->
-                <a-radio-group v-model:value="modelSelection">
-                  <a-radio-button value="customModel" :style="getRadioButtonStyle('customModel')" class="custom-radio-button">基础组件</a-radio-button>
-<!--                  <a-radio-button value="templateModel" :style="getRadioButtonStyle('templateModel')" class="custom-radio-button">系统模型库</a-radio-button>-->
-                </a-radio-group>
-              </a-radio-group>
-              <!-- 普通用户只能选择使用系统用户创建的历史模型 -->
-              <!-- <div v-if="userRole === 'user'" style="display: flex; justify-content: center; align-items: center;">
-                
-                <p style="font-size: 20px; font-weight: bolder">使用系统的内置模型</p>
-              </div> -->
-              <!-- <div v-if="userRole === 'user'" style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                <p style="font-size: 20px; font-weight: bolder; color: #699a60; background-color: #fff; padding: 5px; border-radius: 5px;">使用系统的内置模型</p>
-              </div> -->
-            </div>
-            <div style="height: 85%">
-              <!-- 系统用户可以使用基础组件定义模型 -->
-              <div 
-                style="background-color: white; 
-                color: #436f41;
-                font-family: 'Arial', sans-serif; 
-                font-size: 18px; 
-                line-height: 30px; 
-                text-align: center;
-                border-bottom: solid 1px #CDCFD0;
-                border-bottom-left-radius: 29px;
-                border-bottom-right-radius: 29px;
-                width: 100%;
-                height: 30px;" v-if="((userRole === 'superuser' || userRole === 'user') )">选择组件进行建模</div>
-              <div style="height: 50px; display: flex; flex-direction: column ;justify-content: center; align-items: center;">
-                <!-- 数据源节点 -->
-                <div style="font-size: 20px; color: #343655; font-weight: 600">数据源组件</div>
-                <a-tooltip title="拖拽数据源节点至可视化建模区" >
-                  <div :draggable="true" @dragend="handleDragend($event, 'dataSource', dataSourceNode)" class="item"
-                       @click="showIntroduction('dataSource'.replace(/_multiple/g, ''))"
-                       style="background-color: #7cbbe4; ; width: 165px; height: 35px; margin-bottom: 0px; padding: 0px; border-radius: 5px; border: 1px solid black ; align-content: center;">
-                    <el-text style="width: 105px; font-size: 16px; font-weight: 600; color: white; font-size: 18px" truncated>
-                      {{ labelsForAlgorithms['dataSource'] }}</el-text>
-                  </div>
-                </a-tooltip>
-              </div>
-              <!-- 算法选择区中算法展开结构，只对系统用户可见 -->
-              <div v-if="((userRole === 'superuser' || userRole === 'user') )" style="width: 248px; height: 300px;background-color: white; border: 1px solid #527b96; border-radius: 15px; margin-top: 20px;">
-                <el-scrollbar height="100%" :min-size="35" style="margin-left: 10px;">
-                  <el-col v-for="item in menuList2">
-                    <!-- #4599be #5A87F8 -->
-                    <!-- 此为一级目录，点击展开二级目录 -->
-                    <el-row><el-button style="width: 150px; height: 40px; margin-top: 10px; background-image: linear-gradient(#5daefd, #89cffb); color: #1e213b; "
-                        icon="ArrowDown" @click="menuDetailsSecond[item.label] = !menuDetailsSecond[item.label]">
-                        <el-text style="width: 105px; font-size: 17px; color: #34374f; font-weight: 600;" truncated>{{ item.label
-                          }}</el-text></el-button></el-row>
-                    <div style="border-left: solid 2px #CDCFD0; margin-left: 3px; margin-top: 3px">
-                      <el-col v-if="menuDetailsSecond[item.label]" v-for="option in item.options">
+          <div class="algorithms-selection" style="background: white">
+            <!-- 选择组件或者打开模型库 -->
+            <div style="height: 90%">
+              <!--      m1      -->
+              <div style="border: rgb(95,117,154) 2px solid;background: rgb(204, 208, 214);padding: 1px;">
+                <!-- 选择自定义的模型，或者预定义的模型 -->
+                <div
+                    style="width: 100%; background-color: white; border-bottom: #CDCFD0 1px solid;border-radius: 15px;margin-top: 2px;">
+                  <!-- 系统用户可以自由选择自定义模型或者使用历史模型 -->
+                  <a-radio-group v-if="userRole === 'superuser' || userRole === 'user'" v-model:value="modelSelection"
+                                 button-style="solid" size="large"
+                                 style="padding: 0; width: 100%; height: 100%;border-radius: 15px;">
+                    <!-- <a-radio-button value="customModel" style="width: 50%; border: none; border-radius: 0; font-weight: bolder; font-size: large; color:#558b48">基础组件</a-radio-button>
+                    <a-radio-button value="templateModel" style="width: 50%; border: none; border-radius: 0; font-weight: bolder; font-size: large">历史模型</a-radio-button> -->
+                    <a-radio-group v-model:value="modelSelection">
+                      <el-tooltip placement="right-start"
+                                  :content="'选择组件进行建模'"
+                                  effect="light">
+                        <a-radio-button value="customModel" :style="getRadioButtonStyle('customModel')"
+                                        class="custom-radio-button">
+                          基础组件
+                        </a-radio-button>
+                      </el-tooltip>
+                      <!--                  <a-radio-button value="templateModel" :style="getRadioButtonStyle('templateModel')" class="custom-radio-button">系统模型库</a-radio-button>-->
+                    </a-radio-group>
+                  </a-radio-group>
+                </div>
+                <!-- 系统用户可以使用基础组件定义模型 -->
+                <!--              <div-->
+                <!--                  style="background-color: white;-->
+                <!--                color: #436f41;-->
+                <!--                font-family: 'Arial', sans-serif;-->
+                <!--                font-size: 18px;-->
+                <!--                line-height: 30px;-->
+                <!--                text-align: center;-->
+                <!--                border-bottom: solid 1px #CDCFD0;-->
+                <!--                border-bottom-left-radius: 29px;-->
+                <!--                border-bottom-right-radius: 29px;-->
+                <!--                width: 100%;-->
+                <!--                height: 30px;" v-if="((userRole === 'superuser' || userRole === 'user') )">选择组件进行建模-->
+                <!--              </div>-->
+                <div style="position: relative; width: 248px; background-color: #FCFDFF; display: flex;
+              border-radius: 5px; margin-top: 2px; border: 1px solid #527b96;justify-content: flex-start;align-items: flex-start;height: 100px;">
+                  <!-- 数据源节点 -->
+                  <!--                <div style="font-size: 20px; color: #343655; font-weight: 600">数据源组件</div>-->
+                  <!--                <a-tooltip title="拖拽数据源节点至可视化建模区">-->
+                  <el-tooltip placement="right-start" :content="'拖拽数据源组件至可视化建模区'"
+                              effect="light">
+                    <div :draggable="true" @dragend="handleDragend($event, 'dataSource', dataSourceNode)" class="item"
+                         @click="showIntroduction('dataSource'.replace(/_multiple/g, ''))"
+                         style="background-color: #7cbbe4;
+                         border-radius: 5px; align-content: center;
+                         width: 150px; height: 40px;background-image: linear-gradient(#5daefd, #89cffb); color: #1e213b;
+                         margin-top: 10px;margin-left: 10px;
+">
+                      <el-text style="width: 105px; font-size: 17px; font-weight: 600; color: #34374f;"
+                               truncated>
+                        {{ labelsForAlgorithms['dataSource'] + '组件' }}
+                      </el-text>
+                    </div>
+                  </el-tooltip>
+                </div>
+
+                <!-- 算法选择区中算法展开结构，只对系统用户可见 -->
+                <div v-if="((userRole === 'superuser' || userRole === 'user') )"
+                     style="width: 248px; height: 300px;background-color: white; border: 1px solid #527b96; border-radius: 5px; margin-top: 2px;">
+                  <el-scrollbar height="100%" :min-size="35" style="margin-left: 10px;">
+                    <el-col v-for="item in menuList2">
+                      <!-- #4599be #5A87F8 -->
+                      <!-- 此为一级目录，点击展开二级目录 -->
+                      <el-row>
+                        <el-button
+                            style="width: 150px; height: 40px; margin-top: 10px; background-image: linear-gradient(#5daefd, #89cffb); color: #1e213b; "
+                            icon="ArrowDown" @click="menuDetailsSecond[item.label] = !menuDetailsSecond[item.label]">
+                          <el-text style="width: 105px; font-size: 17px; color: #34374f; font-weight: 600;" truncated>{{
+                              item.label
+                            }}
+                          </el-text>
+                        </el-button>
+                      </el-row>
+                      <div style="border-left: solid 2px #CDCFD0; margin-left: 3px; margin-top: 3px">
+                        <el-col v-if="menuDetailsSecond[item.label]" v-for="option in item.options">
                           <!-- 此为二级目录，点击展开三级目录 -->
                           <el-row style="margin-left: 20px;">
-                          <!--  #75acc3 -->
-                              <el-button style="width: 150px; margin-top: 7px; background-color: #72A1DB; border: 0px; background-image: linear-gradient(#a0d9fd, #a8d8ff);"
-                              type="info" @click="clickAtSecondMenu(option)">
-                                <span><img :src="setIconOfAlgorithms(option.label)" alt="" style="position:absolute; left: 5px; top: 12px; width: 20px; height: auto;"></span>
-                                <el-text style="width: 105px; font-size: 15px; color: #343655; font-weight: 600;" truncated>{{ option.label }}</el-text></el-button>
+                            <!--  #75acc3 -->
+                            <el-button
+                                style="width: 150px; margin-top: 7px; background-color: #72A1DB; border: 0px; background-image: linear-gradient(#a0d9fd, #a8d8ff);"
+                                type="info" @click="clickAtSecondMenu(option)">
+                            <span><img :src="setIconOfAlgorithms(option.label)" alt=""
+                                       style="position:absolute; left: 5px; top: 12px; width: 20px; height: auto;"></span>
+                              <el-text style="width: 105px; font-size: 15px; color: #343655; font-weight: 600;"
+                                       truncated>
+                                {{ option.label }}
+                              </el-text>
+                            </el-button>
                           </el-row>
                           <div style="margin-left: 20px;border-left: solid 2px #CDCFD0;">
                             <el-row v-if="menuDetailsThird[option.label]"
-                            v-for="algorithm in Object.keys(option.parameters)" style="display: flex; align-items: center;">
-                              <span style="width: 20px; height: 30px; display: flex; align-items: center; justify-content: center; background-color: white;">
+                                    v-for="algorithm in Object.keys(option.parameters)"
+                                    style="display: flex; align-items: center;">
+                              <span
+                                  style="width: 20px; height: 30px; display: flex; align-items: center; justify-content: center; background-color: white;">
                                 <div style="height: 2px; width: 100%; background-color: #CDCFD0;"></div>
                               </span>
-                              <el-tooltip placement="right-start" :content="labelsForAlgorithms[algorithm]" effect="light">
+                              <el-tooltip placement="right-start" :content="labelsForAlgorithms[algorithm]"
+                                          effect="light">
                                 <!-- #f9fcff -->
                                 <!-- 此为三级目录，点击进行算法选择 -->
                                 <div :draggable="true" @dragend="handleDragend($event, algorithm, option)" class="item"
-                                  @click="showIntroduction(algorithm.replace(/_multiple/g, ''))"
-                                  style="background-color: #f9eeed ; margin-top: 7px; width: 145px; height: 30px; margin-bottom: 10px; padding: 0px; border: 1px solid #3473d5; border-radius: 5px; align-content: center;">
-                                  <el-text style="width: 105px; font-size: 14px; font-weight: 600; color: #3889ca;" truncated>{{ labelsForAlgorithms[algorithm]
-                                    }}</el-text>
+                                     @click="showIntroduction(algorithm.replace(/_multiple/g, ''))"
+                                     style="background-color: #f9eeed ; margin-top: 7px; width: 145px; height: 30px; margin-bottom: 10px; padding: 0px; border: 1px solid #3473d5; border-radius: 5px; align-content: center;">
+                                  <el-text style="width: 105px; font-size: 14px; font-weight: 600; color: #3889ca;"
+                                           truncated>{{
+                                      labelsForAlgorithms[algorithm]
+                                    }}
+                                  </el-text>
                                 </div>
                               </el-tooltip>
                             </el-row>
@@ -285,266 +347,139 @@
 <!--                  </a-tooltip>-->
 <!--                </div>-->
               </div>
-              <!-- 选择系统模型库 -->
-              <div style="height: 40px; width: 100%; background-color: white; border-bottom: #CDCFD0 1px solid">
-                <!-- 系统用户可以自由选择自定义模型或者使用历史模型 -->
-                <a-radio-group v-if="userRole === 'superuser' || userRole === 'user'" v-model:value="modelSelection" button-style="solid" size="large" style=" padding: 0px; width: 100%; height: 100%">
-                  <!-- <a-radio-button value="customModel" style="width: 50%; border: none; border-radius: 0; font-weight: bolder; font-size: large; color:#558b48">基础组件</a-radio-button>
-                  <a-radio-button value="templateModel" style="width: 50%; border: none; border-radius: 0; font-weight: bolder; font-size: large">历史模型</a-radio-button> -->
+              <el-divider style="height: 20px;background: #CDCFD0;margin-bottom: 0;margin-top: 0px;"/>
+              <!--      m2      -->
+              <div style="border: rgb(95,117,154) 2px solid;background: rgb(204, 208, 214);padding: 1px;">
+                <!-- 选择系统模型库 -->
+                <div
+                    style="height: 40px; width: 100%; background-color: white; border-bottom: #CDCFD0 1px solid;border-radius: 15px;margin-top: 2px;">
+                  <!-- 系统用户可以自由选择自定义模型或者使用历史模型 -->
+                  <a-radio-group v-if="userRole === 'superuser' || userRole === 'user'" v-model:value="modelSelection"
+                                 button-style="solid" size="large" style=" padding: 0; width: 100%; height: 100%">
+                    <!-- <a-radio-button value="customModel" style="width: 50%; border: none; border-radius: 0; font-weight: bolder; font-size: large; color:#558b48">基础组件</a-radio-button>
+                    <a-radio-button value="templateModel" style="width: 50%; border: none; border-radius: 0; font-weight: bolder; font-size: large">历史模型</a-radio-button> -->
 
-
-                  <a-radio-button value="templateModel" :style="getRadioButtonStyle('templateModel')" class="custom-radio-button">系统模型库</a-radio-button>
-
-                </a-radio-group>
-              </div>
-              <!-- 系统用户保存的历史模型，对系统用户和普通用户都可见 -->
-              <div style="background-color: white; 
-                color: #436f41; 
-                font-family: 'Arial', sans-serif; 
-                font-size: 18px; 
-                line-height: 30px; 
-                border-bottom: solid 1px #CDCFD0;
-                border-bottom-left-radius: 29px;
-                border-bottom-right-radius: 29px;
-                text-align: center; 
-                height: 30px;" v-if="((userRole == 'superuser' || userRole === 'user'))"
-                >从数据库中选择模型
-              </div>
-              
-              <div  v-if="((userRole === 'superuser' || userRole === 'user') )"
-              style="position: relative; width: 248px; height: 170px; background-color: #FCFDFF; display: flex;
-              justify-content: center; align-items: center; border-radius: 15px; margin-top: 5px; border: 1px solid #527b96">
-                <a-button style="width: 165px; height: 35px; font-size: 16px; position:absolute;
-                top: 25px; left: 40px; display:flex; justify-content: center; align-items: center; 
+                    <el-tooltip placement="right-start" :content="'从数据库中选择模型'"
+                                effect="light">
+                      <a-radio-button value="templateModel" :style="getRadioButtonStyle('templateModel')"
+                                      class="custom-radio-button">系统模型库
+                      </a-radio-button>
+                    </el-tooltip>
+                  </a-radio-group>
+                </div>
+                <div v-if="((userRole === 'superuser' || userRole === 'user') )"
+                     style="position: relative; width: 248px; height: 170px; background-color: #FCFDFF; display: flex;
+              justify-content: center; align-items: center; border-radius: 5px; margin-top: 2px; border: 1px solid #527b96">
+                  <a-button style="width: 165px; height: 35px; font-size: 16px; position:absolute;
+                top: 25px; left: 40px; display:flex; justify-content: center; align-items: center;
                 background-image: linear-gradient(to bottom right, #a1a2b1, #edf4f6); color: #3c93f8;
                 border: 2px solid #484a66; font-size: 18px; border-radius: 15px;
                 font-weight: 550; "
-                  @click="fetchModels">
-                  <template #icon>
-                    <!-- <EllipsisOutlined /> -->
-                    <img src="../assets/systemModels.svg" alt="" width="40px" height="40px"/>
-                  </template>
-                  打开模型库
-                </a-button>
-                <div class="highlight" :style="{bottom: '15px', color: getColor(modelLoaded)}" :title="modelLoaded"><p>已加载模型</p>{{ modelLoaded }}</div>
-                
-                <!-- 供普通用户上传数据文件 -->
-                <!-- <div v-if="userRole === 'user'"
-                style="width: 100%; height: 150px; background-color: white; position: absolute; bottom: 20px; border-top: 2px solid #527b96; padding-top: 15px">
-                  <div style="font-size: 20px; color: #343655; font-weight: 600; margin-bottom: 20px;">上传数据文件
-                    <el-popover
-                      title="上传数据格式"
-                      confirm-button-text="确认"
-                      trigger="hover"
-                      :width="500"
-                    >
-                      <template #default>
-                        <p>目前系统可处理的数据格式为长度为2048的信号序列，<br>
-                        如果为多传感器数据则确保其数据形状为（2048，传感器数量），其中2048为信号长度，<br>
-                        请按照如上的数据格式，并以.npy或是.mat的文件格式上传。</p>
-                      </template>
-                      <template #reference>
-                        <div style="position: absolute; right: 35px; top: 15px;">
-                          <a class='datatype-trigger-icon'><question-circle-outlined/></a>
-                        </div>
-                      </template>
-                  
-                    </el-popover>
-                  </div>
-                  
-                  <div style="position: relative;">
-                    <a-upload
-                      :file-list="fileList"
-                      :max-count="1"
-                      @remove="handleRemove"
-                      :before-upload="beforeUpload"
-                    >
-                      <a-button class="custom-button"
-                      >
-                        <template #icon>
-                          <img src="../assets/folderOpen.svg" alt="" width="20">
-                        </template>
-                        选择本地文件
-                      </a-button>
-                    </a-upload>
-                    <a-button
-                      
-                      type="primary"
-                      :disabled="fileList.length === 0"
-                      :loading="uploading"
-                      style="width: 165px; height: 35px;
-                      font-size: 16px; border-radius: 15px;
-                      "
-                      @click="handleUpload"
-                    >
-                      <UploadOutlined />
-                      {{ uploading ? "正在上传" : "上传至服务器" }}
-                    </a-button>
-                    
-                  </div>
-                </div> -->
-                
-              </div>
-            </div>
-            <!-- 确认上传文件的弹窗 -->
-            <!-- <a-modal
-              v-model:open="uploadConfirmDialog"
-              title="提交所保存文件信息"
-              :confirm-loading="uploadconfirmLoading"
-              @ok="handleUploadDataFile"
-              
-              okText="确定"
-              cancelText="取消"
-              :maskClosable="false"
-              :zIndex="1000"
-              style="top: 100px; right: 50px; z-index: 1000"
-            >
-              <a-space direction="vertical">
-                <a-form :model="dataFileFormState" :rules="fileNameRules" ref="formRef">
-                  <a-form-item label="文件名称" name="filename">
-                    <a-input v-model:value="dataFileFormState.filename" placeholder="请输入文件名" />
-                  </a-form-item>
-                  <a-form-item label="文件描述" name="description">
-                    <a-input
-                      v-model:value="dataFileFormState.description"
-                      autofocus
-                      placeholder="请输入文件描述"
-                    />
-                  </a-form-item>
-                </a-form>
-              </a-space>
-            </a-modal> -->
-            <!-- 上传增值服务组件，只对系统用户可见 -->
-            <div style="padding: 10px; position:absolute; bottom: 10px; border: 4px solid #ffd541; width: 200px; height: auto" v-if="userRole === 'superuser'">
-              <!-- <p style="padding-bottom: 5px">上传增值服务组件</p> -->
-              
-              <div style="height: 20%; width: 100%; color: #343655; font-size: 20px; font-weight: 600; ">增值服务组件</div>
-              <div style="display: flex; flex-direction: row">
-                <uploadPrivateAlgorithmFiless />
-                <managePrivateAlgorithm />
-              </div>
-              
-            </div>
-            
-          </div>
-          <!-- <a-modal v-model:open="dataSourceSetting" title="数据源配置" centered okText="确定" cancelText="取消" @ok="dataSourceSetting = false" :forceRender="true" :destroyOnClose="true">
-            
-            <div style="width: 250px; height: 180px; background-color: white;">
-              <a-radio-group v-model:value="loadingDataModel">
-                <a-radio :value="1" style="margin-right: 50px">本地文件</a-radio>
-                <a-radio :value="2">服务器文件</a-radio>
-              </a-radio-group>
-              <a-row>
-                <a-col :span="24" v-if="loadingDataModel == 1">
-                  <a-upload
-                    :file-list="fileList"
-                    :max-count="1"
-                    @remove="handleRemove"
-                    :before-upload="beforeUpload"
-                  >
-                    <a-button style="margin-top: 36px; margin-left: 40px; width: 160px; font-size: 16px; background-color: #2082F9; color: white"
-                    :icon="h(FolderOpenOutlined)">
-                      选择本地文件
-                    </a-button>
-                  </a-upload>
-                  <a-button
-                    type="primary"
-                    :disabled="fileList.length === 0"
-                    :loading="uploading"
-                    style="margin-top: 5px; width: 160px; font-size: 16px; margin-left: 40px"
-                    @click="handleUpload"
-                  >
-                    <UploadOutlined />
-                    {{ uploading ? "正在上传" : "上传至服务器" }}
-                  </a-button>
-                  <a-popconfirm
-                  title="上传数据格式"
-                  ok-text="确认"
-                  :showCancel='false'
-                  placement="bottomLeft"
-                  >
-                    <template #description>
-                      <p>目前系统可处理的数据格式为长度为2048的信号序列，<br>
-                      如果为多传感器数据则确保其数据形状为（2048，传感器数量），其中2048为信号长度，<br>
-                      请按照如上的数据格式，并以.npy或是.mat的文件格式上传。</p>
+                            @click="fetchModels">
+                    <template #icon>
+                      <!-- <EllipsisOutlined /> -->
+                      <img src="../assets/systemModels.svg" alt="" width="40px" height="40px"/>
                     </template>
-                    <div style="position: absolute; right: 10px; top: 35px;">
-                      <a href="#" class='datatype-trigger-icon'><question-circle-outlined/></a>
-                    </div>
-                    
-                  </a-popconfirm>
-                </a-col>
-                <a-col :span="24" v-if="loadingDataModel == 2">
-                  <a-button
-                    type="default"
-                    style="margin-top: 35px; margin-left: 40px; width: 160px; font-size: 16px;  background-color: #2082F9; color: white"
-                    @click="switchDrawer"
-                    :icon="h(FolderOutlined)"
-                    >查看历史文件</a-button
-                  >
-                </a-col> -->
-                
+                    打开模型库
+                  </a-button>
+                  <div class="highlight" :style="{bottom: '15px', color: getColor(modelLoaded)}" :title="modelLoaded">
+                    <p>
+                      已加载模型</p>{{ modelLoaded }}
+                  </div>
 
-                <!-- 确认上传文件的弹窗 -->
-                <!-- <a-modal
-                  v-model:open="uploadConfirmDialog"
-                  title="提交所保存文件信息"
-                  :confirm-loading="confirmLoading"
-                  @ok="handleOk"
-                  okText="确定"
-                  cancelText="取消"
-                  :maskClosable="false"
-                >
-                  <a-space direction="vertical">
-                    <a-form :model="formState" :rules="fileNameRules" ref="formRef">
-                      <a-form-item label="文件名称" name="filename">
-                        <a-input v-model:value="formState.filename" placeholder="请输入文件名" />
-                      </a-form-item>
-                      <a-form-item label="文件描述" name="description">
-                        <a-input
-                          v-model:value="formState.description"
-                          autofocus
-                          placeholder="请输入文件描述"
-                        />
-                      </a-form-item>
-                    </a-form>
-                  </a-space>
-                </a-modal>
-                
-              </a-row>
-              <div style="width: 2px; height: 160px; background-color: #808080; position: absolute; right: 230px; bottom: 50px; border-radius: 1px;"></div>
-              <div class="highlight" :style="{color: getColor(usingDatafile), left: '310px',  bottom: '150px'}" :title="usingDatafile">已加载数据：{{ usingDatafile }}</div>
-              
+                  <!-- 供普通用户上传数据文件 -->
+                  <!-- <div v-if="userRole === 'user'"
+                  style="width: 100%; height: 150px; background-color: white; position: absolute; bottom: 20px; border-top: 2px solid #527b96; padding-top: 15px">
+                    <div style="font-size: 20px; color: #343655; font-weight: 600; margin-bottom: 20px;">上传数据文件
+                      <el-popover
+                        title="上传数据格式"
+                        confirm-button-text="确认"
+                        trigger="hover"
+                        :width="500"
+                      >
+                        <template #default>
+                          <p>目前系统可处理的数据格式为长度为2048的信号序列，<br>
+                          如果为多传感器数据则确保其数据形状为（2048，传感器数量），其中2048为信号长度，<br>
+                          请按照如上的数据格式，并以.npy或是.mat的文件格式上传。</p>
+                        </template>
+                        <template #reference>
+                          <div style="position: absolute; right: 35px; top: 15px;">
+                            <a class='datatype-trigger-icon'><question-circle-outlined/></a>
+                          </div>
+                        </template>
+
+                      </el-popover>
+                    </div>
+
+                    <div style="position: relative;">
+                      <a-upload
+                        :file-list="fileList"
+                        :max-count="1"
+                        @remove="handleRemove"
+                        :before-upload="beforeUpload"
+                      >
+                        <a-button class="custom-button"
+                        >
+                          <template #icon>
+                            <img src="../assets/folderOpen.svg" alt="" width="20">
+                          </template>
+                          选择本地文件
+                        </a-button>
+                      </a-upload>
+                      <a-button
+
+                        type="primary"
+                        :disabled="fileList.length === 0"
+                        :loading="uploading"
+                        style="width: 165px; height: 35px;
+                        font-size: 16px; border-radius: 15px;
+                        "
+                        @click="handleUpload"
+                      >
+                        <UploadOutlined />
+                        {{ uploading ? "正在上传" : "上传至服务器" }}
+                      </a-button>
+
+                    </div>
+                  </div> -->
+
+                </div>
+              </div>
             </div>
-          </a-modal> -->
-          <!-- <div class="aside-title">
-            <img src="../assets/data-icon.svg" style="width: 30px; height: auto;"/><span>加载数据</span>
+            <!-- 上传增值服务组件，只对系统用户可见 -->
+            <!--            <el-divider style="height: 5px;background: #CDCFD0;margin-top: 16px;margin-bottom: 0;"/>-->
+            <div style="height: auto">
+              <div
+                  style="padding: 10px; border: 4px solid #ffd541; width: 200px;border-radius: 5px;"
+                  v-if="userRole === 'superuser'">
+                <!-- <p style="padding-bottom: 5px">上传增值服务组件</p> -->
+                
+                  <div
+                    style="height: 20%; width: 100%; color: #343655; font-size: 20px;
+                    font-weight: 600;justify-content: center;align-items: center;margin-bottom: 10px;">
+                    增值服务组件
+                  </div>
+                  <div style="display: flex; flex-direction: row">
+                    <div style="flex: 1;margin-right: 3px;">
+                      <uploadPrivateAlgorithmFiless/>
+                    </div>
+                    <div style="flex: 1;margin-left: 3px;">
+                      <managePrivateAlgorithm/>
+                    </div>
+                  </div>
+              
+              </div>
+            </div>
           </div>
-          <div style="width: 250px; height: 180px; position: relative; background-color: white;">
-            <uploadDatafile @switchDrawer="handleSwitchDrawer" :api="api" />
-            <div class="highlight" :style="{color: getColor(usingDatafile)}" :title="usingDatafile">已加载数据：{{ usingDatafile }}</div>
-     
-          </div> -->
-          
-          <!-- <div class="aside-title">
-            <img src="../assets/models-icon.svg" style="width: 40px; height: auto;"/><span>预定义模型</span>
-          </div>
-          <div style="position: relative; width: 250px; height: 250px; background-color: #FCFDFF; display: flex; justify-content: center; align-items: center;">
-            <a-button style="width: 165px; height:35px; font-size: 16px; position:absolute; top: 25px; left: 40px; display:flex; justify-content: center; align-items: center; background-image: linear-gradient(to bottom right, #104459, #65777F); color: white;"
-              @click="fetchModels">
-              <template #icon>
-                <EllipsisOutlined />
-              </template>
-              用户历史模型
-            </a-button>
-            <div class="highlight" :style="{bottom: '120px', color: getColor(modelLoaded)}" :title="modelLoaded">已加载模型：{{ modelLoaded }}</div>
-          </div> -->
-          
         </el-aside>
 
         <!-- 可视化建模区以及结果可视化区 -->
+        <!-- <el-main @dragover.prevent ref="efContainerRef" id="efContainer "
+          style="height: auto; width: 600px; padding: 0px;"> -->
         <el-main @dragover.prevent ref="efContainerRef" id="efContainer "
-          style="height: auto; width: 600px; padding: 0px;">
+          style="height: auto; width: 600px;
+          border-radius: 8px;margin: 3px;padding: 2px;border: rgb(95,117,154) 1px solid;padding-bottom: 5px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);overflow-y: hidden">
           <!-- 可视化建模区的主要内容 -->
           <div
             style=" position: relative; height: 32%; font-size: 20px; color: #003e50; font-weight: 500; font-family:Arial, Helvetica, sans-serif;  background-position: center;">
@@ -560,7 +495,7 @@
                   <span>
                     <!-- 右键点击可视化建模区中的算法节点弹出对应的参数配置对话框 -->
                     <el-popover placement="bottom" :title="item.label + '参数配置'" 
-                    @show="getPrivateAlgorithm(item)" :teleported="true" :width="450" trigger="contextmenu" popper-style=";display: flex; flex-direction: column; align-content: left;">
+                    @show="getExtraAlgorithm(item)" :teleported="true" :width="450" trigger="contextmenu" popper-style=";display: flex; flex-direction: column; align-content: left;">
                       <!-- 调整算法参数 -->
                       <!-- 可视化建模区中的各节点所具有的参数与代码中menuList2中的参数是相对应的 -->
                       <el-row v-if="item.use_algorithm != null && item.id != '1.2' && item.id != '1.3' && item.id != '1.5' && (item.use_algorithm.indexOf('private')==-1) && (item.use_algorithm.indexOf('extra')==-1)" 
@@ -611,23 +546,27 @@
                           <a-radio :value="1" style="margin-right: 20px">上传数据文件</a-radio>
                           <a-radio :value="2">加载数据文件</a-radio>
                         </a-radio-group>
-                        <div style="width: 100%; height: 100%; background-color: white; display: flex; flex-direction: column; padding: 20px">
+                        <div style="background-color: white; display: flex; flex-direction: column; padding: 20px">
                           <!-- 上传数据文件和加载数据文件 -->
                           <div >
                             <div v-if="loadingDataModel === 1" style="position: relative">
                               <a-space direction="vertical">
-                                <a-form :model="dataFileFormState"  ref="formRef"  @finish="onFinish"
-                                        @finishFailed="onFinishFailed" >
-                                  <a-form-item label="文件名称" name="filename"
-                                               :rules="[{ required: true, message: '文件名不能为空' },{ pattern:/^[\u4e00-\u9fa5_a-zA-Z0-9]+$/, message: '请输入中英文/数字/下划线', trigger: 'blur' }]">
+                                <a-form :model="dataFileFormState" ref="fileUploadFormRef" @finish="onFinish">
+                                  <a-form-item label="文件名称" name="filename" 
+                                  :rules="[{ required: true, message: '请输入文件名!' },
+                                  { pattern:/^[\u4e00-\u9fa5_a-zA-Z0-9]+$/, message: '请输入中英文/数字/下划线', trigger: 'blur' }]">
                                     <a-input v-model:value="dataFileFormState.filename" placeholder="请输入文件名" />
+                                    <!-- 提示文件名命名规则 -->
+                                    <div style="color: #999; font-size: 12px;">(只能包含中英文、数字、下划线)</div>
                                   </a-form-item>
-                                  <a-form-item label="文件描述" name="description" :rules="[{ required: true, message: '文件描述不能为空' }]">
+                                  <a-form-item label="文件描述" name="description" :rules="[{ required: true, message: '请输入文件描述!' },{ min: 1, max: 200, message: '长度应在1到200个字符之间!', trigger: 'blur' }]">
                                     <a-input
                                         v-model:value="dataFileFormState.description"
                                         autofocus
                                         placeholder="请输入文件描述"
                                     />
+                                    <!-- 提示文件描述命名规则 -->
+                                    <div style="color: #999; font-size: 12px;">(长度不超过200字符)</div>
                                   </a-form-item>
                                   <a-form-item label="选择数据类型">
                                     <a-radio-group v-model:value="dataFileFormState.multipleSensors">
@@ -635,41 +574,50 @@
                                       <a-radio :value="'single'">单传感器数据</a-radio>
                                     </a-radio-group>
                                   </a-form-item>
-                                     <a-upload
-                                         :file-list="fileList"
-                                         :max-count="1"
-                                         @remove="handleRemove"
-                                         :before-upload="beforeUpload"
-                                     >
-                                  <a-button style="margin-top: 16px; margin-left: 0px; width: 140px; font-size: 16px; background-color: #2082F9; color: white"
-                                            :icon="h(FolderOpenOutlined)">
-                                    选择本地文件
-                                  </a-button>
+                                  <a-form-item label="是否公开">
+                                    <a-radio-group v-model:value="dataFileFormState.isPublic">
+                                      <a-radio :value="'public'">是</a-radio>
+                                      <a-radio :value="'private'">否</a-radio>
+                                    </a-radio-group>
+                                  </a-form-item>
+                                  <a-form-item>
+                                    <a-upload
+                                      :file-list="fileList"
+                                      :max-count="1"
+                                      @remove="handleRemove"
+                                      :before-upload="beforeUpload"
+                                    >
+                                      <a-button style="margin-top: 16px; margin-left: 0px; width: 140px; font-size: 16px; background-color: #2082F9; color: white"
+                                                :icon="h(FolderOpenOutlined)">
+                                        选择本地文件
+                                      </a-button>
 
-                                </a-upload>
-                                   <a-form-item>
-                                    <a-button  type="primary" html-type="submit" :disabled="fileList?.length === 0"
-                                               :loading="uploading">
-                                    <UploadOutlined />
-                                  {{ uploading ? "正在上传" : "上传至服务器" }}
-                                    </a-button>
+                                    </a-upload>
                                     <el-popover
                                         title="上传数据格式"
                                         confirm-button-text="确认"
                                         trigger="hover"
                                         :width="500"
                                     >
-                                  <template #default>
-                                    <p>目前系统可处理的数据格式为长度为2048的信号序列，<br>
-                                    如果为多传感器数据则确保其数据形状为（2048，传感器数量），其中2048为信号长度，<br>
-                                    请按照如上的数据格式，并以.npy或是.mat的文件格式上传。</p>
-                                  </template>
-                                  <template #reference>
-                                    <div style="position: absolute; top: -35px; left: 150px">
-                                      <a class='datatype-trigger-icon'><question-circle-outlined/></a>
-                                    </div>
-                                  </template>
-                                </el-popover>
+                                      <template #default>
+                                        <p>目前系统可处理的数据格式为长度为2048的信号序列，<br>
+                                        如果为多传感器数据则确保其数据形状为（2048，传感器数量），其中2048为信号长度，<br>
+                                        请按照如上的数据格式，并以.npy或是.mat的文件格式上传。</p>
+                                      </template>
+                                      <template #reference>
+                                        <div style="position: absolute; top: 10px; left: 150px">
+                                          <a class='datatype-trigger-icon'><question-circle-outlined/></a>
+                                        </div>
+                                      </template>
+                                    </el-popover>
+                                  </a-form-item>
+                                  
+                                  <a-form-item>
+                                    <a-button  type="primary" html-type="submit" :disabled="fileList?.length === 0" :loading="uploading">
+                                    <UploadOutlined />
+                                      {{ uploading ? "正在上传" : "上传至服务器" }}
+                                    </a-button>
+                                    
                                   </a-form-item>
                                 </a-form>
                               </a-space>
@@ -876,7 +824,7 @@
               </Vue3DraggableResizable>
             </DraggableContainer>
             <!-- <div style="width: 1000px; height: 100px; background-color: #88b6fb;"></div> -->
-            <div
+            <!-- <div
               style="position: absolute; right: 250px; bottom: 10px; width: 600px; height: auto;display: flex; justify-content: space-between; align-items: center;">
          
               <el-space size="large">
@@ -920,10 +868,59 @@
                 </el-button>
               </el-space>
 
+            </div> -->
+            <div
+                style="position: absolute; right: 250px; bottom: 10px; width: 600px; height: auto;display: flex; justify-content: space-between; align-items: center;">
+
+              <el-space size="large">
+
+                <el-button type="primary" style="width: 125px; font-size: 17px; "
+                           @click="handleClear" icon="Refresh" class="operation-button">
+                  清空模型
+                </el-button>
+
+                <el-button v-if="!toRectifyModel" type="primary" :disabled="canCompleteModeling"
+                           style="width: 125px; font-size: 17px;" @click="finishModeling"
+                           icon="Check" class="operation-button">
+                  完成建模
+                </el-button>
+
+                <el-button v-if="toRectifyModel" type="primary" :disabled="canCompleteModeling"
+                           style="width: 125px; font-size: 17px;" @click="rectifyModel"
+                           icon="Edit" class="operation-button">
+                  修改模型
+                </el-button>
+
+
+                <el-button type="primary" :disabled="canCheckModel" @mouseover="checkModeling"
+                           style="width: 125px; font-size: 17px; " @click="checkModel" icon="Search"
+                           class="operation-button">
+                  检查模型
+                </el-button>
+
+
+                <el-button type="primary" :disabled="canSaveModel" @mouseover="saveModeling"
+                           style="width: 125px; font-size: 17px;" @click="saveModelSetting(true, [])" icon="Finished"
+                           class="operation-button">
+                  保存模型
+                </el-button>
+
+                <el-button type="success" style="width: 125px; font-size: 17px; " @click="startProgram"
+                           icon="SwitchButton" :disabled="canStartProcess || processIsShutdown"
+                           @mouseover="startModeling" class="operation-button">
+                  开始运行
+                </el-button>
+                <el-button :disabled="canShutdown" type="danger" style="width: 125px; font-size: 17px;"
+                           @click="shutDown" icon="Close" class="operation-button">
+                  终止运行
+                </el-button>
+              </el-space>
+
             </div>
           </div>
           <!-- 模型运行结果展示区 -->
-          <div class="resultsContainer" style="background-color: white;">
+          <div class="resultsContainer"
+               style="background-color: white;padding-bottom: 5px;border: rgb(95,117,154) 1px solid;">
             <!-- 显示程序运行的进度条 -->
             <div v-if="processing"  style="display: flex; justify-content: center; align-items: center; padding-top: 120px;">
               <span style="font-weight: 700; font-size: 22px">程序正在运行中</span>
@@ -980,58 +977,80 @@
             <!-- 显示结果 -->
             <el-scrollbar height="600px" v-if="canShowResults && !processing" style="background-color: white;">
               <!-- 健康评估可视化 -->
-              <el-tabs class="demo-tabs" type="border-card" v-model="activeName1" v-if="displayHealthEvaluation">
-                <el-tab-pane label="层级有效指标" name="first">
-                  <!-- <img :src="healthEvaluationFigure1" alt="figure1" id="health_evaluation_figure_1"
-                    class="result_image" style="width: auto; height: 450px;" /> -->
-                  <el-image
-                    style="width: auto; height: 450px;" 
-                    :src="healthEvaluationFigure1"
-                    :zoom-rate="1.2"
-                    :max-scale="7"
-                    :min-scale="0.2"
-                    :preview-src-list="[healthEvaluationFigure1]"
-                    :initial-index="4"
-                    fit="cover"
-                  />
-                </el-tab-pane>
-                <el-tab-pane label="指标权重" name="second">
-                  <!-- <img :src="healthEvaluationFigure2" alt="figure2" id="health_evaluation_figure_2"
-                    class="result_image" style="width: auto; height: 450px;" /> -->
-                  <el-image
-                    style="width: auto; height: 450px;" 
-                    :src="healthEvaluationFigure2"
-                    :zoom-rate="1.2"
-                    :max-scale="7"
-                    :min-scale="0.2"
-                    :preview-src-list="[healthEvaluationFigure2]"
-                    :initial-index="4"
-                    fit="cover"
-                  />
-                </el-tab-pane>
-                <el-tab-pane label="评估结果" name="third">
-                  <el-col>
-                    <!-- <img :src="healthEvaluationFigure3" alt="figure3" id="health_evaluation_figure_3"
-                      class="result_image" style="width: auto; height: 360px;" /> -->
-                    <el-image
-                      style="width: auto; height: 360px;" 
-                      :src="healthEvaluationFigure3"
-                      :zoom-rate="1.2"
-                      :max-scale="7"
-                      :min-scale="0.2"
-                      :preview-src-list="[healthEvaluationFigure3]"
-                      :initial-index="4"
-                      fit="cover"
-                    />
-                    <br>
-                    <div style="width: 1000px; margin-left: 250px;">
-                      <el-text :v-model="healthEvaluation" style="font-weight: bold; font-size: 18px;">{{
-                        healthEvaluation
+              <!-- 不同样本的评估结果 -->
+              <el-tabs type="border-card" tab-position="top" v-model="healthEvaluationOfExample" v-if="displayHealthEvaluation">
+                <el-tab-pane label="总结论" name="总结论">
+                  <div style="display:flex; flex-direction: row; align-items: center;">
+                    <div id="healthEvaluationPieChart" style="width: 600px; height: 500px"></div>
+                    <div style="width: 700px;">
+                      <el-text style="font-weight: bold; font-size: 18px;">{{
+                        finalSuggestion
                       }}</el-text>
                     </div>
-                  </el-col>
+                    <!-- 绘制饼状图 -->
+                  </div>
                 </el-tab-pane>
+
+                <el-tab-pane v-for="(value, key) in resultsBarOfAllExamples" :key="key" :label="key" :name="key">
+                  <el-tabs type="border-card" tab-position="left" v-model="activeName1">
+                    <el-tab-pane label="层级有效指标" name="first">
+                      <!-- <img :src="healthEvaluationFigure1" alt="figure1" id="health_evaluation_figure_1"
+                        class="result_image" style="width: auto; height: 450px;" /> -->
+                      <el-image
+                        style="width: auto; height: 450px;" 
+                        :src="resultsBarOfAllExamples[key]"
+                        :zoom-rate="1.2"
+                        :max-scale="7"
+                        :min-scale="0.2"
+                        :preview-src-list="[resultsBarOfAllExamples[key]]"
+                        :initial-index="4"
+                        fit="cover"
+                      />
+                    </el-tab-pane>
+                    <el-tab-pane label="指标权重" name="second">
+                      <!-- <img :src="healthEvaluationFigure2" alt="figure2" id="health_evaluation_figure_2"
+                        class="result_image" style="width: auto; height: 450px;" /> -->
+                      <el-image
+                        style="width: auto; height: 450px;" 
+                        :src="levelIndicatorsOfAllExamples[key]"
+                        :zoom-rate="1.2"
+                        :max-scale="7"
+                        :min-scale="0.2"
+                        :preview-src-list="[levelIndicatorsOfAllExamples[key]]"
+                        :initial-index="4"
+                        fit="cover"
+                      />
+                    </el-tab-pane>
+                    <el-tab-pane label="评估结果" name="third">
+                      <div style="display:flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%">
+                        <el-image
+                          style="width: 800px; height: auto;" 
+                          :src="statusOfExamples[key]"
+                          :zoom-rate="1.2"
+                          :max-scale="7"
+                          :min-scale="0.2"
+                          :preview-src-list="[statusOfExamples[key]]"
+                          :initial-index="4"
+                          fit="cover"
+                        />
+                        <br>
+
+                        <div style="width: 700px;">
+                          <el-text :v-model="suggestionOfAllExamples[key]" style="font-weight: bold; font-size: 18px;">{{
+                            suggestionOfAllExamples[key]
+                          }}</el-text>
+                        </div>
+                      </div>
+                        <!-- <img :src="healthEvaluationFigure3" alt="figure3" id="health_evaluation_figure_3"
+                          class="result_image" style="width: auto; height: 360px;" /> -->
+                        
+                      
+                    </el-tab-pane>
+                  </el-tabs>
+                </el-tab-pane>
+                
               </el-tabs>
+              
               <!-- 特征提取可视化 -->
               <div  v-if="displayFeatureExtraction" style="justify-content: center;">
                 <el-tabs tab-position="left" type="border-card" v-model="featuresExtractionRawData">
@@ -1267,7 +1286,7 @@
 
               <!-- 展示用户文件中原始数据 -->
               <div v-if="displayRawDataWaveform" style="padding: 20px; position: relative;" >
-                <el-button text style="color: green;position: absolute; right: 10px; top: 10px; width: 90px; height: 50px" @click="displayRawDataWaveform=false">关闭</el-button>
+                <el-button text style="color: green;position: absolute; right: 10px; top: 10px; width: 90px; height: 50px" @click="displayRawDataWaveform = false">关闭</el-button>
                 <p style="text-align: left; color: red; font-weight: bolder; font-size: 18px">已上传数据文件内容浏览</p>
                 <p style="font-size: 18px">文件名：{{ currentDataBrowsing }}</p>
                 <el-image
@@ -1351,12 +1370,13 @@
         </el-drawer>
 
         <!-- 以抽屉的形式打开用户历史数据 -->
-        <el-drawer v-model="dataDrawer" direction="ltr" size="40%">
+        <el-drawer v-model="dataDrawer" direction="ltr" size="45%">
           <div style="display: flex; flex-direction: column">
             <el-col>
               <h2 style="margin-bottom: 25px; color: #253b45">用户数据文件</h2>
 
               <el-table :data="fetchedDataFiles" height="500" stripe style="width: 100%">
+                <el-table-column :width="100" property="owner" label="文件上传者" show-overflow-tooltip/>
                 <el-table-column :width="200" property="dataset_name" label="文件名称" show-overflow-tooltip/>
                 <el-table-column :width="230" property="description" label="文件描述" show-overflow-tooltip/>
                 <el-table-column :width="210" label="操作">
@@ -1370,14 +1390,39 @@
                     >
                       使用
                     </el-button>
-                    <el-button
-                      size="small"
-                      type="danger"
-                      style="width: 50px"
-                      @click="deleteDataset(scope.$index, scope.row)"
-                    >
-                      删除
-                    </el-button>
+                    <el-popconfirm title="你确定要删除该增值服务组件吗" @confirm="deleteDatasetConfirm(scope.$index, scope.row)">
+                      <template #reference>
+                        <!-- <el-button
+                          size="small"
+                          type="danger"
+                          style="width: 50px"
+                        >
+                          删除组件
+                        </el-button> -->
+                        <el-button
+                          size="small"
+                          type="danger"
+                          style="width: 50px"
+                        >
+                          删除
+                        </el-button>
+                      </template>
+                      <template #actions="{ confirm, cancel }">
+                        <el-row>
+                          <el-col :span="12"><el-button size="small" @click="cancel">取消</el-button></el-col>
+                          <el-col :span="12">
+                            <el-button
+                              type="primary"
+                              size="small"
+                              @click="confirm"
+                            >
+                              确定
+                            </el-button>
+                          </el-col>
+                        </el-row>  
+                      </template> 
+                    </el-popconfirm>
+                    
                     <el-button
                       size="small"
                       type="success"
@@ -1390,7 +1435,7 @@
                 </el-table-column>
               </el-table>
 
-              <el-dialog
+              <!-- <el-dialog
                 v-model="deleteDatasetConfirmVisible"
                 title="提示"
                 width="500"
@@ -1409,7 +1454,7 @@
                     >确定</el-button
                   >
                 </template>
-              </el-dialog>
+              </el-dialog> -->
             </el-col>
            
           </div>
@@ -1703,7 +1748,7 @@ const setIconOfAlgorithms = (label: string) => {
     case '层次分析模糊综合评估':
     case '层次逻辑回归评估':
     case '层次朴素贝叶斯评估':
-    case '专有健康评估':
+    case '健康评估':
       iconName = 'health-evaluation-icon.svg'
   }
   return new URL(`../assets/${iconName}`, import.meta.url).href
@@ -1737,15 +1782,15 @@ const howToUseTemplateModel2 = "### 如何使用预定义的模型？ \n "+
 const uploadconfirmLoading = ref<boolean>(false);
 const uploadConfirmDialog = ref<boolean>(false);
 // 确保弹出的确认上传文件对话框位于最顶层
-const getContainer = () => document.body;
-
+// const getContainer = () => document.body;
 
 const dataFileFormState = ref({
   filename: "",
   description: "",
   multipleSensors: 'single',
+  isPublic: 'private',
 });
-const formRef = ref();
+const fileUploadFormRef = ref();
 const fileNameRules: Record<string, Rule[]> = {
   filename: [
     { required: true, message: "请输入文件名", trigger: "blur" },
@@ -1773,13 +1818,15 @@ const fileNameRules: Record<string, Rule[]> = {
 
 
 // 确认上传文件
-const onFinish = (values: any) => {
+const onFinish = () => {
+
   uploadconfirmLoading.value = true;
   const formData = new FormData();
   formData.append("file", fileList.value[0]);
   formData.append("filename", dataFileFormState.value.filename);
   formData.append("description", dataFileFormState.value.description);
   formData.append("multipleSensors", dataFileFormState.value.multipleSensors);
+  formData.append("isPublic", dataFileFormState.value.isPublic);
   uploading.value = true;
 
   api.post("/user/upload_datafile/", formData)
@@ -1811,10 +1858,7 @@ const onFinish = (values: any) => {
         uploadconfirmLoading.value = false;
         message.error("上传失败, "+error);
       });
-};
 
-const onFinishFailed = () => {
-  message.error("请补充文件信息, ");
 };
 
 
@@ -1911,13 +1955,12 @@ const extraAlgorithmStatement = ref({})
 // 额外算法的描述
 // const extraAlgorithmStatement = ref('')
 
-const getPrivateAlgorithm = (item: any) =>{
+const getExtraAlgorithm = (item: any) =>{
 
   let algorithmTypeMapping = {'插值处理': "private_interpolation", '特征选择': 'extra_feature_selection',
                               '特征提取': 'private_feature_extraction', '无量纲化': 'private_scale',
                               '小波变换': 'extra_wavelet_transform', '故障诊断': 'private_fault_diagnosis',
-
-                              '故障预测': 'private_fault_prediction', '专有健康评估': 'extra_health_evaluation'}
+                              '故障预测': 'private_fault_prediction', '健康评估': 'extra_health_evaluation'}
 
   
   //获取私有算法列表
@@ -2167,7 +2210,7 @@ const menuList2 = ref([{
         }, tip_show: false, tip: '使用专有故障预测方法', optional: false
       },
       {
-        label: '专有健康评估', id: '3.4', use_algorithm: null, parameters: {
+        label: '健康评估', id: '3.4', use_algorithm: null, parameters: {
           'extra_health_evaluation': ''
         }, tip_show: false, tip: '使用专有健康评估的评价方法', optional: false
       },
@@ -2261,7 +2304,7 @@ const clickAtSecondMenu = (option: any) => {
 
   // 在结果可视化区域显示对应二级目录功能下所有算法的优劣比较
   let secondAlgorithm = option.label
-  if (secondAlgorithm === '层次分析模糊综合评估' || secondAlgorithm === '层次朴素贝叶斯评估' || secondAlgorithm === '层次逻辑回归评估'){
+  if (secondAlgorithm === '层次分析模糊综合评估' || secondAlgorithm === '层次朴素贝叶斯评估' || secondAlgorithm === '层次逻辑回归评估' || secondAlgorithm === '健康评估'){
     secondAlgorithm = '层次分析健康评估'
   }
   contrastToShow.value = contrastOfAlgorithm[secondAlgorithm]
@@ -2711,6 +2754,20 @@ const checkModel = () => {
     return endPosition < text.length;
   }
 
+  const includeHealthEvaluation = (moduleStr: string) => {
+    if (moduleStr.match('层次分析模糊综合评估')){
+      return '层次分析模糊综合评估';
+    }else if(moduleStr.match('层次朴素贝叶斯评估')){
+      return '层次朴素贝叶斯评估';
+    }else if(moduleStr.match('层次逻辑回归评估')){
+      return '层次逻辑回归评估';
+    }else if(moduleStr.match('健康评估')){
+      return '健康评估';
+    }else{
+      return '';
+    }
+  }
+
   // 判断一个子串后是否有另一个子串，其中subStrs2为包含需要寻找的子串的数组
   const checkSubstrings = (str, subStr1, subStrs2) => {
     const index1 = str.indexOf(subStr1);
@@ -2858,7 +2915,7 @@ const checkModel = () => {
               let nextModuleText = moduleStr.substring(moduleStr.indexOf('故障诊断'), moduleStr.length)  //故障诊断模块之后的其他模块名拼接的字符串
               if (nextModuleText.match('故障预测') || nextModuleText.match('层次分析模糊综合评估') || nextModuleText.match('层次朴素贝叶斯评估') || nextModuleText.match('层次逻辑回归评估')) {
                 // 如果同时包含故障预测以及层次分析模糊综合评估
-                let current: String
+                let current: string
                 if (nextModuleText.match('故障预测') && (nextModuleText.match('层次分析模糊综合评估') || nextModuleText.match('层次朴素贝叶斯评估') || nextModuleText.match('层次逻辑回归评估'))){
                   // 获取健康评估模块所在的位置
                   let healthEvaluationIndex
@@ -2885,11 +2942,20 @@ const checkModel = () => {
                 
                 // 因为之前的深度学习模型的故障诊断无法为故障预测或是健康评估提供样本特征，因此需要进行特征提取和特征选择
                 if (nextModuleText.indexOf('故障预测') == -1){
-                  current = '层次分析模糊综合评估'
-                }
-                if (nextModuleText.indexOf('层次分析模糊综合评估') == -1){
+                  current = includeHealthEvaluation(moduleStr)
+                  if(!current){
+                    message.error('模型检查出错，请重新链接模型')
+                    return 
+                  }
+                }else{
                   current = '故障预测'
                 }
+                // if (nextModuleText.indexOf('层次分析模糊综合评估') == -1){
+                //   current = '故障预测'
+                // }
+                // if (includeHealthEvaluation(nextModuleText) == ''){
+                //   current = '故障预测'
+                // }
                 // if (nextModuleText.indexOf('故障预测') > nextModuleText.indexOf('层次分析模糊综合评估')){
                 //   current = '层次分析模糊综合评估'
                 // }else{
@@ -3085,31 +3151,53 @@ const checkModel = () => {
             return
           }
         } 
-        if (moduleStr.match('层次分析模糊综合评估') && !moduleStr.match('特征提取')) {
+        if (includeHealthEvaluation(moduleStr)) {
 
-          ElMessage({
-            showClose: true,
-            message: '因模型中包含层次分析模糊综合评估，建议在此之前包含特征提取',
-            type: 'warning'
-          })
+          let healthEvaluation = includeHealthEvaluation(moduleStr)  //所包含的健康评估的组件名
+          if (!moduleStr.match('特征提取')){
+            ElMessage({
+              showClose: true,
+              message: '因模型中包含层次分析模糊综合评估，建议在此之前包含特征提取',
+              type: 'warning'
+            })
+            let current = linkedList.searchPre(healthEvaluation) // 寻找健康评估之前的节点，即不符合规则的节点
+
+            // 红色标明报错连线
+            let sourceId = labelToId(current.value)
+            let targetId = labelToId(healthEvaluation)
+            
+            let connection = plumbIns.getConnections({ source: sourceId, traget: targetId })
+            console.log('connection: ', connection)
+
+            plumbIns.select({ source: sourceId, target: targetId }).setPaintStyle({
+              stroke: '#E53935',
+              strokeWidth: 7,
+              outlineStroke: 'transparent',
+              outlineWidth: 5,
+            });
+            return
+          }
+          if (moreText(moduleStr, healthEvaluation)){
+            let sourceId = labelToId(healthEvaluation)
+            let current = linkedList.search(healthEvaluation)
+            let next = current.next.value
+            let targetId = labelToId(next)
+
+            plumbIns.select({ source: sourceId, target: targetId }).setPaintStyle({
+              stroke: '#E53935',
+              strokeWidth: 7,
+              outlineStroke: 'transparent',
+              outlineWidth: 5,
+
+            });
+            ElMessage({
+              showClose: true,
+              message: '注意健康评估之后无法连接更多的模块',
+              type: 'warning'
+            })
+            return
+          }
           
-          let current = linkedList.searchPre('层次分析模糊综合评估') // 寻找健康评估之前的节点，即不符合规则的节点
-
-          // 红色标明报错连线
-          let sourceId = labelToId(current.value)
-          let targetId = labelToId('层次分析模糊综合评估')
-          
-          let connection = plumbIns.getConnections({ source: sourceId, traget: targetId })
-          console.log('connection: ', connection)
-
-          plumbIns.select({ source: sourceId, target: targetId }).setPaintStyle({
-            stroke: '#E53935',
-            strokeWidth: 7,
-            outlineStroke: 'transparent',
-            outlineWidth: 5,
-
-          });
-          return
         } 
         if (moduleStr.match('特征选择')){
           let preModuleText = moduleStr.substring(0, moduleStr.indexOf('特征选择'))
@@ -3161,26 +3249,26 @@ const checkModel = () => {
         //   return
         // }
         // 健康评估之后无法再连接其他模块
-        if (moduleStr.match('层次分析模糊综合评估') && moreText(moduleStr, '层次分析模糊综合评估')) {
-          let sourceId = labelToId('层次分析模糊综合评估')
-          let current = linkedList.search('层次分析模糊综合评估')
-          let next = current.next.value
-          let targetId = labelToId(next)
+        // if (includeHealthEvaluation(moduleStr) && moreText(moduleStr, '层次分析模糊综合评估')) {
+        //   let sourceId = labelToId('层次分析模糊综合评估')
+        //   let current = linkedList.search('层次分析模糊综合评估')
+        //   let next = current.next.value
+        //   let targetId = labelToId(next)
 
-          plumbIns.select({ source: sourceId, target: targetId }).setPaintStyle({
-            stroke: '#E53935',
-            strokeWidth: 7,
-            outlineStroke: 'transparent',
-            outlineWidth: 5,
+        //   plumbIns.select({ source: sourceId, target: targetId }).setPaintStyle({
+        //     stroke: '#E53935',
+        //     strokeWidth: 7,
+        //     outlineStroke: 'transparent',
+        //     outlineWidth: 5,
 
-          });
-          ElMessage({
-            showClose: true,
-            message: '注意健康评估之后无法连接更多的模块',
-            type: 'warning'
-          })
-          return
-        }
+        //   });
+        //   ElMessage({
+        //     showClose: true,
+        //     message: '注意健康评估之后无法连接更多的模块',
+        //     type: 'warning'
+        //   })
+        //   return
+        // }
         if (algorithmStr.match('多传感器') && algorithmStr.match('单传感器')) {
           ElMessage({
             showClose: true,
@@ -3346,7 +3434,7 @@ const checkModel = () => {
           if (moreText(moduleStr, '故障诊断')) {
             // 机器学习的故障诊断之后只能是进行故障预测或是健康评估
             
-            if (!useDeepLearning && !checkSubstrings(moduleStr, '故障诊断', ['层次分析模糊综合评估', '故障预测', '层次朴素贝叶斯评估'])) {
+            if (!useDeepLearning && !checkSubstrings(moduleStr, '故障诊断', ['层次分析模糊综合评估', '故障预测', '层次朴素贝叶斯评估', '层次逻辑回归评估', '健康评估'])) {
               ElMessage({
                 showClose: true,
                 message: '注意故障诊断之后仅能进行故障预测或是健康评估！',
@@ -3810,7 +3898,7 @@ const handleMouseup = (ev, data) => { // 在图表中拖拽节点时，设置他
         //   data.nodeContainerStyle.left = ev.clientX - 290 
         //   data.nodeContainerStyle.top = ev.clientY - 80 
         // }, 2)
-        nodeList.value[i].nodeContainerStyle.left = ev.clientX - 340 + 'px'
+        nodeList.value[i].nodeContainerStyle.left = ev.clientX - 355 + 'px'
         nodeList.value[i].nodeContainerStyle.top = ev.clientY - 105 + 'px'
       }
     }
@@ -4027,21 +4115,94 @@ const canShowResults = ref(false)
 const healthEvaluation = ref('')
 const displayHealthEvaluation = ref(false)
 const activeName1 = ref('first')
-const healthEvaluationFigure1 = ref('data:image/png;base64,')
-const healthEvaluationFigure2 = ref('data:image/png;base64,')
-const healthEvaluationFigure3 = ref('data:image/png;base64,')
+const healthEvaluationOfExample = ref('样本1')
+const resultsBarOfAllExamples = ref({});
+const levelIndicatorsOfAllExamples = ref({});
+const statusOfExamples = ref({});
+const suggestionOfAllExamples = ref({});
+const finalSuggestion = ref('');
+// const healthEvaluationFigure1 = ref('data:image/png;base64,')
+// const healthEvaluationFigure2 = ref('data:image/png;base64,')
+// const healthEvaluationFigure3 = ref('data:image/png;base64,')
 
 const healthEvaluationDisplay = (results_object) => {
 
+  // 各个样本健康评估的可视化结果
   displayHealthEvaluation.value = true
+
   let figure1 = results_object.层级有效指标_Base64
   let figure2 = results_object.二级指标权重柱状图_Base64
   let figure3 = results_object.评估结果柱状图_Base64
+  let suggestions = results_object.评估建议
 
-  healthEvaluation.value = results_object.评估建议
-  healthEvaluationFigure1.value = 'data:image/png;base64,' + figure1
-  healthEvaluationFigure2.value = 'data:image/png;base64,' + figure2
-  healthEvaluationFigure3.value = 'data:image/png;base64,' + figure3
+  figure1.forEach((element: string, index: number) => {
+    // console.log("element: ", element)
+    // console.log("index: ", index)
+    resultsBarOfAllExamples.value[`样本${index + 1}`] = 'data:image/png;base64,' + element
+  });
+  figure2.forEach((element: string, index: number) => {
+    levelIndicatorsOfAllExamples.value[`样本${index + 1}`] = 'data:image/png;base64,' + element
+  });
+  figure3.forEach((element: string, index: number) => {
+    statusOfExamples.value[`样本${index + 1}`] = 'data:image/png;base64,' + element
+  });
+  suggestions.forEach((element: string, index: number) => {
+    suggestionOfAllExamples.value[`样本${index + 1}`] = element
+  });
+
+  // 最终评估结果
+  finalSuggestion.value = results_object.最终评估结果
+  let statusOfAllExamples: Object = results_object.各样本状态隶属度
+
+  nextTick(()=>{
+    // 绘制故障样本与非故障样本数量饼状图
+  var pieChartDom = document.getElementById('healthEvaluationPieChart');
+  var pieChart = echarts.init(pieChartDom);
+  var pieChartOption;
+
+  pieChartOption = {
+    title: {
+      text: '评估结果中不同状态所属的样本数量比例',
+      // subtext: 'Fake Data',
+      left: 'center'
+    },
+    tooltip: {
+      trigger: 'item'
+    },
+    legend: {
+      orient: 'vertical',
+      left: 'left'
+    },
+    series: [
+      {
+        name: '样本数量',
+        type: 'pie',
+        radius: '50%',
+        data: [
+          // { value: 580, name: 'Email' },
+          // { value: 484, name: 'Union Ads' },
+          // { value: 300, name: 'Video Ads' }
+        ],
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      }
+    ]
+  };
+  for(let [key, value] of Object.entries(statusOfAllExamples)){
+    pieChartOption.series[0].data.push({ value: value, name: key })
+  }
+  console.log("pieChartOption.series[0].data: ", pieChartOption.series[0].data)
+  pieChart.setOption(pieChartOption);
+  })
+  // healthEvaluation.value = results_object.评估建议
+  // healthEvaluationFigure1.value = 'data:image/png;base64,' + figure1
+  // healthEvaluationFigure2.value = 'data:image/png;base64,' + figure2
+  // healthEvaluationFigure3.value = 'data:image/png;base64,' + figure3
 
 }
 
@@ -4410,7 +4571,7 @@ const faultRegressionDisplay = (resultsObject) => {
 const activeName3 = ref('1')
 const displayInterpolation = ref(false)
 const interpolationFigures = ref([]) // 插值处理结果图像
-const interpolationResultsOfSensors = ref([])   // 后端插值处理返回结果
+const interpolationResultsOfSensors = ref([])   // 插值处理结果中有几个传感器
 
 const interpolationDisplay = (resultsObject: any) => {
   displayInterpolation.value = true
@@ -4423,8 +4584,8 @@ const interpolationDisplay = (resultsObject: any) => {
     interpolationFigures.value.push('data:image/png;base64,' + value)
     interpolationResultsOfSensors.value.push({label: key.split('_')[0], name: sensorId.toString()})
   }
-  console.log('interpolationResultsOfSensors: ', interpolationResultsOfSensors)
-  console.log('interpolationFigures: ', interpolationFigures)
+  // console.log('interpolationResultsOfSensors: ', interpolationResultsOfSensors)
+  // console.log('interpolationFigures: ', interpolationFigures)
   // displayDenoise.value = true
 }
 
@@ -4588,7 +4749,7 @@ const showResult = (item) => {
         return
       }
       if (item.label != '层次逻辑回归评估' && item.label != '层次分析模糊综合评估' && item.label != '层次朴素贝叶斯评估' && item.label != '特征提取' && item.label != '特征选择' && item.label != '故障诊断'
-        && item.label != '故障预测' && item.label != '特征提取' && item.label != '插值处理' && item.label != '无量纲化' && item.label != '小波变换' && item.label != '专有健康评估'
+        && item.label != '故障预测' && item.label != '特征提取' && item.label != '插值处理' && item.label != '无量纲化' && item.label != '小波变换' && item.label != '健康评估'
       ) {
         showPlainIntroduction.value = false
         showStatusMessage.value = false
@@ -4665,8 +4826,8 @@ const showResult = (item) => {
         } else if (item.label == '层次逻辑回归评估') {
           let results_to_show = responseResults.层次逻辑回归评估
           healthEvaluationDisplay(results_to_show)
-        } else if (item.label == '专有健康评估') {
-          let results_to_show = responseResults.专有健康评估
+        } else if (item.label == '健康评估') {
+          let results_to_show = responseResults.健康评估
           healthEvaluationDisplay(results_to_show)
         }
         else {
@@ -5060,19 +5221,19 @@ let indexDataset: any = null
 
 
 // 用户删除历史数据
-const deleteDataset = (index_in: any, row_in: any) => {
-  indexDataset = index_in
-  rowDataset = row_in
-  deleteDatasetConfirmVisible.value = true
-}
+// const deleteDataset = (index_in: any, row_in: any) => {
+//   indexDataset = index_in
+//   rowDataset = row_in
+//   deleteDatasetConfirmVisible.value = true
+// }
 // 确认删除历史数据文件
-const deleteDatasetConfirm = () => {
+const deleteDatasetConfirm = (index: any, row: any) => {
 
-  api.get('/user/delete_datafile?filename=' + rowDataset.dataset_name)
+  api.get('/user/delete_datafile/?filename=' + row.dataset_name)
     .then((response: any) => {
       if (response.data.code == 200){
         // 删除前端表中数据
-        fetchedDataFiles.value.splice(indexDataset, 1)
+        fetchedDataFiles.value.splice(index, 1)
         deleteDatasetConfirmVisible.value = false
         ElMessage({
           message: '文件删除成功',
@@ -5097,11 +5258,11 @@ const deleteDatasetConfirm = () => {
       }
     })
     .catch((error: any) => {
-      console.log('delete_datafile_error: ', error)
-      ElMessage({
-        message: '删除失败',
-        type: 'error'
-      })
+      // console.log('delete_datafile_error: ', error)
+      // ElMessage({
+      //   message: '删除失败',
+      //   type: 'error'
+      // })
     })
 }
 
@@ -5480,5 +5641,100 @@ body {
 .custom-radio-button:hover{
   background-color: #c4e8ba;
   
+}
+</style>
+
+<style scoped lang="scss">
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  padding: 0 20px;
+  height: 60px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border: rgb(95, 117, 154) 1px solid;
+  text-align: center;
+  line-height: 60px;
+  position: relative;
+  margin-bottom: 5px;
+  width: 100%;
+}
+
+.logo {
+  display: flex;
+  flex: 4;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 22px;
+}
+
+.logo img {
+  height: 36px;
+  margin-right: 12px;
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: bold;
+  color: #409EFF;
+}
+
+.title {
+  flex-grow: 1;
+  display: flex;
+  flex: 4;
+  justify-content: center; /* 水平居中 */
+  align-items: center; /* 垂直居中 */
+}
+
+.title h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  font-family: 'Microsoft YaHei', sans-serif; /* 修改为微软雅黑字体 */
+}
+
+.user-actions {
+  display: flex;
+  flex: 4;
+  align-items: center;
+  justify-content: flex-end;
+  margin-right: 0;
+}
+
+.welcome-message {
+  font-size: 15px;
+  color: #409EFF;
+  margin-right: 18px;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  margin-right: 18px;
+  cursor: pointer;
+}
+
+.action-item .action-icon {
+  font-size: 18px;
+  margin-right: 5px;
+  color: #409EFF;
+}
+
+.action-item .action-text {
+  font-size: 14px;
+  color: #409EFF;
+}
+
+.action-item:hover .action-icon,
+.action-item:hover .action-text {
+  color: #66b1ff;
+}
+
+.action-item:hover .action-icon {
+  transform: scale(1.2);
+  transition: transform 0.3s;
 }
 </style>

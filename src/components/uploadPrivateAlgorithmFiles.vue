@@ -2,6 +2,7 @@
   <a-button class="private-algorithm-button" ghost @click="uploadPrivateAlgorithmFiles()">
     <span>上传组件</span></a-button
   >
+  <!-- 上传增值服务组件的操作面板 -->
   <a-modal
     v-model:open="dialogVisible"
     title="上传增值服务组件"
@@ -17,24 +18,11 @@
         justify-content: center;
       "
     >
-      <span style="width: 100%">
+      <div style="width: 100%">
         <!-- 选择组件的算法类型 -->
         <div style="width: 100%; margin-bottom: 10px">
-          <span><span style="color: red">*</span>选择上传组件的算法类型：</span>
-          <!-- <a-select
-            v-model:value="form.algorithmType"
-            @change="selectAlgorithmType"
-            placeholder="请选择算法类型"
-            style="width: 150px"
-          >
-            <a-select-option
-              v-for="option in options"
-              :key="option.value"
-              :value="option.value"
-            >
-              {{ option.label }}
-            </a-select-option>
-          </a-select> -->
+          <span><span style="color: red">*</span>选择上传组件的类型：</span>
+      
           <a-tree-select
             v-model:value="unknownform.algorithmType"
             show-search
@@ -70,7 +58,7 @@
           <div style="display: flex; flex-direction: row">
             <!-- 上传增值服务的算法源文件 -->
             <div>
-              <span><span style="color: red">*</span>选择要上传的算法源文件：</span>
+              <span><span style="color: red">*</span>选择要上传的源文件：</span>
               <a-upload
                 :file-list="pythonFileList"
                 :before-upload="beforeUploadAlgorithmFile"
@@ -121,7 +109,7 @@
               (unknownform.algorithmType === '无量纲化' && unknownform.useLog)
             "
           >
-            <span><span style="color: red">*</span>选择所要使用的模型文件：</span>
+            <span><span style="color: red">*</span>选择使用的模型文件：</span>
             <a-upload
               :file-list="modelFileList"
               :before-upload="beforeUploadModelFile"
@@ -156,23 +144,28 @@
             <a-form-item
               label="增值组件名称"
               name="algorithmName"
-              :rules="[{ required: true, message: '请输入增值组件算法名称!' }]"
+              :rules="[{ required: true, message: '请输入增值组件算法名称!' },
+              { min: 3, max: 50, message: '长度应在3到50个字符之间!', trigger: 'blur' },
+              { pattern: /^[\u4e00-\u9fa5a-zA-Z_][\u4e00-\u9fa5a-zA-Z0-9_-]*$/, message: '只能包含中英文、数字、下划线，且不能以数字开头!', trigger: 'blur' }]"
             >
               <a-input
                 v-model:value="extraAlgorithmFileFormState.algorithmName"
                 placeholder="请输入增值组件名称"
               />
+              <p style="color: #999; font-size: 12px;">只能包含中英文、数字和下划线，长度不超过50个字符。</p>
             </a-form-item>
 
             <a-form-item
               label="增值组件描述"
               name="statement"
-              :rules="[{ required: true, message: '请输入增值组件描述' }]"
+              :rules="[{ required: true, message: '请输入增值组件描述' },
+              { min: 1, max: 200, message: '长度应在1到200个字符之间!', trigger: 'blur' }]"
             >
               <a-input
                 v-model:value="extraAlgorithmFileFormState.statement"
                 placeholder="请输入增值算法描述"
               />
+              <p style="color: #999; font-size: 12px;">长度不超过300个字符。</p>
             </a-form-item>
 
             <!-- <a-form-item name="remember" :wrapper-col="{ offset: 8, span: 16 }">
@@ -180,13 +173,13 @@
             </a-form-item> -->
 
             <!-- <a-button type="primary" html-type="submit">Submit</a-button> -->
-            <span style="width: 350px"
-              >选择一个已上传文件作为测试样本，在上传组件后对该组件进行完整性校验：</span
+            <div style="width: 350px; margin-left: 10px; margin-bottom: 10px"
+              >上传组件并进行完整性校验：</div
             >
             <a-space>
               <!-- <a-button type="primary" @click="extraModuleValidate">完整性校验</a-button> -->
-              <!-- 显示校验结果 -->
-              <div style="width: 160px">
+              <!-- 选择一个测试样本进行组件的校验 -->
+              <!-- <div style="width: 160px">
                 <a-select
                   v-model:value="validateExtraAlgorithmUsingFileName"
                   style="width: 100%"
@@ -199,15 +192,14 @@
                     {{ item.dataset_name }}
                   </a-select-option>
                 </a-select>
-              </div>
+              </div> -->
 
               <a-button
                 type="primary"
                 :disabled="
                   (canUploadModelFile &&
                     (modelFileList?.length === 0 || pythonFileList?.length === 0)) ||
-                  (!canUploadModelFile && pythonFileList?.length === 0) ||
-                  validateExtraAlgorithmUsingFileName === ''
+                  (!canUploadModelFile && pythonFileList?.length === 0)
                 "
                 :loading="uploading"
                 @click="extraModuleUploadAndValidate"
@@ -216,24 +208,47 @@
               >
                 {{ uploading ? "正在进行完整性校验" : "上传增值组件" }}
               </a-button>
+
+              <!-- 显示校验结果 -->
               <span style="font-size: 20px" v-if="canShowValidationResult">
                 <!-- <a-icon v-if="extraModuleValidationResult === 'success'" type="check-circle" theme="twoTone" twoToneColor="#52c41a" /> -->
-                <span v-if="extraModuleValidationResult === true">
+                <span v-if="extraModuleValidationResult === true" style="display: flex;align-items: center">
                   <CheckCircleOutlined style="color: green" />
-                  <!-- <span style="font-size: 12px">校验通过，上传成功</span> -->
+                  <span style="font-size: 12px; margin-left: 5px">校验通过，上传成功</span>
                 </span>
 
-                <span v-else>
+                <span v-else style="display: flex;align-items: center">
                   <CloseCircleOutlined style="color: red" />
-                  <!-- <span style="font-size: 12px">校验失败</span> -->
+                  <span style="font-size: 12px; margin-left: 5px">校验失败</span>
                 </span>
-
                 <!-- <a-icon v-else type="close-circle" theme="twoTone" twoToneColor="#ff4d4f" /> -->
               </span>
             </a-space>
           </a-form>
         </div>
-      </span>
+      </div>
+
+      <!-- 显示组件的校验结果。 -->
+      <div v-if="canShowValidationResult && extraModuleValidationResult" 
+      style="display: flex; flex-direction: column; align-content: left; padding-top: 20px; width: 100%">
+        <!-- <div v-if="extraModuleValidationResult === true">校验通过，上传成功</div> -->
+        <!-- <div v-else>校验失败</div> -->
+        <span>所上传的组件运行结果（点击放大）</span>
+        <!-- 插值处理组件校验的结果 -->
+        <div v-if="canDisplayInterpolationValidationResult" style="width: 100%; height: 250px;" >
+          <el-image
+            :src="interpolationFigures[0]"
+            :zoom-rate="1.2"
+            :max-scale="7"
+            :min-scale="0.2"
+            :preview-src-list="interpolationFigures"
+            :initial-index="4"
+            fit="cover"
+          />
+        </div>
+        
+        <!-- <div v-if="extraModuleValidationResult !== true">{{ extraModuleValidationResult }}</div> -->
+      </div>
 
       <!-- 点击相应按钮时，显示私有算法模版参考 -->
       <!-- <a-button @click="showDrawer = true">显示算法模板参考</a-button> -->
@@ -605,7 +620,7 @@ const pythonFileList = ref<UploadProps["fileList"]>([]); //算法源文件列表
 const modelFileList = ref<UploadProps["fileList"]>([]); //模型源文件列表
 const uploading = ref<boolean>(false);
 const unknownform = reactive({
-  algorithmType: null, // 私有算法类型
+  algorithmType: '', // 私有算法类型
   fileList: [],
   faultDiagnosisType: "machineLearning", // 故障诊断算法类型，可选值为machineLearning和deepLearning
   useLog: false, // 是否使用训练模型时的标准化方法，为true时，使用训练模型时的标准化方法，为false时，使用当前数据集的标准化方法
@@ -614,7 +629,7 @@ const unknownform = reactive({
 const fetchedDataFiles = ref([]);
 // 从数据库获取用户已上传的数据文件
 const fetchDataFiles = () => {
-  let url = "user/fetch_datafiles/";
+  let url = "user/fetch_datafiles/?publicOnly=Y";
   api.get(url).then((response: any) => {
     let datasetInfo = response.data;
     // modelsDrawer.value = false;
@@ -738,11 +753,14 @@ let contentJsonForFaultDiagnosisML = {
 // 增值服务组件完整性校验结果
 const extraModuleValidationResult = ref(false);
 const canShowValidationResult = ref(false);
+
+let validationResultsToDisplay: Object;
 //上传文件后，点击开始运行以运行程序
 const startValidating = () => {
   const data = new FormData();
-  data.append("file_name", validateExtraAlgorithmUsingFileName.value); // 所使用的数据文件
+  // data.append("file_name", validateExtraAlgorithmUsingFileName.value); // 所使用的数据文件
   data.append("params", JSON.stringify(contentJson)); // 模型信息
+  data.append('validationExample', 'single_sensor_example')
 
   return api
     .post("user/run_with_datafile_on_cloud/", data, {
@@ -759,6 +777,7 @@ const startValidating = () => {
       }
       if (response.data.code === 200) {
         message.success("组件校验成功！");
+        validationResultsToDisplay = response.data.results
         extraModuleValidationResult.value = true;
       } else {
         extraModuleValidationResult.value = false;
@@ -828,6 +847,35 @@ const deleteExtraModule = () => {
     });
 };
 
+const canDisplayInterpolationValidationResult = ref(false)
+const canDisplayWaveletTransformValidationResult = ref(false)
+
+const resetDisplay = () => {
+  canDisplayInterpolationValidationResult.value = false
+  canDisplayWaveletTransformValidationResult.value = false
+}
+
+
+const interpolationFigures = ref([])
+// const interpolationResultsOfSensors = ref([])
+// 完整性校验通过后的结果展示
+const displayValidationResult = (algorithmType: string, resultsObject: Object) => {
+  interpolationFigures.value.length = 0
+  // interpolationResultsOfSensors.value.length = 0
+  // 清除显示结果
+  resetDisplay();  
+  if (algorithmType == "插值处理"){
+    canDisplayInterpolationValidationResult.value = true
+    for(const [key, value] of Object.entries(resultsObject.插值处理)){
+      // 将插值处理的结果添加到插值图展示
+      console.log('value: ', value)
+      interpolationFigures.value.push('data:image/png;base64,' + value)
+      // interpolationResultsOfSensors.value.push({label: key.split('_')[0], name: sensorId.toString()})
+    }
+  }
+}
+
+
 // 校验增值服务组件所使用的用户样本
 const validateExtraAlgorithmUsingFileName = ref("");
 // 提交上传组件并进行校验
@@ -870,6 +918,7 @@ const extraModuleUploadAndValidate = async () => {
     await startValidating();
     canShowValidationResult.value = true;
     if (extraModuleValidationResult.value === true) {
+      displayValidationResult(unknownform.algorithmType, validationResultsToDisplay)
       // message.success("组件校验通过");
     } else {
       // 组件校验失败，删除已上传的组件
@@ -1240,6 +1289,9 @@ const beforeUploadModelFile = (file: any) => {
   modelFileList.value = [...(modelFileList.value || []), file];
   return false;
 };
+
+
+
 // const beforeUpload = (file: any) => {
 //   const algorithmType = form.value.algorithmType;
 //   const isFaultDiagnosis = algorithmType === "故障诊断";

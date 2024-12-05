@@ -2,64 +2,64 @@
 <template>
   <el-container>
     <el-main style="height: 93vh;">
-      <div>
-        <div class="login-body">
-          <div class="system-name">欢迎使用<span>车轮状态分析与健康评估软件<br>(Beta测试版)</span></div>
-          <div class="login-panel">
-            <div class="login-title">用户登录</div>
-            <!-- <div>用户登录</div> -->
+      <div class="login-body">
+        <!-- <div class="system-name">欢迎使用<span>车轮状态分析与健康评估软件<br>(Beta测试版)</span></div> -->
+        <div class="system-name">欢迎使用<span>轨道车辆智能运维通用算法和工具软件<br>(Beta测试版)</span></div>
 
-            <a-form :model="formState" :rules="rules" ref="formRef" style="width: 70%; height: 80%">
-              <a-form-item label="账号" name="username">
-                <a-input
-                  placeholder="请输入账号"
-                  v-model:value="formState.username"
-                  size="large"
-                  type="text"
-                >
-                  <template #prefix>
-                    <user-outlined />
-                  </template>
-                </a-input>
-              </a-form-item>
-              <a-form-item label="密码" name="password">
-                <a-input
-                  placeholder="请输入密码"
-                  v-model:value="formState.password"
-                  size="large"
-                  type="password"
-                  @keyup.enter.native="login()"
-                >
-                  <template #prefix>
-                    <lock-outlined />
-                  </template>
-                </a-input>
-              </a-form-item>
-              <a-form-item label="角色" name="role">
-                <a-select
-                  v-model:value="formState.role"
-                  size="large"
-                  placeholder="请选择角色"
-                >
-                  <a-select-option value="user">普通用户</a-select-option> 
-                  <a-select-option value="admin">系统管理员</a-select-option>
-                  <a-select-option value="superuser">系统用户</a-select-option>
-                </a-select>
-              </a-form-item>
-              <a-form-item label="">
-                <a-button
-                  type="primary"
-                  html-type="submit"
-                  style="width: 100%"
-                  @click="login()"
-                  size="large"
-                  >登录</a-button
-                >
-              </a-form-item>
-            </a-form>
-            <div style="position: absolute; right: 5px; bottom: 0px">
-              <el-button @click="goToResetPassword" class="button"> 忘记密码? </el-button>
-            </div>
+        <div class="login-panel">
+          <div class="login-title">用户登录</div>
+          <!-- <div>用户登录</div> -->
+
+          <a-form :model="formState" :rules="rules" ref="formRef" style="width: 70%; height: 80%">
+            <a-form-item label="账号" name="username">
+              <a-input
+                placeholder="请输入账号"
+                v-model:value="formState.username"
+                size="large"
+                type="text"
+              >
+                <template #prefix>
+                  <user-outlined />
+                </template>
+              </a-input>
+            </a-form-item>
+            <a-form-item label="密码" name="password">
+              <a-input
+                placeholder="请输入密码"
+                v-model:value="formState.password"
+                size="large"
+                type="password"
+                @keyup.enter.native="login()"
+              >
+                <template #prefix>
+                  <lock-outlined />
+                </template>
+              </a-input>
+            </a-form-item>
+            <a-form-item label="角色" name="role">
+              <a-select
+                v-model:value="formState.role"
+                size="large"
+                placeholder="请选择角色"
+              >
+                <a-select-option value="user">普通用户</a-select-option> 
+                <a-select-option value="admin">系统管理员</a-select-option>
+                <a-select-option value="superuser">系统用户</a-select-option>
+              </a-select>
+            </a-form-item>
+            <a-form-item label="">
+              <a-button
+                type="primary"
+                html-type="submit"
+                style="width: 100%"
+                @click="login()"
+                size="large"
+                >登录</a-button
+              >
+            </a-form-item>
+          </a-form>
+          <div style="position: absolute; right: 5px; bottom: 0px">
+            <el-button @click="goToResetPassword" class="button"> 忘记密码? </el-button>
           </div>
         </div>
       </div>
@@ -175,6 +175,10 @@ const login = () => {
   width: 100%;
   background-size: cover;
   position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   left: 0;
   top: 0;
 
@@ -286,7 +290,7 @@ const login = () => {
 .system-name {
   position: absolute;
   top: 100px;
-  left: 26%;
+  
   text-align: center;
   color: #ffffff;
   font-family: "Arial", sans-serif;

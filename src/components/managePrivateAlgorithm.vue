@@ -45,7 +45,7 @@
           <!-- <el-button size="small" type="primary" style="width: 50px;" @click="useModel(scope.row)">
               使用
             </el-button> -->
-            <el-popconfirm title="你确定要删除该增值服务组件吗" @confirm="deleteModule(scope.$index, scope.row)">
+            <el-popconfirm title="你确定要删除该增值服务组件吗" @confirm="deleteExtraModule(scope.$index, scope.row)">
               <template #reference>
                 <el-button
                   size="small"
@@ -124,8 +124,10 @@ const getExtraAlgorithm = () => {
   });
 };
 
+const emit = defineEmits(["deleteExtraModule"]);
+
 // 删除增值服务组件
-const deleteModule = (index: number, row: any) => {
+const deleteExtraModule = (index: number, row: any) => {
   // 发送删除请求到后端，row 是要删除的数据行
   api
     .get("/user/delete_extra_algorithm/?algorithmAlias=" + row.alias)
@@ -146,6 +148,7 @@ const deleteModule = (index: number, row: any) => {
         //   canStartProcess.value = true
         //   handleClear()
         // }
+        emit("deleteExtraModule", index);
         if (index !== -1) {
           // 删除前端表中数据
           fetchedExtraAlgorithm.value.splice(index, 1);

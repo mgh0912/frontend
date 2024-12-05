@@ -346,6 +346,7 @@
 <!--                    </div>-->
 <!--                  </a-tooltip>-->
 <!--                </div>-->
+                  </div>
               </div>
               <el-divider style="height: 20px;background: #CDCFD0;margin-bottom: 0;margin-top: 0px;"/>
               <!--      m2      -->
@@ -461,13 +462,12 @@
                   </div>
                   <div style="display: flex; flex-direction: row">
                     <div style="flex: 1;margin-right: 3px;">
-                      <uploadPrivateAlgorithmFiless/>
+                      <uploadPrivateAlgorithmFiless @addExtraModule="handleAddExtraModule"/>
                     </div>
                     <div style="flex: 1;margin-left: 3px;">
-                      <managePrivateAlgorithm/>
+                      <managePrivateAlgorithm @deleteExtraModule="handleDeleteExtraModule"/>
                     </div>
                   </div>
-              
               </div>
             </div>
           </div>
@@ -1390,7 +1390,7 @@
                     >
                       使用
                     </el-button>
-                    <el-popconfirm title="你确定要删除该增值服务组件吗" @confirm="deleteDatasetConfirm(scope.$index, scope.row)">
+                    <el-popconfirm title="你确定要删除该数据文件吗" @confirm="deleteDatasetConfirm(scope.$index, scope.row)">
                       <template #reference>
                         <!-- <el-button
                           size="small"
@@ -1501,6 +1501,15 @@ import { FolderOutlined, FolderOpenOutlined, QuestionCircleOutlined } from '@ant
 import { pa } from 'element-plus/es/locales.mjs';
 import { multipleCascaderProps } from 'ant-design-vue/es/vc-cascader/Cascader';
 
+// 删除增值服务组件时需要刷新增值组件列表
+const handleDeleteExtraModule = ()=>{
+  getExtraAlgorithmMao();
+}
+// 上传增值服务组件时需要刷新增值组件列表
+const handleAddExtraModule = ()=>{
+  getExtraAlgorithmMao();
+}
+
 //控制增值组件目录开关
 const isShowSecondButton = ref(false);
 const fetchedExtraAlgorithmList = ref([])
@@ -1508,45 +1517,44 @@ const fetchedExtraAlgorithmList = ref([])
 //构造数据
 const options_modules = ref([
   {
-    label: '插值处理', id: '1.1', use_algorithm: null,alias:null, parameters: {
+    label: '插值处理', id: '1.1', use_algorithm: null, alias:null, machineLearning: '', parameters: {
       'private_interpolation': '',
     }, tip_show: false, tip: '使用专有插值处理方法', optional: false
   } ,
-  {label: '特征提取', id: '1.2', use_algorithm: null,alias:null, parameters: {
+  {label: '特征提取', id: '1.2', use_algorithm: null, alias:null, machineLearning: '', parameters: {
       'private_feature_extraction':'',
     }},
   {
-    label: '无量纲化', id: '1.5', use_algorithm: null, alias:null,parameters: {
+    label: '无量纲化', id: '1.5', use_algorithm: null, alias:null, machineLearning: '', parameters: {
       'private_scaler': {useLog: false, algorithm: ''}
     }, tip_show: false, tip: '使用专有无量纲化处理方法', optional: true
   },
   {
-    label: '特征选择', id: '1.3', use_algorithm: null, alias:null,parameters: {
+    label: '特征选择', id: '1.3', use_algorithm: null, alias:null, machineLearning: '', parameters: {
       'extra_feature_selection': {rule: 1, threshold1: 0.1, threshold2: 0.1}
     }, tip_show: false, tip: '使用专有特征选择方法', optional: true
   },
   {
-    label: '小波变换', id: '1.4', use_algorithm: null,alias:null, parameters: {
+    label: '小波变换', id: '1.4', use_algorithm: null, alias:null, machineLearning: '', parameters: {
       'extra_wavelet_transform': ''
     }, tip_show: false, tip: '对输入信号进行小波变换', optional: true
   },
   {
-    label: '故障诊断', id: '2.1', use_algorithm: null, alias:null,parameters: {
-
-      'private_fault_diagnosis_deeplearning': '',
+    label: '故障诊断', id: '2.1', use_algorithm: null, alias:null, machineLearning: '', parameters: {
       'private_fault_diagnosis_machine_learning': '',
+      'private_fault_diagnosis_deeplearning': '',
     }, tip_show: false, tip: '使用专有故障诊断方法', optional: false
   },
   {
-    label: '故障预测', id: '2.2', use_algorithm: null, alias:null,parameters: {
+    label: '故障预测', id: '2.2', use_algorithm: null, alias:null, machineLearning: '', parameters: {
 
       'private_fault_prediction': {}
     }, tip_show: false, tip: '使用专有故障预测方法', optional: false
   },
   {
-    label: '专有健康评估', id: '3.4', use_algorithm: null, alias:null,parameters: {
+    label: '专有健康评估', id: '3.4', use_algorithm: null, alias:null, machineLearning: '', parameters: {
       'extra_health_evaluation': ''
-    }, tip_show: false, tip: '使用专有健康评估的评价方法', optional: false
+    }, tip_show: false, tip: '使用专有健康评估的评价方法', optional: false, 
   },
 
 ])
@@ -1573,6 +1581,7 @@ function updateOptionsWithBackendData(data) {
       // newOption.use_algorithm = item.algorithmName;
       // newOption.use_algorithm = newOption.parameters[]
       newOption.alias = item.alias;
+      newOption.machineLearning = item.machineLearning;
 
       // 将新对象添加到 fetchedExtraAlgorithmList 中
       fetchedExtraAlgorithmList.value.push(newOption);
@@ -1583,7 +1592,7 @@ function updateOptionsWithBackendData(data) {
 
 
 //获取用户的增值组件列表
-const getExtraAlgorithm = () => {
+const getExtraAlgorithmMao = () => {
   api.get("/user/user_fetch_extra_algorithm/").then((response: any) => {
     if (response.data.code == 401) {
       ElMessageBox.alert("登录状态失效，请重新登陆", "提示", {
@@ -1605,10 +1614,15 @@ const handleDragendAdd = (ev, algorithm, node) => {
   // 使用find方法查找具有特定alias的对象
   console.log("现拖拽algorithm",algorithm)
   const foundObject = fetchedExtraAlgorithmList.value.find(obj => obj.alias === algorithm)
-  const parametersKey = Object.keys(foundObject.parameters)[0]
+  // const parametersKey = Object.keys(foundObject.parameters)[0]
+  const machineLearning = foundObject.machineLearning
+  const parametersKey = machineLearning === 'ml' ? 'private_fault_diagnosis_machine_learning' : 'private_fault_diagnosis_deeplearning'
+  console.log("参数的键",parametersKey)
+  console.log("foundObject: ", foundObject)
+  console.log("foundObject.parameters: ", foundObject.parameters)
   // 如果找到了对象，复制其parameters的键
   if (foundObject) {
-    console.log("找到的算法文件",parametersKey); // 输出: ['private_fault_diagnosis_deeplearning', 'private_fault_diagnosis_machine_learning']
+    console.log("找到的算法文件", parametersKey); // 输出: ['private_fault_diagnosis_deeplearning', 'private_fault_diagnosis_machine_learning']
   }
   node.parameters[parametersKey] = node.alias
   console.log("node.parameters",node.parameters)
@@ -1622,7 +1636,7 @@ const handleDragendAdd = (ev, algorithm, node) => {
   else{
     left = evClientX - 300 + 'px'
   }
-
+  console.log("node.label: ", node.label)
   let top = 50 + 'px'
   const nodeId = node.id
   const nodeInfo = {
@@ -2014,9 +2028,6 @@ const getExtraAlgorithm = (item: any) =>{
 }
 
 
-
-
-
 // 保存模型时提交的模型名的规则验证
 const rules = {
   name: [
@@ -2171,52 +2182,52 @@ const menuList2 = ref([{
     },
   ]
 },
-  {
-    label: '增值组件', id: '-1', options: [
-      {
-        label: '插值处理', id: '1.1', use_algorithm: null, parameters: {
-          'private_interpolation': '',
-        }, tip_show: false, tip: '使用专有插值处理方法', optional: false
-      } ,
-      {label: '特征提取', id: '1.2', use_algorithm: null, parameters: {
-        'private_feature_extraction':'',
-        }},
-      {
-        label: '无量纲化', id: '1.5', use_algorithm: null, parameters: {
-          'private_scaler': {useLog: false, algorithm: ''}
-        }, tip_show: false, tip: '使用专有无量纲化处理方法', optional: true
-      },
-      {
-        label: '特征选择', id: '1.3', use_algorithm: null, parameters: {
-          'extra_feature_selection': {rule: 1, threshold1: 0.1, threshold2: 0.1}
-        }, tip_show: false, tip: '使用专有特征选择方法', optional: true
-      },
-      {
-        label: '小波变换', id: '1.4', use_algorithm: null, parameters: {
-          'extra_wavelet_transform': ''
-        }, tip_show: false, tip: '对输入信号进行小波变换', optional: true
-      },
-      {
-        label: '故障诊断', id: '2.1', use_algorithm: null, parameters: {
+  // {
+  //   label: '增值组件', id: '-1', options: [
+  //     {
+  //       label: '插值处理', id: '1.1', use_algorithm: null, parameters: {
+  //         'private_interpolation': '',
+  //       }, tip_show: false, tip: '使用专有插值处理方法', optional: false
+  //     } ,
+  //     {label: '特征提取', id: '1.2', use_algorithm: null, parameters: {
+  //       'private_feature_extraction':'',
+  //       }},
+  //     {
+  //       label: '无量纲化', id: '1.5', use_algorithm: null, parameters: {
+  //         'private_scaler': {useLog: false, algorithm: ''}
+  //       }, tip_show: false, tip: '使用专有无量纲化处理方法', optional: true
+  //     },
+  //     {
+  //       label: '特征选择', id: '1.3', use_algorithm: null, parameters: {
+  //         'extra_feature_selection': {rule: 1, threshold1: 0.1, threshold2: 0.1}
+  //       }, tip_show: false, tip: '使用专有特征选择方法', optional: true
+  //     },
+  //     {
+  //       label: '小波变换', id: '1.4', use_algorithm: null, parameters: {
+  //         'extra_wavelet_transform': ''
+  //       }, tip_show: false, tip: '对输入信号进行小波变换', optional: true
+  //     },
+  //     {
+  //       label: '故障诊断', id: '2.1', use_algorithm: null, parameters: {
 
-          'private_fault_diagnosis_deeplearning': '',
-          'private_fault_diagnosis_machine_learning': '',
-        }, tip_show: false, tip: '使用专有故障诊断方法', optional: false
-      },
-      {
-        label: '故障预测', id: '2.2', use_algorithm: null, parameters: {
+  //         'private_fault_diagnosis_deeplearning': '',
+  //         'private_fault_diagnosis_machine_learning': '',
+  //       }, tip_show: false, tip: '使用专有故障诊断方法', optional: false
+  //     },
+  //     {
+  //       label: '故障预测', id: '2.2', use_algorithm: null, parameters: {
 
-          'private_fault_prediction': {}
-        }, tip_show: false, tip: '使用专有故障预测方法', optional: false
-      },
-      {
-        label: '健康评估', id: '3.4', use_algorithm: null, parameters: {
-          'extra_health_evaluation': ''
-        }, tip_show: false, tip: '使用专有健康评估的评价方法', optional: false
-      },
+  //         'private_fault_prediction': {}
+  //       }, tip_show: false, tip: '使用专有故障预测方法', optional: false
+  //     },
+  //     {
+  //       label: '健康评估', id: '3.4', use_algorithm: null, parameters: {
+  //         'extra_health_evaluation': ''
+  //       }, tip_show: false, tip: '使用专有健康评估的评价方法', optional: false
+  //     },
 
-    ],
-  },
+  //   ],
+  // },
 
 ]);
 
@@ -2453,7 +2464,7 @@ onMounted(() => {
   // console.log('username: ', username.value)
   console.log('userRole: ', userRole.value)
   //获取用户上传的增值组件并构造对应的目录结构体
-  getExtraAlgorithm()
+  getExtraAlgorithmMao()
   // 当进行建模的时候隐藏可视化建模区的背景文字
   document.querySelector('.el-main').classList.add('has-background');
   plumbIns = jsPlumb.getInstance()

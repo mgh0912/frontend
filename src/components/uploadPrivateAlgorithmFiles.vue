@@ -233,7 +233,10 @@
       style="display: flex; flex-direction: column; align-content: left; padding-top: 20px; width: 100%">
         <!-- <div v-if="extraModuleValidationResult === true">校验通过，上传成功</div> -->
         <!-- <div v-else>校验失败</div> -->
-        <span>所上传的组件运行结果（点击放大）</span>
+        <div style="display: flex; flex-direction: row; width: 100%">
+          <span style="">所上传的组件运行结果（点击放大）</span>
+          <span><a-button type="word" style="margin-left: 150px" @click="closeValidationResult">关闭</a-button></span></div>
+       
         <!-- 插值处理组件校验的结果 -->
         <div v-if="canDisplayInterpolationValidationResult" style="width: 100%; height: 250px;" >
           <el-image
@@ -648,7 +651,7 @@ const uploadPrivateAlgorithmFiles = () => {
   fetchDataFiles();
 };
 
-const emit = defineEmits(["validateExtraModule"]);
+const emit = defineEmits(["addExtraModule"]);
 
 // 校验组件时向父组件传递的模型运行信息
 let contentJson = {
@@ -754,6 +757,7 @@ let contentJsonForFaultDiagnosisML = {
 const extraModuleValidationResult = ref(false);
 const canShowValidationResult = ref(false);
 
+
 let validationResultsToDisplay: Object;
 //上传文件后，点击开始运行以运行程序
 const startValidating = () => {
@@ -779,6 +783,7 @@ const startValidating = () => {
         message.success("组件校验成功！");
         validationResultsToDisplay = response.data.results
         extraModuleValidationResult.value = true;
+        emit('addExtraModule')
       } else {
         extraModuleValidationResult.value = false;
         message.error("组件校验失败，" + response.data.message);
@@ -803,7 +808,8 @@ const startValidating = () => {
     });
 };
 
-// 删除增值服务组件
+
+// 如果校验失败则需要删除上传的增值服务组件
 const deleteExtraModule = () => {
   // 发送删除请求到后端，row 是要删除的数据行
   api
@@ -855,6 +861,9 @@ const resetDisplay = () => {
   canDisplayWaveletTransformValidationResult.value = false
 }
 
+const closeValidationResult = () => {
+  canShowValidationResult.value = false
+}
 
 const interpolationFigures = ref([])
 // const interpolationResultsOfSensors = ref([])

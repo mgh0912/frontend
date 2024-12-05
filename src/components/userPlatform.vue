@@ -251,18 +251,26 @@
                       </el-col>
                     </div>
                   </el-col>
-                  
-                  <!-- 自定义模块节点 -->
-                  <!-- <div style="width: 100%; height: 50px; display: flex; justify-content: left; align-items: center;">
-                    <a-tooltip title="拖拽自定义模块节点至可视化建模区" >
-                      <div :draggable="true" @dragend="handleDragend($event, 'customModule', customModuleNode)" class="item"
-                      @click="showIntroduction('customModule'.replace(/_multiple/g, ''))"
-                      style="background-color: #87A9D1 ; margin-top: 7px; width: 145px; height: 30px; margin-bottom: 10px; padding: 0px; border-radius: 5px; align-content: center;">
-                      <el-text style="width: 105px; font-size: 16px; font-weight: 600; color: white;" truncated>
-                      {{ labelsForAlgorithms['customModule']}}</el-text>
-                      </div>
-                    </a-tooltip>  
-                  </div> -->
+
+                  <!--                  针对增值服务组件动态渲染-->
+
+                  <el-row>
+                    <el-button style="width: 150px; height: 40px; margin-top: 10px; background-image: linear-gradient(#5daefd, #89cffb); color: #1e213b; "
+                               icon="ArrowDown" @click="isShowSecondButton=!isShowSecondButton">
+                      <el-text style="width: 105px; font-size: 17px; color: #34374f; font-weight: 600;" truncated>增值组件</el-text>
+                    </el-button>
+                  </el-row>
+                  <div style="border-left: solid 2px #CDCFD0; margin-left: 3px; margin-top: 3px">
+                    <el-row v-if="isShowSecondButton" style="margin-left: 20px;" v-for="dataSourceNode in fetchedExtraAlgorithmList" >
+                      <el-tooltip placement="right-start" :content="dataSourceNode.alias" effect="light">
+                      <el-button :draggable="true" @dragend="handleDragendAdd($event, dataSourceNode.alias, dataSourceNode)"
+                                 style="width: 150px; margin-top: 7px; background-color: #72A1DB; border: 0px; background-image: linear-gradient(#a0d9fd, #a8d8ff);">
+                        <el-text style="width: 105px; font-size: 15px; color: #343655; font-weight: 600;" truncated>{{dataSourceNode.alias}}</el-text>
+                      </el-button>
+                      </el-tooltip>
+                    </el-row>
+                  </div>
+
                 </el-scrollbar>
 <!--                <div style="height: 100px; border-top: 1px solid #527b96; display: flex; flex-direction: column ;justify-content: center; align-items: center;">-->
 <!--                  &lt;!&ndash; 数据源节点 &ndash;&gt;-->
@@ -611,7 +619,7 @@
                                 <a-form :model="dataFileFormState"  ref="formRef"  @finish="onFinish"
                                         @finishFailed="onFinishFailed" >
                                   <a-form-item label="文件名称" name="filename"
-                                               :rules="[{ required: true, message: '文件名不能为空' }]">
+                                               :rules="[{ required: true, message: '文件名不能为空' },{ pattern:/^[\u4e00-\u9fa5_a-zA-Z0-9]+$/, message: '请输入中英文/数字/下划线', trigger: 'blur' }]">
                                     <a-input v-model:value="dataFileFormState.filename" placeholder="请输入文件名" />
                                   </a-form-item>
                                   <a-form-item label="文件描述" name="description" :rules="[{ required: true, message: '文件描述不能为空' }]">
@@ -1107,11 +1115,7 @@
                   </div>
                   <a-form>
                     <a-form-item label="当前模型中存在疑问的模块">
-                      <!-- <a-radio-group v-model="">
-                        <a-radio value="1">正常</a-radio>
-                        <a-radio value="2">异常</a-radio>
-                        <a-radio></a-radio>
-                      </a-radio-group> -->
+
                       <a-select>
                         <a-select-option v-for="item in contentJson.modules" :value="item">
                           {{ item }}
@@ -1451,6 +1455,192 @@ import managePrivateAlgorithm from '../components/managePrivateAlgorithm.vue';
 import { FolderOutlined, FolderOpenOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue';
 import { pa } from 'element-plus/es/locales.mjs';
 import { multipleCascaderProps } from 'ant-design-vue/es/vc-cascader/Cascader';
+
+//控制增值组件目录开关
+const isShowSecondButton = ref(false);
+const fetchedExtraAlgorithmList = ref([])
+
+//构造数据
+const options_modules = ref([
+  {
+    label: '插值处理', id: '1.1', use_algorithm: null,alias:null, parameters: {
+      'private_interpolation': '',
+    }, tip_show: false, tip: '使用专有插值处理方法', optional: false
+  } ,
+  {label: '特征提取', id: '1.2', use_algorithm: null,alias:null, parameters: {
+      'private_feature_extraction':'',
+    }},
+  {
+    label: '无量纲化', id: '1.5', use_algorithm: null, alias:null,parameters: {
+      'private_scaler': {useLog: false, algorithm: ''}
+    }, tip_show: false, tip: '使用专有无量纲化处理方法', optional: true
+  },
+  {
+    label: '特征选择', id: '1.3', use_algorithm: null, alias:null,parameters: {
+      'extra_feature_selection': {rule: 1, threshold1: 0.1, threshold2: 0.1}
+    }, tip_show: false, tip: '使用专有特征选择方法', optional: true
+  },
+  {
+    label: '小波变换', id: '1.4', use_algorithm: null,alias:null, parameters: {
+      'extra_wavelet_transform': ''
+    }, tip_show: false, tip: '对输入信号进行小波变换', optional: true
+  },
+  {
+    label: '故障诊断', id: '2.1', use_algorithm: null, alias:null,parameters: {
+
+      'private_fault_diagnosis_deeplearning': '',
+      'private_fault_diagnosis_machine_learning': '',
+    }, tip_show: false, tip: '使用专有故障诊断方法', optional: false
+  },
+  {
+    label: '故障预测', id: '2.2', use_algorithm: null, alias:null,parameters: {
+
+      'private_fault_prediction': {}
+    }, tip_show: false, tip: '使用专有故障预测方法', optional: false
+  },
+  {
+    label: '专有健康评估', id: '3.4', use_algorithm: null, alias:null,parameters: {
+      'extra_health_evaluation': ''
+    }, tip_show: false, tip: '使用专有健康评估的评价方法', optional: false
+  },
+
+])
+
+
+//构造增值组件菜单,复制速度不能过快，foreach和map太快会直接覆盖到前面的内容
+function updateOptionsWithBackendData(data) {
+  // 清空 fetchedExtraAlgorithmList，准备存储新数据
+  fetchedExtraAlgorithmList.value = [];
+
+  // 使用 for 循环遍历 data 数组
+  for (let i = 0; i < data.length; i++) {
+    const item = data[i];
+    // 在 options_modules 中查找与当前 item 的 algorithmType 匹配的选项
+    const foundOption = options_modules.value.find(option => option.label === item.algorithmType);
+
+    // 如果找到了匹配的选项
+    if (foundOption) {
+      // 创建一个新对象，它是 foundOption 的副本
+      const newOption = { ...foundOption };
+
+      // 更新新对象的属性
+      newOption.label = item.algorithmType
+      // newOption.use_algorithm = item.algorithmName;
+      // newOption.use_algorithm = newOption.parameters[]
+      newOption.alias = item.alias;
+
+      // 将新对象添加到 fetchedExtraAlgorithmList 中
+      fetchedExtraAlgorithmList.value.push(newOption);
+    }
+  }
+
+}
+
+
+//获取用户的增值组件列表
+const getExtraAlgorithm = () => {
+  api.get("/user/user_fetch_extra_algorithm/").then((response: any) => {
+    if (response.data.code == 401) {
+      ElMessageBox.alert("登录状态失效，请重新登陆", "提示", {
+        confirmButtonText: "确定",
+        callback: () => {
+          router.push("/");
+        },
+      });
+    }
+    if (response.data.code == 200) {
+      console.log('信息：',response.data.data)
+      updateOptionsWithBackendData(response.data.data)
+    }
+  });
+};
+
+//处理增值组件的拖拽
+const handleDragendAdd = (ev, algorithm, node) => {
+  // 使用find方法查找具有特定alias的对象
+  console.log("现拖拽algorithm",algorithm)
+  const foundObject = fetchedExtraAlgorithmList.value.find(obj => obj.alias === algorithm)
+  const parametersKey = Object.keys(foundObject.parameters)[0]
+  // 如果找到了对象，复制其parameters的键
+  if (foundObject) {
+    console.log("找到的算法文件",parametersKey); // 输出: ['private_fault_diagnosis_deeplearning', 'private_fault_diagnosis_machine_learning']
+  }
+  node.parameters[parametersKey] = node.alias
+  console.log("node.parameters",node.parameters)
+  // 拖拽进来相对于地址栏偏移量
+  const evClientX = ev.clientX
+  const evClientY = ev.clientY
+  let left
+  if (evClientX < 300){
+    left = evClientX + 'px'
+  }
+  else{
+    left = evClientX - 300 + 'px'
+  }
+
+  let top = 50 + 'px'
+  const nodeId = node.id
+  const nodeInfo = {
+    label_display: node.alias,   // 具体算法的名称
+
+    label: node.label,      // 算法模块名称
+    id: node.id,
+    nodeId,
+    nodeContainerStyle: {
+      left: left,
+      top: top,
+    },
+    use_algorithm: parametersKey,
+    parameters: node.parameters,
+    optional: node.optional
+  }
+
+  console.log(nodeInfo)
+  // 针对时域或是频域特征给出不同的可选特征
+
+  // console.log(nodeInfo)
+  //算法模块不允许重复
+  if (nodeList.value.length === 0) {
+    nodeList.value.push(nodeInfo)
+  } else {
+    let isDuplicate = false;
+    for (let i = 0; i < nodeList.value.length; i++) {
+      let nod = nodeList.value[i];
+      if (nod.id == node.id) {
+        // window.alert('不允许出现重复模块');
+        ElMessage({
+          message: '不允许出现同一类别的算法',
+          type: 'warning'
+        })
+        isDuplicate = true;
+        break;
+      }
+    }
+    // 向节点列表中添加新拖拽入可视化建模区中的模块
+    if (!isDuplicate) {
+      nodeList.value.push(nodeInfo);
+      console.log('画布列表',nodeList.value)
+    }
+
+  }
+
+  // 将节点初始化为可以连线的状态
+  nextTick(() => {
+    plumbIns.draggable(nodeId, { containment: "efContainer" })
+
+    if (node.id < 4) {
+      plumbIns.makeSource(nodeId, deff.jsplumbSourceOptions)
+    }
+
+    if (node.id == '4') {
+      plumbIns.makeSource(nodeId, deff.jsplumbSourceOptions)
+      return
+    }
+
+    plumbIns.makeTarget(nodeId, deff.jsplumbTargetOptions)
+
+  })
+}
 
 // 动态绑定选择基础组件和系统模型按钮的样式，使得其背景色动态改变
 const getRadioButtonStyle = (value) => {
@@ -2219,6 +2409,8 @@ onMounted(() => {
   userRole.value = window.localStorage.getItem('role') || '无效的用户'
   // console.log('username: ', username.value)
   console.log('userRole: ', userRole.value)
+  //获取用户上传的增值组件并构造对应的目录结构体
+  getExtraAlgorithm()
   // 当进行建模的时候隐藏可视化建模区的背景文字
   document.querySelector('.el-main').classList.add('has-background');
   plumbIns = jsPlumb.getInstance()
@@ -2394,7 +2586,7 @@ let modelCheckRight = false  // 为真时表明通过模型检查
 
 // 检查模型
 const checkModel = () => {
-  // console.log(linkedList.get_all_nodes())
+  console.log("进入检查模型",linkedList.get_all_nodes())
   let idToModule = {}
   let algorithms = []
   let algorithmSchedule = []
@@ -3641,7 +3833,7 @@ const modelInfoForm = ref({
 const checkModelParams = () => {
   for (let i = 0; i < nodeList.value.length; i++) {
     let dict = nodeList.value[i]
-
+    console.log('dict.use_algorithm: ', dict.use_algorithm)
     if (!dict.use_algorithm) 
     {
       return false
@@ -3665,13 +3857,18 @@ const checkModelParams = () => {
           return false
         }
       } else {
+        console.log('dict信息: ', dict)
+        console.log('dict.use: ', dict.use_algorithm)
+        console.log('dict.parameters: ', dict.parameters)
         // 检查一般算法模块的参数设置，参数设置不能为空
         let parameters = dict.parameters[dict.use_algorithm]
+        console.log('parameters: ', parameters)
         if (!parameters){
           console.log('parameters is null')
           return false
         }else{
           for (let key in parameters){
+            console.log("parameters", parameters[key])
             console.log("key....", key)
             if (parameters[key] === '' || parameters[key] === null){
               console.log('parameters[key] is null: ', parameters[key])

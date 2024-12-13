@@ -2,25 +2,39 @@
  
   <div class="shadow-border title-container">用户账号管理</div>
   <div class="roleManage">
-    <div class="tableTool" style="position:relative; right: 150px;">
-      <el-button @click="dialogFormVisible = true" style="width: 120px; border: none;" icon="Plus" color="green">
-        新增用户
-      </el-button>
+    <div class="tableTool" style="position: relative; width: 100%; height: 30px;">
+      <div style="position: absolute; right: 12%; display: flex; flex-direction: row;">
+        <span style="display: flex; flex-direction: row; margin-right: 20px">
+          <div style="display: flex; flex-direction: row; margin-right: 20px">
+            <span style="width: 100px; display: flex;align-items: center; justify-content: center;">选择关键字</span>
+            <a-select style="width: 110px" v-model:value="keywordType">
+              <a-select-option value="username">用户名</a-select-option>
+              <a-select-option value="jobnumber">工号</a-select-option>
+            </a-select>
+          </div>
+          <a-input v-model:value="keyword" placeholder="按关键字搜索"></a-input>
+          <a-button @click="search">搜索</a-button>
+        </span>
+        <el-button @click="dialogFormVisible = true" style="width: 120px; border: none;" icon="Plus" color="green">
+          新增用户
+        </el-button>
+      </div>
     </div>
   </div>
   <div class="table-container">
-    <el-table :data="tableData" style="width: 100%;" height="500px" :stripe="true" :header-cell-style="{ backgroundColor: '#f5f7fa', color: '#606266' }" border>
+    <el-table :data="tableData" style="width: 100%;" height="500px" 
+    :stripe="true" :header-cell-style="{ backgroundColor: '#f5f7fa', color: '#606266' }" border empty-text="暂无数据">
       <el-table-column prop="id" label="ID" />
       <el-table-column prop="jobNumber" label="工号"  />
-      <el-table-column prop="username" label="姓名"  />
+      <el-table-column prop="username" label="用户名"  />
       <!-- <el-table-column prop="password" label="密码" /> -->
       <el-table-column prop="email" label="邮箱"  />
       <el-table-column label="操作" >
         <template #default="scope" >
-          <div  style="display: flex; justify-content: space-between;">
+          <div style="display: flex; justify-content:">
             <el-popconfirm title="你确定要删除该用户吗?" @confirm="handleDelete(scope.$index, scope.row)" width="100px">
               <template #reference>
-                <el-button size="small" type="danger" style="width: 100px;">删除</el-button>
+                <el-button size="small" type="danger" style="width: 100px; margin-right: 20px;">删除</el-button>
               </template>
 
               <template #actions="{ confirm, cancel }">
@@ -89,7 +103,7 @@
         <el-radio-group v-model="form.role" style="padding-left: 10px">
           <el-radio label="user" size="large">普通用户</el-radio>
           <!-- <el-radio label="admin" size="large">管理员</el-radio> -->
-          <el-radio label="superuser" size="large">系统用户</el-radio>
+          <el-radio label="superuser" size="large">开发者用户</el-radio>
         </el-radio-group>
       </el-form-item>
       
@@ -110,12 +124,38 @@
 </template>
 
 <script setup>
-import {onMounted, reactive, ref} from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import api from "../utils/api.js"
+import { message } from 'ant-design-vue';
 const router = useRouter();
 
+
+// 按关键字搜索用户
+const keywordType = ref('jobnumber')
+const keyword = ref('')
+const search = () => {
+  api.get('administration/search_user/?keywords=' + keyword.value + '&keywordType=' + keywordType.value)
+      .then(response => {
+        if (response.data.code == 401){
+          ElMessageBox.alert('登录状态已失效，请重新登陆', '提示', {
+            confirmButtonText: '确定',
+            callback: (action) => {
+              router.push('/')
+            }
+          })
+        } else if (response.data.code == 200){
+          tableData.value.length = 0;
+          for (let item of response.data.result) {
+            tableData.value.push(item);
+          }
+        }
+      })
+      .catch(error => {
+        message.error('搜索失败，请重试');
+      })
+}
 
 //模拟数据，对接时把tableData替换成真实数据
 const tableData = ref([]);

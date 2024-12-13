@@ -454,7 +454,6 @@
                     style="padding: 10px; border: 4px solid #ffd541; width: 200px;border-radius: 5px;"
                     v-if="userRole === 'superuser'">
                   <!-- <p style="padding-bottom: 5px">上传增值服务组件</p> -->
-
                   <div
                       style="height: 20%; width: 100%; color: #343655; font-size: 20px;
                     font-weight: 600;justify-content: center;align-items: center;margin-bottom: 10px;">
@@ -471,6 +470,8 @@
               </div>
             </div>
           </div>
+          </div>
+
         </el-aside>
 
         <!-- 可视化建模区以及结果可视化区 -->
@@ -969,7 +970,6 @@
             <div
                 v-if="!showPlainIntroduction && !showStatusMessage && !canShowResults && !contrastVisible && !processing"
                 style="background-color: white; height: 100%; width: auto">
-
               <el-scrollbar height="100%">
                 <!-- 自定义建模 -->
                 <div v-if="(userRole==='superuser' || userRole === 'user') && modelSelection === 'customModel'">
@@ -1012,8 +1012,38 @@
               </el-scrollbar>
             </div>
 
-            <!-- 显示结果 -->
+            <!-- 结果可视化各组件的结果展示 -->
             <el-scrollbar height="600px" v-if="canShowResults && !processing" style="background-color: white;">
+
+              <!-- 用户反馈对话框 -->
+              <div style="width: 100%; position: relative; z-index: 999;">
+                <span style="position: absolute; right: 30px; top: 55px;">
+                  <a-button circle :icon="h(EditOutlined)"
+                  @click="feedBackDialogVisible = true" ></a-button> 反馈
+                </span>
+                <a-modal v-model:open="feedBackDialogVisible" title="用户反馈" cancelText="取消" okText="提交" @ok="feedBack">
+                  <div style="font-weight: 600; font-size: 14px; margin-bottom: 20px">
+                    <p>当前使用的模型：{{ modelLoaded }}</p>
+                    <p>当前使用的数据：{{ usingDatafile }}</p>
+                  </div>
+                  <a-form :model="feedBackFormRefState" :rules="feedBackRules" ref="feedBackFormRef">
+                    <a-form-item label="当前模型中存在疑问的模块" name="module">
+                      <a-select style="width: 70%" placeholder="请选择组件" v-model:value="feedBackFormRefState.module">
+                        <a-select-option v-for="item in contentJson.modules" :value="item">
+                          {{ item }}
+                        </a-select-option>
+                      </a-select>
+                    </a-form-item>
+                    <a-form-item name="feedbackContent">
+                      <div>问题描述</div>
+                      <a-input style="width: 80%" v-model:value="feedBackFormRefState.feedbackContent"/>
+                    </a-form-item>
+                    <!-- <a-form-item>
+                      <a-button @click="feedBack"></a-button>
+                    </a-form-item> -->
+                  </a-form>
+                </a-modal>
+              </div>
               <!-- 健康评估可视化 -->
               <!-- 不同样本的评估结果 -->
               <el-tabs type="border-card" tab-position="top" v-model="healthEvaluationOfExample"
@@ -1162,6 +1192,8 @@
                 </el-tabs>
 
               </div>
+
+              
               <!-- 故障诊断可视化 -->
               <div v-if="displayFaultDiagnosis" class="result-visualization-container">
                 <!-- <div style="font-weight: bold;">
@@ -1170,30 +1202,9 @@
                       faultDiagnosis }}</span>
                 </div> -->
                 <v-md-preview style="padding: 0px; margin: 0px" :text="faultDiagnosisResultsText"></v-md-preview>
-                <span><a-button circle :icon="h(EditOutlined)"
-                                @click="feedBackDialogVisible = true"></a-button> 反馈</span>
+                
                 <!-- 用户填写反馈的对话框 -->
-                <a-modal v-model:open="feedBackDialogVisible" title="用户反馈" cancelText="取消" okText="确定">
-                  <div style="font-weight: 600; font-size: 14px">
-                    <p>当前使用的模型：{{ modelLoaded }}</p>
-                    <p>当前使用的数据：{{ usingDatafile }}</p>
-                  </div>
-                  <a-form>
-                    <a-form-item label="当前模型中存在疑问的模块">
-
-                      <a-select>
-                        <a-select-option v-for="item in contentJson.modules" :value="item">
-                          {{ item }}
-                        </a-select-option>
-                      </a-select>
-                    </a-form-item>
-                    <a-form-item>
-                      <div>问题描述</div>
-                      <a-input>
-                      </a-input>
-                    </a-form-item>
-                  </a-form>
-                </a-modal>
+                
                 <el-tabs v-model="faultDiagnosisResultOption" tab-position="top">
                   <el-tab-pane key="1" label="连续样本指标变化">
                     <!-- 连续样本指标变化的折线图 -->
@@ -1541,7 +1552,7 @@
 
 <script lang="ts" setup>
 
-import {onMounted, nextTick, ref, h} from 'vue'
+import {onMounted, nextTick, ref, h, reactive} from 'vue'
 import {jsPlumb} from 'jsplumb'
 import {Action, ElNotification, ElMessage, ElMessageBox} from "element-plus";
 import axios from 'axios';
@@ -4328,7 +4339,7 @@ const healthEvaluation = ref('')
 const displayHealthEvaluation = ref(false)
 const activeName1 = ref('first')
 const healthEvaluationOfExample = ref('样本1')
-const resultsBarOfAllExamples = ref({});
+const resultsBarOfAllExamples = ref<Object>({});
 const levelIndicatorsOfAllExamples = ref({});
 const statusOfExamples = ref({});
 const suggestionOfAllExamples = ref({});
@@ -4347,17 +4358,21 @@ const healthEvaluationDisplay = (results_object) => {
   let figure3 = results_object.评估结果柱状图_Base64
   let suggestions = results_object.评估建议
 
+  resultsBarOfAllExamples.value = {}
   figure1.forEach((element: string, index: number) => {
     // console.log("element: ", element)
     // console.log("index: ", index)
     resultsBarOfAllExamples.value[`样本${index + 1}`] = 'data:image/png;base64,' + element
   });
+  levelIndicatorsOfAllExamples.value = {}
   figure2.forEach((element: string, index: number) => {
     levelIndicatorsOfAllExamples.value[`样本${index + 1}`] = 'data:image/png;base64,' + element
   });
+  statusOfExamples.value = {};
   figure3.forEach((element: string, index: number) => {
     statusOfExamples.value[`样本${index + 1}`] = 'data:image/png;base64,' + element
   });
+  suggestionOfAllExamples.value = {};
   suggestions.forEach((element: string, index: number) => {
     suggestionOfAllExamples.value[`样本${index + 1}`] = element
   });
@@ -4614,8 +4629,54 @@ const featuresSelectionDisplay = (resultsObject) => {
 
 // 用户对于故障诊断结果准确性
 const feedBackDialogVisible = ref(false)
+// const feedbackContent = ref('')
+const feedBackFormRef = ref()
+
+const feedBackRules = {
+  selectedModule: [
+    { required: true, message: '请选择一个模块', trigger: 'change' }
+  ],
+  feedbackContent: [
+    { required: true, message: '请输入问题描述', trigger: 'blur' },
+    { pattern: /^[\u4e00-\u9fa5a-zA-Z0-9_]+$/, message: '只能包含中英文字符、数字和下划线', trigger: 'blur' }
+  ]
+}
+
+
+const feedBackFormRefState = reactive({
+  module: '',
+  feedbackContent: ''
+})
 
 const feedBack = () => {
+  // console.log("feedBackFormRef: ", feedBackFormRef.value)
+  // feedBackFormRef.value.validate.then(() => {
+    
+    const formData = new FormData();
+    formData.append('username', username.value)
+    formData.append('datafile', usingDatafile.value)
+    formData.append('modelName', modelLoaded.value)
+    formData.append('module', feedBackFormRefState.module)
+    formData.append('question', feedBackFormRefState.feedbackContent)
+    formData.append('modelId', modelLoadedId)
+    api.post('user/user_feedback/', formData).then((response: any)=>{
+        if(response.data.code === 200){
+
+          message.success('已收到您的反馈')
+        }else{
+          message.error("反馈提交失败, ", response.data.message)
+        }
+      }
+    )
+    .catch(error => {
+      console.log("上传反馈失败", error)
+      message.error("上传反馈失败")
+    })
+//   })
+//   .catch((error: any) => {
+//     console.error('反馈提交失败', error);
+//     message.error('反馈提交失败，请重试');
+//   })
 }
 
 // 故障诊断结果展示
@@ -4987,6 +5048,12 @@ const showResult = (item) => {
         canShowResults.value = true
         if (item.label == '层次分析模糊综合评估') {
           let results_to_show = responseResults.层次分析模糊综合评估
+          if (currentDisplayedItem != '层次分析模糊综合评估') {
+            currentDisplayedItem = '层次分析模糊综合评估'
+          } else {
+            displayHealthEvaluation.value = true  // 显示健康评估结果
+            return
+          }
           healthEvaluationDisplay(results_to_show)
         } else if (item.label == '特征提取') {
           if (currentDisplayedItem != '特征提取') {
@@ -5029,12 +5096,30 @@ const showResult = (item) => {
           denoiseDisplay(results_to_show)
         } else if (item.label == '层次朴素贝叶斯评估') {
           let results_to_show = responseResults.层次朴素贝叶斯评估
+          if (currentDisplayedItem != '层次朴素贝叶斯评估') {
+            currentDisplayedItem = '层次朴素贝叶斯评估'
+          } else {
+            displayHealthEvaluation.value = true
+            return
+          }
           healthEvaluationDisplay(results_to_show)
         } else if (item.label == '层次逻辑回归评估') {
           let results_to_show = responseResults.层次逻辑回归评估
+          if (currentDisplayedItem != '层次逻辑回归评估') {
+            currentDisplayedItem = '层次逻辑回归评估'
+          } else {
+            displayHealthEvaluation.value = true
+            return
+          }
           healthEvaluationDisplay(results_to_show)
         } else if (item.label == '健康评估') {
           let results_to_show = responseResults.健康评估
+          if (currentDisplayedItem != '健康评估') {
+            currentDisplayedItem = '健康评估'
+          } else {
+            displayHealthEvaluation.value = true
+            return
+          }
           healthEvaluationDisplay(results_to_show)
         } else {
           ElMessage({
@@ -5104,7 +5189,7 @@ const toggleFullscreen = () => {
 // 复用历史模型，不需要进行模型检查等操作
 let modelHasBeenSaved = false
 const modelLoaded = ref('无')  // 已加载的历史模型
-
+let modelLoadedId: string  // 所加载的模型的唯一标识符
 
 // 点击历史模型表格中使用按钮复现用户历史模型
 const useModel = (row) => {
@@ -5119,6 +5204,7 @@ const useModel = (row) => {
   modelHasBeenSaved = true
   canStartProcess.value = false
   modelLoaded.value = row.model_name
+  modelLoadedId = String(row.id)
   let objects
   try {
     objects = JSON.parse(row.model_info)

@@ -44,7 +44,7 @@
               >
                 <a-select-option value="user">普通用户</a-select-option> 
                 <a-select-option value="admin">系统管理员</a-select-option>
-                <a-select-option value="superuser">系统用户</a-select-option>
+                <a-select-option value="superuser">开发者用户</a-select-option>
               </a-select>
             </a-form-item>
             <a-form-item label="">

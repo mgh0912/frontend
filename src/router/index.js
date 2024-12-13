@@ -37,6 +37,11 @@ const routes = [
                 name: 'addUser',
                 component: () =>import("../components/addUser.vue")
             },
+            {
+                path: '/admin/feedBackManagement',
+                name: 'feedBackManagement',
+                component: () =>import("../components/feedBack.vue")
+            },
         ]
 
     },

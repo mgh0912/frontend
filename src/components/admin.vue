@@ -80,7 +80,8 @@ const handleCollapse =() => {
 const menus = ref([
   { key: 'Usermanage', label: '用户管理', icon: 'UserFilled', path: '/admin/userManage' },
   { key: 'Modelmanage', label: '模型管理', icon: 'OfficeBuilding', path: '/admin/modelManage' },
-  { key: 'dataManage', label: '数据管理', icon: 'UploadFilled', path: '/admin/dataManage' }
+  { key: 'dataManage', label: '数据管理', icon: 'UploadFilled', path: '/admin/dataManage' },
+  { key: 'feedBackManagement', label: '用户反馈', icon: 'Edit', path: '/admin/feedBackManagement' },
 ]);
 
 // 活动索引

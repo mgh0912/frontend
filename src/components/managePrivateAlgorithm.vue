@@ -13,6 +13,11 @@
     title="管理增值服务组件"
     width="800px"
   >
+    <div style="display: flex; flex-direction: row;">
+      <el-input v-model="searchKeyword" placeholder="搜索关键字" style="width: 200px; margin-right: 15px" />
+      <el-button type="primary" :icon="Search" style="width: 100px" @click="searchExtraAlgorithm(searchKeyword)">搜索</el-button>
+    </div>
+    
     <el-table :data="fetchedExtraAlgorithm" height="500" stripe>
       <!-- <el-table-column :width="100" property="author" label="模型作者" /> -->
       <el-table-column
@@ -97,6 +102,10 @@ import { onMounted, ref } from "vue";
 import api from "../utils/api.js";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { useRouter } from "vue-router";
+import { Search } from "@element-plus/icons-vue";
+
+// 按关键字搜索增值服务组件
+const searchKeyword = ref("");
 
 const dialogVisible = ref(false);
 const router = useRouter();
@@ -110,6 +119,22 @@ const showExtraModules = () => {
 // 获取已上传的增值服务组件
 const getExtraAlgorithm = () => {
   api.get("/user/user_fetch_extra_algorithm/").then((response: any) => {
+    if (response.data.code == 401) {
+      ElMessageBox.alert("登录状态失效，请重新登陆", "提示", {
+        confirmButtonText: "确定",
+        callback: () => {
+          router.push("/");
+        },
+      });
+    }
+    if (response.data.code == 200) {
+      fetchedExtraAlgorithm.value = response.data.data;
+    }
+  });
+};
+// 根据关键字搜索已上传的增值服务组件
+const searchExtraAlgorithm = (keyword: string) => {
+  api.get("/user/user_fetch_extra_algorithm/?keyword=" + keyword).then((response: any) => {
     if (response.data.code == 401) {
       ElMessageBox.alert("登录状态失效，请重新登陆", "提示", {
         confirmButtonText: "确定",

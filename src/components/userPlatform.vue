@@ -181,18 +181,22 @@
 
         <!-- 左侧菜单栏 -->
         <el-aside width="250"
-                  style="border: rgb(95,117,154) 1px solid;margin: 3px;border-radius: 8px;box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);background: white;overflow-x: hidden;">
+                  style="border: rgb(95,117,154) 1px solid;margin: 3px;
+                  border-radius: 8px;background: white;
+                  overflow-y: hidden;
+                  overflow-x: hidden;
+                  width: 250px;align-items: center;">
           <!-- #80a5ba -->
           <div class="aside-title"
                style="font-size: 25px; color: #56a4e4;border: rgb(204,208,214) 1px solid;width: 100%;">
             <img src="../assets/algorithms-icon.svg"
                  style="width: 40px; height: auto; color: #34374f"/><span>模型构建</span>
           </div>
-          <el-divider style="height: 15px;background: #CDCFD0;margin-top: 0;margin-bottom: 0;"/>
+          <el-divider style="width: 100%;height: 15px;background: #CDCFD0;margin-top: 0;margin-bottom: 0;"/>
           <!-- #eff3f6 -->
-          <div class="algorithms-selection" style="background: white">
+          <div class="algorithms-selection" style="background: white;width: 100%;">
             <!-- 选择组件或者打开模型库 -->
-            <div style="height: 90%">
+            <div style="height: auto;width: 100%;">
               <!--      m1      -->
               <div style="border: rgb(204,208,214) 1px solid;background: rgb(204, 208, 214);padding: 1px;">
                 <!-- 选择自定义的模型，或者预定义的模型 -->
@@ -231,8 +235,11 @@
                 <!--              </div>-->
                 <!-- 算法选择区中算法展开结构，只对系统用户可见 -->
                 <div v-if="((userRole === 'superuser' || userRole === 'user') )"
-                     style="width: 248px; height: 330px;background-color: white; border: 1px solid #527b96; border-radius: 5px; margin-top: 2px;">
-                  <el-scrollbar height="100%" :min-size="35" style="margin-left: 10px;">
+                     style="width: 241px; height: 330px;
+                     background-color: white; border: 1px solid #527b96;
+                     border-radius: 5px;
+                     margin-top: 2px;margin-left: 1px;margin-right: 1px;">
+                  <el-scrollbar height="100%" :min-size="35" style="margin-left: 10px;width: 100%;">
                     <!-- 数据源节点 -->
                     <!--                <div style="font-size: 20px; color: #343655; font-weight: 600">数据源组件</div>-->
                     <!--                <a-tooltip title="拖拽数据源节点至可视化建模区">-->
@@ -308,8 +315,7 @@
                       </div>
                     </el-col>
 
-                    <!--                  针对增值服务组件动态渲染-->
-
+                    <!--针对增值服务组件动态渲染-->
                     <el-row>
                       <el-button
                           style="width: 150px; height: 40px; margin-top: 10px; background-image: linear-gradient(#5daefd, #89cffb); color: #1e213b; "
@@ -348,7 +354,7 @@
                   <!--                  </a-tooltip>-->
                   <!--                </div>-->
                 </div>
-                <el-divider style="height: 15px;background: #CDCFD0;margin-bottom: 0;margin-top: 0px;"/>
+                <el-divider style="width: 100%;height: 15px;background: #CDCFD0;margin-bottom: 0;margin-top: 0;"/>
                 <!--      m2      -->
                 <div style="border: rgb(204,208,214) 1px solid;background: rgb(204, 208, 214);padding: 1px;">
                   <!-- 选择系统模型库 -->
@@ -369,8 +375,8 @@
                     </a-radio-group>
                   </div>
                   <div v-if="((userRole === 'superuser' || userRole === 'user') )"
-                       style="position: relative; width: 248px; height: 170px; background-color: #FCFDFF; display: flex;
-              justify-content: center; align-items: center; border-radius: 5px; margin-top: 2px; border: 1px solid #527b96">
+                       style="position: relative; width: 100%; height: 170px; background-color: #FCFDFF; display: flex;
+              justify-content: center; align-items: center; border-radius: 5px; margin-top: 2px; border: 1px solid #527b96;">
                     <a-button style="width: 165px; height: 35px; font-size: 16px; position:absolute;
                 top: 25px; left: 40px; display:flex; justify-content: center; align-items: center;
                 background-image: linear-gradient(to bottom right, #a1a2b1, #edf4f6); color: #3c93f8;
@@ -449,9 +455,9 @@
               </div>
               <!-- 上传增值服务组件，只对系统用户可见 -->
               <!--            <el-divider style="height: 5px;background: #CDCFD0;margin-top: 16px;margin-bottom: 0;"/>-->
-              <div style="height: auto">
+              <div style="width: 100%;">
                 <div
-                    style="padding: 10px; border: 4px solid #ffd541; width: 200px;border-radius: 5px;"
+                    style="padding: 10px; border: 4px solid #ffd541;"
                     v-if="userRole === 'superuser'">
                   <!-- <p style="padding-bottom: 5px">上传增值服务组件</p> -->
                   <div
@@ -467,6 +473,7 @@
                       <managePrivateAlgorithm @deleteExtraModule="handleDeleteExtraModule"/>
                     </div>
                   </div>
+                </div>
               </div>
             </div>
           </div>
@@ -594,38 +601,42 @@
                                     </a-radio-group>
                                   </a-form-item>
                                   <a-form-item>
-                                    <a-upload
-                                        :file-list="fileList"
-                                        :max-count="1"
-                                        @remove="handleRemove"
-                                        :before-upload="beforeUpload"
-                                    >
+                                    <div style="display: flex;flex-direction: row;">
+                                      <div>
+                                        <a-upload
+                                            :file-list="fileList"
+                                            :max-count="1"
+                                            @remove="handleRemove"
+                                            :before-upload="beforeUpload"
+                                        >
                                       <a-button
-                                          style="margin-top: 16px; margin-left: 0px; width: 140px; font-size: 16px; background-color: #2082F9; color: white"
+                                          style="margin-left: 0; width: 140px; font-size: 16px; background-color: #2082F9; color: white"
                                           :icon="h(FolderOpenOutlined)">
                                         选择本地文件
                                       </a-button>
-
                                     </a-upload>
-                                    <el-popover
-                                        title="上传数据格式"
-                                        confirm-button-text="确认"
-                                        trigger="hover"
-                                        :width="500"
-                                    >
+                                      </div>
+                                      <div style="margin-left: 10px;">
+                                        <el-popover
+                                            title="上传数据格式"
+                                            confirm-button-text="确认"
+                                            trigger="hover"
+                                            :width="500"
+                                        >
                                       <template #default>
                                         <p>目前系统可处理的数据格式为长度为2048的信号序列，<br>
                                         如果为多传感器数据则确保其数据形状为（2048，传感器数量），其中2048为信号长度，<br>
                                         请按照如上的数据格式，并以.npy或是.mat的文件格式上传。</p>
                                       </template>
                                       <template #reference>
-                                        <div style="position: absolute; top: 10px; left: 150px">
+                                        <div>
                                           <a class='datatype-trigger-icon'><question-circle-outlined/></a>
                                         </div>
                                       </template>
                                     </el-popover>
+                                      </div>
+                                    </div>
                                   </a-form-item>
-                                  
                                   <a-form-item>
                                     <a-button type="primary" html-type="submit" :disabled="fileList?.length === 0"
                                               :loading="uploading">
@@ -1459,7 +1470,8 @@
                     >
                       使用
                     </el-button>
-                    <el-popconfirm title="你确定要删除该数据文件吗" @confirm="deleteDatasetConfirm(scope.$index, scope.row)">
+                    <el-popconfirm title="你确定要删除该数据文件吗"
+                                   @confirm="deleteDatasetConfirm(scope.$index, scope.row)">
                       <template #reference>
                         <!-- <el-button
                           size="small"
@@ -1579,11 +1591,11 @@ import {pa} from 'element-plus/es/locales.mjs';
 import {multipleCascaderProps} from 'ant-design-vue/es/vc-cascader/Cascader';
 
 // 删除增值服务组件时需要刷新增值组件列表
-const handleDeleteExtraModule = ()=>{
+const handleDeleteExtraModule = () => {
   getExtraAlgorithmMao();
 }
 // 上传增值服务组件时需要刷新增值组件列表
-const handleAddExtraModule = ()=>{
+const handleAddExtraModule = () => {
   getExtraAlgorithmMao();
 }
 
@@ -1594,44 +1606,46 @@ const fetchedExtraAlgorithmList = ref([])
 //构造数据
 const options_modules = ref([
   {
-    label: '插值处理', id: '1.1', use_algorithm: null, alias:null, machineLearning: '', parameters: {
+    label: '插值处理', id: '1.1', use_algorithm: null, alias: null, machineLearning: '', parameters: {
       'private_interpolation': '',
     }, tip_show: false, tip: '使用专有插值处理方法', optional: false
-  } ,
-  {label: '特征提取', id: '1.2', use_algorithm: null, alias:null, machineLearning: '', parameters: {
-      'private_feature_extraction':'',
-    }},
+  },
   {
-    label: '无量纲化', id: '1.5', use_algorithm: null, alias:null, machineLearning: '', parameters: {
+    label: '特征提取', id: '1.2', use_algorithm: null, alias: null, machineLearning: '', parameters: {
+      'private_feature_extraction': '',
+    }
+  },
+  {
+    label: '无量纲化', id: '1.5', use_algorithm: null, alias: null, machineLearning: '', parameters: {
       'private_scaler': {useLog: false, algorithm: ''}
     }, tip_show: false, tip: '使用专有无量纲化处理方法', optional: true
   },
   {
-    label: '特征选择', id: '1.3', use_algorithm: null, alias:null, machineLearning: '', parameters: {
+    label: '特征选择', id: '1.3', use_algorithm: null, alias: null, machineLearning: '', parameters: {
       'extra_feature_selection': {rule: 1, threshold1: 0.1, threshold2: 0.1}
     }, tip_show: false, tip: '使用专有特征选择方法', optional: true
   },
   {
-    label: '小波变换', id: '1.4', use_algorithm: null, alias:null, machineLearning: '', parameters: {
+    label: '小波变换', id: '1.4', use_algorithm: null, alias: null, machineLearning: '', parameters: {
       'extra_wavelet_transform': ''
     }, tip_show: false, tip: '对输入信号进行小波变换', optional: true
   },
   {
-    label: '故障诊断', id: '2.1', use_algorithm: null, alias:null, machineLearning: '', parameters: {
+    label: '故障诊断', id: '2.1', use_algorithm: null, alias: null, machineLearning: '', parameters: {
       'private_fault_diagnosis_machine_learning': '',
       'private_fault_diagnosis_deeplearning': '',
     }, tip_show: false, tip: '使用专有故障诊断方法', optional: false
   },
   {
-    label: '故障预测', id: '2.2', use_algorithm: null, alias:null, machineLearning: '', parameters: {
+    label: '故障预测', id: '2.2', use_algorithm: null, alias: null, machineLearning: '', parameters: {
 
       'private_fault_prediction': {}
     }, tip_show: false, tip: '使用专有故障预测方法', optional: false
   },
   {
-    label: '专有健康评估', id: '3.4', use_algorithm: null, alias:null, machineLearning: '', parameters: {
+    label: '专有健康评估', id: '3.4', use_algorithm: null, alias: null, machineLearning: '', parameters: {
       'extra_health_evaluation': ''
-    }, tip_show: false, tip: '使用专有健康评估的评价方法', optional: false, 
+    }, tip_show: false, tip: '使用专有健康评估的评价方法', optional: false,
   },
 
 ])
@@ -1694,7 +1708,7 @@ const handleDragendAdd = (ev, algorithm, node) => {
   // const parametersKey = Object.keys(foundObject.parameters)[0]
   const machineLearning = foundObject.machineLearning
   const parametersKey = machineLearning === 'ml' ? 'private_fault_diagnosis_machine_learning' : 'private_fault_diagnosis_deeplearning'
-  console.log("参数的键",parametersKey)
+  console.log("参数的键", parametersKey)
   console.log("foundObject: ", foundObject)
   console.log("foundObject.parameters: ", foundObject.parameters)
   // 如果找到了对象，复制其parameters的键
@@ -1780,7 +1794,7 @@ const handleDragendAdd = (ev, algorithm, node) => {
 // 动态绑定选择基础组件和系统模型按钮的样式，使得其背景色动态改变
 const getRadioButtonStyle = (value) => {
   const baseStyle = {
-    width: '250px',
+    width: '100%',
     border: 'none',
     borderRadius: 0,
     fontWeight: 'bolder',
@@ -2307,54 +2321,54 @@ const menuList2 = ref([{
     }
   ], tip_show: false, tip: '包含添加噪声、插值以及特征提取等'
 },
-{
-  label: '故障检测', id: '2', options: [
-    {
-      label: '故障诊断', id: '2.1', use_algorithm: null, parameters: {
-        'random_forest': {},
-        'svc': {},
-        'gru': {},
-        'lstm': {},
-        'random_forest_multiple': {},
-        'svc_multiple': {},
-        'gru_multiple': {},
-        'lstm_multiple': {},
-        'ulcnn': {},
-        'ulcnn_multiple': {},
-        'spectrumModel': {},
-        'spectrumModel_multiple': {},
-        // 'private_fault_diagnosis_deeplearning': '',
-      }, tip_show: false, tip: '根据提取特征对输入信号作故障诊断', optional: false
-    },
-    {
-      label: '故障预测', id: '2.2', use_algorithm: null, parameters: {
-        'linear_regression': {},
-        'linear_regression_multiple': {},
-      }, tip_show: false, tip: '根据提取的信号特征对输入信号进行故障预测', optional: false
-    }]
-},
-{
-  label: '健康评估', id: '3', options: [
-    {
-      label: '层次分析模糊综合评估', id: '3.1', use_algorithm: null, parameters: {
-        'FAHP': {},
-        'FAHP_multiple': {},
-      }, tip_show: false, tip: '将模糊综合评价法和层次分析法相结合的评价方法', optional: false
-    },
-    {
-      label: '层次朴素贝叶斯评估', id: '3.2', use_algorithm: null, parameters: {
-        'BHM': {},
-        'BHM_multiple': {},
-      }, tip_show: false, tip: '使用朴素贝叶斯方法的评价方法', optional: false
-    },
-    {
-      label: '层次逻辑回归评估', id: '3.3', use_algorithm: null, parameters: {
-        'AHP': {},
-        'AHP_multiple': {},
-      }, tip_show: false, tip: '使用层次逻辑回归方法的评价方法', optional: false
-    },
-  ]
-},
+  {
+    label: '故障检测', id: '2', options: [
+      {
+        label: '故障诊断', id: '2.1', use_algorithm: null, parameters: {
+          'random_forest': {},
+          'svc': {},
+          'gru': {},
+          'lstm': {},
+          'random_forest_multiple': {},
+          'svc_multiple': {},
+          'gru_multiple': {},
+          'lstm_multiple': {},
+          'ulcnn': {},
+          'ulcnn_multiple': {},
+          'spectrumModel': {},
+          'spectrumModel_multiple': {},
+          // 'private_fault_diagnosis_deeplearning': '',
+        }, tip_show: false, tip: '根据提取特征对输入信号作故障诊断', optional: false
+      },
+      {
+        label: '故障预测', id: '2.2', use_algorithm: null, parameters: {
+          'linear_regression': {},
+          'linear_regression_multiple': {},
+        }, tip_show: false, tip: '根据提取的信号特征对输入信号进行故障预测', optional: false
+      }]
+  },
+  {
+    label: '健康评估', id: '3', options: [
+      {
+        label: '层次分析模糊综合评估', id: '3.1', use_algorithm: null, parameters: {
+          'FAHP': {},
+          'FAHP_multiple': {},
+        }, tip_show: false, tip: '将模糊综合评价法和层次分析法相结合的评价方法', optional: false
+      },
+      {
+        label: '层次朴素贝叶斯评估', id: '3.2', use_algorithm: null, parameters: {
+          'BHM': {},
+          'BHM_multiple': {},
+        }, tip_show: false, tip: '使用朴素贝叶斯方法的评价方法', optional: false
+      },
+      {
+        label: '层次逻辑回归评估', id: '3.3', use_algorithm: null, parameters: {
+          'AHP': {},
+          'AHP_multiple': {},
+        }, tip_show: false, tip: '使用层次逻辑回归方法的评价方法', optional: false
+      },
+    ]
+  },
   // {
   //   label: '增值组件', id: '-1', options: [
   //     {
@@ -5811,7 +5825,7 @@ body {
   border-top: solid 3px #7D8081;
 
   text-align: center;
-  width: 250px;
+  width: 100%;
   height: 50px;
   color: #093256;
 }

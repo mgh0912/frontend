@@ -8,32 +8,6 @@
   <div>
     <div
     >
-      <!-- <a-button
-        style="
-          width: 165px;
-          height: 35px;
-          font-size: 16px;
-          position: absolute;
-          top: 25px;
-          left: 40px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          background-image: linear-gradient(to bottom right, #a1a2b1, #edf4f6);
-          color: #3c93f8;
-          border: 2px solid #484a66;
-          font-size: 18px;
-          border-radius: 15px;
-          font-weight: 550;
-        "
-        @click="fetchModels"
-      >
-        <template #icon>
-          <EllipsisOutlined />
-           <img src="../assets/systemModels.svg" alt="" width="40px" height="40px" />
-        </template>
-        打开模型库
-      </a-button>  -->
       <div style="flex-direction: column;display: flex;">
         <a-button v-if="props.userRole === 'superuser'" @click="openPublishModelPanel" >
           <span style="font-family: 'JetBrains Mono', monospace;width:100%">模型管理</span>
@@ -164,7 +138,7 @@
                   :type="scope.row.isPublish == '未发布' ? 'success' : 'warning'"
                   v-if="scope.row.isPublish === '未发布'"
                   style="width: 90px;"
-                  >{{scope.row.isPublish == '未发布' ? '发布模型' : '取消发布'}}</el-button
+                  >{{scope.row.isPublish == '未发布' ? '申请发布' : '取消发布'}}</el-button
                 >
               </template>
 

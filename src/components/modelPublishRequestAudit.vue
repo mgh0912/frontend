@@ -1,5 +1,5 @@
 <template>
-  <div class="shadow-border title-container">模型发布申请审核</div>
+  <div class="shadow-border title-container">模型审核</div>
   <div class="table-container">
     <el-table
       :data="tableData"
@@ -16,6 +16,9 @@
       <el-table-column prop="applicant" label="申请人" />
       <el-table-column prop="modelName" label="申请发布模型" />
       <el-table-column prop="status" label="申请状态" />
+      <el-table-column prop="" label="模型信息" />
+      <el-table-column prop="" label="审批人" />
+      <el-table-column prop="" label="审核时间" />
       <!-- <el-table-column prop="password" label="密码" /> -->
       <el-table-column label="操作" width="300px">
         <template #default="scope">

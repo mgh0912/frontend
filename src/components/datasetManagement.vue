@@ -9,7 +9,7 @@
         align-items: center;
       "
     >
-    <span style="font-size: 20px;" @click="openDatasetManagementPanel">用户数据管理</span>
+    <span style="font-size: 20px;" @click="openDatasetManagementPanel">数据管理</span>
       
     </div>
 

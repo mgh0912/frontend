@@ -510,12 +510,11 @@
               <my-collapse-item v-if="userRole === 'superuser'" name="6" :data="{name:'6'}" item-background="#ebeef4">
                 <template #title>
                   <div style="padding: 10px;">
-                    <span style="font-size: 20px;" @click="openCodeEditPanel">系统组件源码</span>
+                    <span style="font-size: 20px;" @click="openCodeEditPanel">组件代码</span>
                   </div>
                   <!-- 修改源码 -->
                  <div>
-                   <!-- <a-button @click="openCodeEditPanel">系统组件源码</a-button> -->
-                   <a-modal v-model:open="codeEditDialogVisible" title="组件源码编辑" :footer="null" style="width: 60%">
+                   <a-modal v-model:open="codeEditDialogVisible" title="组件代码编辑" :footer="null" style="width: 60%">
                      <editCodeEmbedded :moduleWithCode="moduleWithCode" :canOpenCodeEditor="canOpenCodeEditor"/>
                    </a-modal>
                  </div>
@@ -525,7 +524,7 @@
               <my-collapse-item v-if="userRole === 'superuser'" name="7" :data="{name:'7'}" item-background="#ebeef4">
                 <template #title>
                   <div style="padding: 10px;">
-                    <span style="font-size: 20px;">系统模型库</span>
+                    <span style="font-size: 20px;">模型库</span>
                   </div>
                 </template>
                 <template #arrow="{ isActive }">
@@ -555,7 +554,7 @@
               <my-collapse-item v-if="userRole === 'superuser'" name="8" :data="{name:'8'}" item-background="#ebeef4">
                 <template #title>
                   <div style="padding: 10px;">
-                    <span style="font-size: 20px;">终端用户模型结构树</span>
+                    <span style="font-size: 20px;">模型结构树</span>
                   </div>
                 </template>
                 <template #arrow="{ isActive }">

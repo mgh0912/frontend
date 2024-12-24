@@ -10,7 +10,7 @@ const routes = [
     {
         path: '/UserPlatform',
         name: 'UserPlatform',
-        component: () =>import('../components/userPlatform_v4.vue')
+        component: () =>import('../components/userPlatform.vue')
     },
     {
         path: '/admin',

@@ -544,3 +544,5 @@ export const contenJsonForWaveletTrans = {
     schedule: ['小波变换']
     
 }
+
+

@@ -6,7 +6,7 @@
 </template>
 
 <script setup>
-import userPlatform from './components/userPlatform.vue';
+import userPlatform from './components/userPlatform-副本.vue';
 
 
 

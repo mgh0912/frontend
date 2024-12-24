@@ -13,6 +13,7 @@ import '@kangc/v-md-editor/lib/theme/style/vuepress.css';
 import router from "./router/index.js";
 import AntiDesignVue from 'ant-design-vue';
 import {createPinia} from "pinia";
+import '@fortawesome/fontawesome-free/css/all.css';
 
 VMdPreview.use(vuepressTheme);
 

@@ -10,7 +10,7 @@ const routes = [
     {
         path: '/UserPlatform',
         name: 'UserPlatform',
-        component: () =>import('../components/userPlatform.vue')
+        component: () =>import('../components/userPlatform_v4.vue')
     },
     {
         path: '/admin',
@@ -54,7 +54,17 @@ const routes = [
         path: '/resetPassword',
         name: 'resetPassword',
         component: () =>import("../components/resetPassword.vue")
-    }
+    },
+    {
+    path: '/admin/feedBackManagement',
+    name: 'feedBackManagement',
+    component: () =>import("../components/feedBack.vue")
+     },
+     {
+     path: '/admin/publishModelApplicationsAudit',
+     name: 'publishModelApplicationsAudit',
+     component: () =>import("../components/modelPublishRequestAudit.vue")
+     }
 
 ];
 

@@ -82,6 +82,7 @@ const menus = ref([
   { key: 'Modelmanage', label: '模型管理', icon: 'OfficeBuilding', path: '/admin/modelManage' },
   { key: 'dataManage', label: '数据管理', icon: 'UploadFilled', path: '/admin/dataManage' },
   { key: 'feedBackManagement', label: '用户反馈', icon: 'Edit', path: '/admin/feedBackManagement' },
+  { key: 'publishModelApplicationsAudit', label: '模型审核', icon: 'Edit', path: '/admin/publishModelApplicationsAudit' },
 ]);
 
 // 活动索引

@@ -1,12 +1,17 @@
+<style lang="scss">
+//vue flow 建模区域start
+@import "vueflow/main.css";
+//vue flow 建模区域end
+</style>
 <template>
   <!--
-  更新页面 --v5.7
-  版本  2024-10-19
+  更新页面 --v6.0
+  版本  2024-12-15
   -->
-  <div style="height: 100vh; overflow:hidden" @mouseover="background_IMG">
+  <div style="height: 100vh;overflow-x: hidden;">
     <el-container class="fullscreen_container">
       <!-- 头部栏目 -->
-      <el-header class="header">
+      <el-header class="header" style="z-index: 2;">
         <!-- 左侧的 Logo 区域 -->
         <div class="logo">
           <img src="../assets/system-logo.png" alt="Logo"/>
@@ -28,11 +33,9 @@
           <div class="clickable action-item">
             <el-dropdown :trigger="['click']" class="clickable" placement="bottom-end">
               <div style="display: flex; align-items: center; justify-content: center;">
-                <el-icon style="margin: 5px;" class="action-icon">
-                  <QuestionFilled/>
-                </el-icon>
+                <i style="margin: 5px;" class="fa-regular fa-circle-question action-icon"></i>
                 <a @click.prevent>
-                  <span class="action-text">帮助</span>
+                  <span class="action-text" style="white-space: nowrap;overflow: hidden;">帮助</span>
                 </a>
               </div>
               <template #dropdown>
@@ -46,18 +49,15 @@
 
           <!-- 退出 -->
           <div @click="logout" class="clickable action-item">
-            <el-icon style="margin: 5px;" class="action-icon">
-              <SwitchButton/>
-            </el-icon>
-            <span class="action-text">退出</span>
+            <i style="margin: 5px;" class="fa-solid fa-right-from-bracket action-icon"></i>
+            <span class="action-text" style="white-space: nowrap;overflow: hidden;">退出</span>
           </div>
 
           <!-- 全屏 -->
           <div @click="toggleFullscreen()" class="clickable action-item" style="margin-right: 0;">
-            <el-icon style="margin: 5px;" class="action-icon">
-              <FullScreen/>
-            </el-icon>
-            <span class="action-text">全屏</span>
+            <i v-if="!isFullScreen" style="margin: 5px;" class="fa-solid fa-expand action-icon"></i>
+            <i v-else style="margin: 5px;" class="fa-solid fa-compress action-icon"></i>
+            <span class="action-text" style="white-space: nowrap;overflow: hidden;">全屏</span>
           </div>
         </div>
 
@@ -175,547 +175,795 @@
           </div>
         </el-dialog>
       </el-header>
-
       <!-- 可视化建模主界面 -->
-      <el-container>
-
+      <el-container style="flex-grow: 1;overflow-y: hidden;">
         <!-- 左侧菜单栏 -->
         <el-aside width="250"
-                  style="border: rgb(95,117,154) 1px solid;margin: 3px;
-                  border-radius: 8px;background: white;
-                  overflow-y: hidden;
+                  class="el-aside-demo"
+                  style="background: white;
+                  overflow-y: auto;
                   overflow-x: hidden;
+                  margin-right: 1px;
+                  box-shadow: 3px 0 3px rgba(0, 0, 0, 0.2);
+                  z-index: 2;
                   width: 250px;align-items: center;">
-          <!-- #80a5ba -->
-          <div class="aside-title"
-               style="font-size: 25px; color: #56a4e4;border: rgb(204,208,214) 1px solid;width: 100%;">
-            <img src="../assets/algorithms-icon.svg"
-                 style="width: 40px; height: auto; color: #34374f"/><span>模型构建</span>
-          </div>
-          <el-divider style="width: 100%;height: 15px;background: #CDCFD0;margin-top: 0;margin-bottom: 0;"/>
-          <!-- #eff3f6 -->
-          <div class="algorithms-selection" style="background: white;width: 100%;">
-            <!-- 选择组件或者打开模型库 -->
-            <div style="height: auto;width: 100%;">
-              <!--      m1      -->
-              <div style="border: rgb(204,208,214) 1px solid;background: rgb(204, 208, 214);padding: 1px;">
-                <!-- 选择自定义的模型，或者预定义的模型 -->
-                <div
-                    style="height: 40px;width: 100%; background-color: rgb(204, 208, 214); border-bottom: #CDCFD0 1px solid;margin-top: 2px;">
-                  <!-- 系统用户可以自由选择自定义模型或者使用历史模型 -->
-                  <!-- <a-radio-button value="customModel" style="width: 50%; border: none; border-radius: 0; font-weight: bolder; font-size: large; color:#558b48">基础组件</a-radio-button>
-                  <a-radio-button value="templateModel" style="width: 50%; border: none; border-radius: 0; font-weight: bolder; font-size: large">历史模型</a-radio-button> -->
-                  <a-radio-group v-if="userRole === 'superuser' || userRole === 'user'" v-model:value="modelSelection"
-                                 button-style="solid" size="large"
-                                 style="padding: 0; width: 100%; height: 100%;">
-                    <el-tooltip placement="right-start"
-                                :content="'选择组件进行建模'"
-                                effect="light">
-                      <a-radio-button value="customModel" :style="getRadioButtonStyle('customModel')"
-                                      class="custom-radio-button">
-                        基础组件
-                      </a-radio-button>
-                    </el-tooltip>
-                    <!--                  <a-radio-button value="templateModel" :style="getRadioButtonStyle('templateModel')" class="custom-radio-button">系统模型库</a-radio-button>-->
-                  </a-radio-group>
-                </div>
-                <!-- 系统用户可以使用基础组件定义模型 -->
-                <!--              <div-->
-                <!--                  style="background-color: white;-->
-                <!--                color: #436f41;-->
-                <!--                font-family: 'Arial', sans-serif;-->
-                <!--                font-size: 18px;-->
-                <!--                line-height: 30px;-->
-                <!--                text-align: center;-->
-                <!--                border-bottom: solid 1px #CDCFD0;-->
-                <!--                border-bottom-left-radius: 29px;-->
-                <!--                border-bottom-right-radius: 29px;-->
-                <!--                width: 100%;-->
-                <!--                height: 30px;" v-if="((userRole === 'superuser' || userRole === 'user') )">选择组件进行建模-->
-                <!--              </div>-->
-                <!-- 算法选择区中算法展开结构，只对系统用户可见 -->
-                <div v-if="((userRole === 'superuser' || userRole === 'user') )"
-                     style="width: 241px; height: 330px;
-                     background-color: white; border: 1px solid #527b96;
-                     border-radius: 5px;
-                     margin-top: 2px;margin-left: 1px;margin-right: 1px;">
-                  <el-scrollbar height="100%" :min-size="35" style="margin-left: 10px;width: 100%;">
-                    <!-- 数据源节点 -->
-                    <!--                <div style="font-size: 20px; color: #343655; font-weight: 600">数据源组件</div>-->
-                    <!--                <a-tooltip title="拖拽数据源节点至可视化建模区">-->
-                    <el-tooltip placement="right-start" :content="'拖拽数据源组件至可视化建模区'"
-                                effect="light">
-                      <div :draggable="true" @dragend="handleDragend($event, 'dataSource', dataSourceNode)" class="item"
-                           @click="showIntroduction('dataSource'.replace(/_multiple/g, ''))"
-                           style="background-color: #7cbbe4;
-                         border-radius: 5px; align-content: center;
-                         width: 150px; height: 40px;background-image: linear-gradient(#5daefd, #89cffb); color: #1e213b;
-                         margin-top: 10px;
-">
-                        <el-text style="width: 105px; font-size: 17px; font-weight: 600; color: #34374f;"
-                                 truncated>
-                          {{ labelsForAlgorithms['dataSource'] + '组件' }}
-                        </el-text>
-                      </div>
-                    </el-tooltip>
-                    <el-col v-for="item in menuList2">
-                      <!-- #4599be #5A87F8 -->
-                      <!-- 此为一级目录，点击展开二级目录 -->
-                      <el-row>
-                        <el-button
-                            style="width: 150px; height: 40px; margin-top: 10px; background-image: linear-gradient(#5daefd, #89cffb); color: #1e213b; "
-                            icon="ArrowDown" @click="menuDetailsSecond[item.label] = !menuDetailsSecond[item.label]">
-                          <el-text style="width: 105px; font-size: 17px; color: #34374f; font-weight: 600;" truncated>{{
-                              item.label
-                            }}
-                          </el-text>
-                        </el-button>
-                      </el-row>
-                      <div style="border-left: solid 2px #CDCFD0; margin-left: 3px; margin-top: 3px">
-                        <el-col v-if="menuDetailsSecond[item.label]" v-for="option in item.options">
-                          <!-- 此为二级目录，点击展开三级目录 -->
-                          <el-row style="margin-left: 20px;">
-                            <!--  #75acc3 -->
-                            <el-button
-                                style="width: 150px; margin-top: 7px; background-color: #72A1DB; border: 0px; background-image: linear-gradient(#a0d9fd, #a8d8ff);"
-                                type="info" @click="clickAtSecondMenu(option)">
-                            <span><img :src="setIconOfAlgorithms(option.label)" alt=""
-                                       style="position:absolute; left: 5px; top: 12px; width: 20px; height: auto;"></span>
-                              <el-text style="width: 105px; font-size: 15px; color: #343655; font-weight: 600;"
-                                       truncated>
-                                {{ option.label }}
-                              </el-text>
-                            </el-button>
-                          </el-row>
-                          <div style="margin-left: 20px;border-left: solid 2px #CDCFD0;">
-                            <el-row v-if="menuDetailsThird[option.label]"
-                                    v-for="algorithm in Object.keys(option.parameters)"
-                                    style="display: flex; align-items: center;">
-                              <span
-                                  style="width: 20px; height: 30px; display: flex; align-items: center; justify-content: center; background-color: white;">
-                                <div style="height: 2px; width: 100%; background-color: #CDCFD0;"></div>
-                              </span>
-                              <el-tooltip placement="right-start" :content="labelsForAlgorithms[algorithm]"
-                                          effect="light">
-                                <!-- #f9fcff -->
-                                <!-- 此为三级目录，点击进行算法选择 -->
-                                <div :draggable="true" @dragend="handleDragend($event, algorithm, option)" class="item"
-                                     @click="showIntroduction(algorithm.replace(/_multiple/g, ''))"
-                                     style="background-color: #f9eeed ; margin-top: 7px; width: 145px; height: 30px; margin-bottom: 10px; padding: 0px; border: 1px solid #3473d5; border-radius: 5px; align-content: center;">
-                                  <el-text style="width: 105px; font-size: 14px; font-weight: 600; color: #3889ca;"
-                                           truncated>{{
-                                      labelsForAlgorithms[algorithm]
-                                    }}
-                                  </el-text>
-                                </div>
-                              </el-tooltip>
-                            </el-row>
-                          </div>
-                        </el-col>
-                      </div>
-                    </el-col>
-
-                    <!--针对增值服务组件动态渲染-->
-                    <el-row>
-                      <el-button
-                          style="width: 150px; height: 40px; margin-top: 10px; background-image: linear-gradient(#5daefd, #89cffb); color: #1e213b; "
-                          icon="ArrowDown" @click="isShowSecondButton=!isShowSecondButton">
-                        <el-text style="width: 105px; font-size: 17px; color: #34374f; font-weight: 600;" truncated>
-                          增值组件
-                        </el-text>
-                      </el-button>
-                    </el-row>
-                    <div style="border-left: solid 2px #CDCFD0; margin-left: 3px; margin-top: 3px">
-                      <el-row v-if="isShowSecondButton" style="margin-left: 20px;"
-                              v-for="dataSourceNode in fetchedExtraAlgorithmList">
-                        <el-tooltip placement="right-start" :content="dataSourceNode.alias" effect="light">
-                          <el-button :draggable="true"
-                                     @dragend="handleDragendAdd($event, dataSourceNode.alias, dataSourceNode)"
-                                     style="width: 150px; margin-top: 7px; background-color: #72A1DB; border: 0px; background-image: linear-gradient(#a0d9fd, #a8d8ff);">
-                            <el-text style="width: 105px; font-size: 15px; color: #343655; font-weight: 600;" truncated>
-                              {{ dataSourceNode.alias }}
-                            </el-text>
-                          </el-button>
-                        </el-tooltip>
-                      </el-row>
-                    </div>
-
-                  </el-scrollbar>
-                  <!--                <div style="height: 100px; border-top: 1px solid #527b96; display: flex; flex-direction: column ;justify-content: center; align-items: center;">-->
-                  <!--                  &lt;!&ndash; 数据源节点 &ndash;&gt;-->
-                  <!--                  <div style="font-size: 20px; color: #343655; font-weight: 600">数据源组件</div>-->
-                  <!--                  <a-tooltip title="拖拽数据源节点至可视化建模区" >-->
-                  <!--                    <div :draggable="true" @dragend="handleDragend($event, 'dataSource', dataSourceNode)" class="item"-->
-                  <!--                    @click="showIntroduction('dataSource'.replace(/_multiple/g, ''))"-->
-                  <!--                    style="background-color: #7cbbe4; margin-top: 7px; width: 145px; height: 30px; margin-bottom: 10px; padding: 0px; border-radius: 5px; align-content: center;">-->
-                  <!--                    <el-text style="width: 105px; font-size: 16px; font-weight: 600; color: white; font-size: 18px" truncated>-->
-                  <!--                    {{ labelsForAlgorithms['dataSource'] }}</el-text>-->
-                  <!--                    </div>-->
-                  <!--                  </a-tooltip>-->
-                  <!--                </div>-->
-                </div>
-                <el-divider style="width: 100%;height: 15px;background: #CDCFD0;margin-bottom: 0;margin-top: 0;"/>
-                <!--      m2      -->
-                <div style="border: rgb(204,208,214) 1px solid;background: rgb(204, 208, 214);padding: 1px;">
-                  <!-- 选择系统模型库 -->
-                  <div
-                      style="height: 40px; width: 100%; background-color: rgb(204, 208, 214); border-bottom: #CDCFD0 1px solid;margin-top: 2px;">
-                    <!-- 系统用户可以自由选择自定义模型或者使用历史模型 -->
-                    <a-radio-group v-if="userRole === 'superuser' || userRole === 'user'" v-model:value="modelSelection"
-                                   button-style="solid" size="large" style=" padding: 0; width: 100%; height: 100%">
-                      <!-- <a-radio-button value="customModel" style="width: 50%; border: none; border-radius: 0; font-weight: bolder; font-size: large; color:#558b48">基础组件</a-radio-button>
-                      <a-radio-button value="templateModel" style="width: 50%; border: none; border-radius: 0; font-weight: bolder; font-size: large">历史模型</a-radio-button> -->
-
-                      <el-tooltip placement="right-start" :content="'从数据库中选择模型'"
-                                  effect="light">
-                        <a-radio-button value="templateModel" :style="getRadioButtonStyle('templateModel')"
-                                        class="custom-radio-button">系统模型库
-                        </a-radio-button>
-                      </el-tooltip>
-                    </a-radio-group>
+          <div style="width: 100%;">
+            <!--      标题      -->
+            <div class="aside-title"
+                 style="font-size: 25px; color: #34374f;border: rgb(204,208,214) 1px solid;width: 100%;">
+              <img src="../assets/algorithms-icon.svg"
+                   style="width: 40px; height: auto; color: #34374f"/>
+              <span v-if="userRole === 'superuser'">模型构建</span>
+              <span v-if="userRole === 'user'">模型库</span>
+            </div>
+            <!--      菜单面板 accordion手风琴模式      -->
+            <my-collapse
+                v-model="activeNamesOfMenuPanel"
+                :accordion="false"
+                theme="light"
+                @item-click="onItemClickOfMycollapse"
+            >
+              <my-collapse-item v-if="userRole === 'superuser'" name="1" :data="{name:'1'}" item-background="#ebeef4" style="border-bottom-width: 2px;">
+                <!--      可以内容自定义，可以设置占满父div        -->
+                <template #title>
+                  <div style="padding: 10px;">
+                    <span style="font-size: 20px;">基础组件</span>
                   </div>
-                  <div v-if="((userRole === 'superuser' || userRole === 'user') )"
-                       style="position: relative; width: 100%; height: 170px; background-color: #FCFDFF; display: flex;
-              justify-content: center; align-items: center; border-radius: 5px; margin-top: 2px; border: 1px solid #527b96;">
-                    <a-button style="width: 165px; height: 35px; font-size: 16px; position:absolute;
-                top: 25px; left: 40px; display:flex; justify-content: center; align-items: center;
-                background-image: linear-gradient(to bottom right, #a1a2b1, #edf4f6); color: #3c93f8;
-                border: 2px solid #484a66; font-size: 18px; border-radius: 15px;
-                font-weight: 550; "
-                              @click="fetchModels">
-                      <template #icon>
-                        <!-- <EllipsisOutlined /> -->
-                        <img src="../assets/systemModels.svg" alt="" width="40px" height="40px"/>
+                </template>
+                <!--      可以不要图标，将下面删除即可          -->
+                <template #arrow="{ isActive }">
+                  <div style="align-items: center;padding-right: 10px;">
+                    <i :class="['fa', isActive ? 'fa-caret-down' : 'fa-caret-right']"></i>
+                  </div>
+                </template>
+                <!--      面板内容自定义          -->
+                <div style="width: 100%;">
+                  <my-collapse
+                      v-model="activeNamesOfMenuPanel"
+                      :accordion="true"
+                      theme="light"
+                      @item-click="onItemClickOfMycollapse"
+                  >
+                    <!--         数据源            -->
+                    <my-collapse-item name="1-0" :data="{name:'1-0'}">
+                      <template #title>
+                        <div style="padding: 10px 0 10px 20px;">
+                          <span style="font-size: 18px;">数据源</span>
+                        </div>
                       </template>
-                      打开模型库
-                    </a-button>
-                    <div class="highlight" :style="{bottom: '15px', color: getColor(modelLoaded)}" :title="modelLoaded">
-                      <p>
-                        已加载模型</p>{{ modelLoaded }}
-                    </div>
-
-                    <!-- 供普通用户上传数据文件 -->
-                    <!-- <div v-if="userRole === 'user'"
-                    style="width: 100%; height: 150px; background-color: white; position: absolute; bottom: 20px; border-top: 2px solid #527b96; padding-top: 15px">
-                      <div style="font-size: 20px; color: #343655; font-weight: 600; margin-bottom: 20px;">上传数据文件
-                        <el-popover
-                          title="上传数据格式"
-                          confirm-button-text="确认"
-                          trigger="hover"
-                          :width="500"
+                      <template #arrow="{ isActive }">
+                        <div style="align-items: center;padding-right: 10px;">
+                          <i :class="['fa', isActive ? 'fa-caret-down' : 'fa-caret-right']"></i>
+                        </div>
+                      </template>
+                      <div
+                          style="width: 100%;display: flex;flex-wrap: wrap;gap: 0;padding: 0;background-color: #ffffff;flex-direction: column;">
+                        <div :draggable="true"
+                             style="width: 100%;"
+                             @dragstart="onDragStart($event,'dataSource',dataSourceNode,'handleDragend','default')"
+                             @click="showIntroduction('dataSource'.replace(/_multiple/g, ''))"
                         >
-                          <template #default>
-                            <p>目前系统可处理的数据格式为长度为2048的信号序列，<br>
-                            如果为多传感器数据则确保其数据形状为（2048，传感器数量），其中2048为信号长度，<br>
-                            请按照如上的数据格式，并以.npy或是.mat的文件格式上传。</p>
-                          </template>
-                          <template #reference>
-                            <div style="position: absolute; right: 35px; top: 15px;">
-                              <a class='datatype-trigger-icon'><question-circle-outlined/></a>
-                            </div>
-                          </template>
-
-                        </el-popover>
-                      </div>
-
-                      <div style="position: relative;">
-                        <a-upload
-                          :file-list="fileList"
-                          :max-count="1"
-                          @remove="handleRemove"
-                          :before-upload="beforeUpload"
-                        >
-                          <a-button class="custom-button"
+                          <DragModelItem
+                              :text="'数据源组件'"
+                              :tooltip_text="'拖拽数据源组件至可视化建模区'"
+                              :custom-styles="{
+                                 backgroundColor: '#ffffff',
+                                 width: '250px',
+                                 height: '40px',
+                              }"
+                              :content-style="{
+                                 backgroundColor: '#ffffff',
+                                 paddingLeft: '30px',
+                                 paddingRight: '10px',
+                              }"
                           >
                             <template #icon>
-                              <img src="../assets/folderOpen.svg" alt="" width="20">
+                              <i class="fa-solid fa-database"></i>
                             </template>
-                            选择本地文件
-                          </a-button>
-                        </a-upload>
-                        <a-button
-
-                          type="primary"
-                          :disabled="fileList.length === 0"
-                          :loading="uploading"
-                          style="width: 165px; height: 35px;
-                          font-size: 16px; border-radius: 15px;
-                          "
-                          @click="handleUpload"
-                        >
-                          <UploadOutlined />
-                          {{ uploading ? "正在上传" : "上传至服务器" }}
-                        </a-button>
-
+                          </DragModelItem>
+                        </div>
                       </div>
-                    </div> -->
-
+                    </my-collapse-item>
+                    <!--         中间组件的一级目录             -->
+                    <my-collapse-item v-for="(item,index1) in menuList2"
+                                      :name="'1-'+(index1+1)"
+                                      :data="{name: '1-'+(index1+1)}">
+                      <template #title>
+                        <div style="padding: 10px 0 10px 20px;">
+                          <span style="font-size: 18px;">{{ item.label }}</span>
+                        </div>
+                      </template>
+                      <template #arrow="{ isActive }">
+                        <div style="align-items: center;padding-right: 10px;">
+                          <i :class="['fa', isActive ? 'fa-caret-down' : 'fa-caret-right']"></i>
+                        </div>
+                      </template>
+                      <div style="width: 100%;display: flex;flex-wrap: wrap;
+                          gap: 0;padding: 0;background-color: #ffffff;">
+                        <!--           中间组件的二级目录           -->
+                        <my-collapse
+                            v-model="activeNamesOfMenuPanel"
+                            :accordion="true"
+                            theme="light"
+                            @item-click="onItemClickOfMycollapse"
+                        >
+                          <!--            v-if="menuDetailsSecond[item.label]"              -->
+                          <my-collapse-item v-for="(option,index2) in item.options"
+                                            :name="'1-'+(index1+1)+'-'+(index2)"
+                                            :data="{name: '1-'+(index1+1)+'-'+(index2)}"
+                                            @click="clickAtSecondMenu(option)"
+                          >
+                            <template #title>
+                              <div style="padding: 10px 0 10px 30px;display: flex;align-items: center;">
+                                <img style="height: 20px;width: 20px;" :src="setIconOfAlgorithms(option.label)"
+                                     alt="none"/>
+                                <span
+                                    style="font-size: 16px;margin-left: 8px;">{{
+                                    option.label
+                                  }}</span>
+                              </div>
+                            </template>
+                            <template #arrow="{ isActive }">
+                              <div style="align-items: center;padding-right: 10px;">
+                                <i :class="['fa', isActive ? 'fa-caret-down' : 'fa-caret-right']"></i>
+                              </div>
+                            </template>
+                            <div
+                                style="width: 100%;display: flex;gap: 0;padding: 0;background-color: #ffffff;flex-direction: column;">
+                              <!--              中间组件的三级图标 v-if="menuDetailsThird[option.label]"
+                              @dragend="handleDragend($event, algorithm, option)"
+                              -->
+                              <div v-for="algorithm in Object.keys(option.parameters)"
+                                   :draggable="true"
+                                   style="width: 100%;"
+                                   @dragstart="onDragStart($event,algorithm, option,'handleDragend','default')"
+                                   @click="showIntroduction(algorithm.replace(/_multiple/g, ''))"
+                              >
+                                <!--                                :bgColor="'#fefefe'"-->
+                                <DragModelItem
+                                    :text="labelsForAlgorithms[algorithm]"
+                                    :tooltip_text="labelsForAlgorithms[algorithm]"
+                                    :custom-styles="{
+                                      // backgroundColor: '#1a5be8',
+                                      backgroundColor: '#ffffff',
+                                      width: '250px',
+                                      height: '40px',
+                                    }"
+                                    :content-style="{
+                                      // backgroundColor: '#151414',
+                                      backgroundColor: '#ffffff',
+                                      paddingLeft: '40px',
+                                      paddingRight: '10px',
+                                    }"
+                                >
+                                  <template #icon>
+                                    <!--                                    <i class="fa-solid fa-puzzle-piece" style="border: red solid 2px;"></i>-->
+                                    <i class="fa-solid fa-puzzle-piece"></i>
+                                  </template>
+                                </DragModelItem>
+                              </div>
+                            </div>
+                          </my-collapse-item>
+                        </my-collapse>
+                      </div>
+                    </my-collapse-item>
+                    <!--         增值组件           -->
+                    <my-collapse-item name="1-0-0" :data="{name:'1-0-0'}">
+                      <template #title>
+                        <div style="padding: 10px 0 10px 20px;">
+                          <span style="font-size: 18px;">增值组件</span>
+                        </div>
+                      </template>
+                      <template #arrow="{ isActive }">
+                        <div style="align-items: center;padding-right: 10px;">
+                          <i :class="['fa', isActive ? 'fa-caret-down' : 'fa-caret-right']"></i>
+                        </div>
+                      </template>
+                      <div
+                          style="width: 100%;display: flex;flex-wrap: wrap;gap: 0;padding: 0;background-color: #ffffff;flex-direction: column;">
+                        <div :draggable="true"
+                             style="width: 100%;"
+                             v-for="(dataSourceNode,index) in fetchedExtraAlgorithmList"
+                             :index="index"
+                             @dragstart="onDragStart($event,dataSourceNode.alias,dataSourceNode,'handleDragendAdd','default')">
+                          <DragModelItem
+                              :text="dataSourceNode.alias"
+                              :tooltip_text="dataSourceNode.alias"
+                              :custom-styles="{
+                                 backgroundColor: '#ffffff',
+                                 width: '250px',
+                                 height: '40px',
+                              }"
+                              :content-style="{
+                                 backgroundColor: '#ffffff',
+                                 paddingLeft: '40px',
+                                 paddingRight: '10px',
+                              }"
+                          >
+                            <template #icon>
+                              <i class="fa-solid fa-puzzle-piece"></i>
+                            </template>
+                          </DragModelItem>
+                        </div>
+                      </div>
+                    </my-collapse-item>
+                  </my-collapse>
+                </div>
+              </my-collapse-item>
+              <my-collapse-item v-if="userRole === 'superuser'" name="2" :data="{name:'2'}" item-background="#ebeef4" style="border-bottom-width: 2px;">
+                <template #title>
+                  <div style="padding: 10px;">
+                    <span style="font-size: 20px;">新增组件</span>
+                  </div>
+                </template>
+                <template #arrow="{ isActive }">
+                  <div style="align-items: center;padding-right: 10px;">
+                    <i :class="['fa', isActive ? 'fa-caret-down' : 'fa-caret-right']"></i>
+                  </div>
+                </template>
+                <div style="width: 100%;">
+                  <!-- 上传增值服务组件，只对系统用户可见 -->
+                  <!--            <el-divider style="height: 5px;background: #CDCFD0;margin-top: 16px;margin-bottom: 0;"/>-->
+                  <div v-if="userRole === 'superuser'"
+                       style="width: 100%;flex-direction: column;display: flex;">
+                    <div
+                        style="width: 100%;flex: 1;display: flex;
+                        flex-direction: column;align-items: center;justify-content: center;
+                        margin-right: 1px;"
+                    >
+                      <uploadPrivateAlgorithmFiless style="width: 100%;height: 100%;"
+                                                    @addExtraModule="handleAddExtraModule"/>
+                    </div>
+                    <div
+                        style="width: 100%;flex: 1;display: flex;
+                        flex-direction: column;align-items: center;justify-content: center;
+                        margin-right: 1px;"
+                    >
+                      <managePrivateAlgorithm style="width: 100%;height: 100%;"
+                                              @deleteExtraModule="handleDeleteExtraModule"/>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <!-- 上传增值服务组件，只对系统用户可见 -->
-              <!--            <el-divider style="height: 5px;background: #CDCFD0;margin-top: 16px;margin-bottom: 0;"/>-->
-              <div style="width: 100%;">
-                <div
-                    style="padding: 10px; border: 4px solid #ffd541;"
-                    v-if="userRole === 'superuser'">
-                  <!-- <p style="padding-bottom: 5px">上传增值服务组件</p> -->
-                  <div
-                      style="height: 20%; width: 100%; color: #343655; font-size: 20px;
-                    font-weight: 600;justify-content: center;align-items: center;margin-bottom: 10px;">
-                    增值服务组件
+              </my-collapse-item>
+              
+              <my-collapse-item v-if="userRole === 'user'" name="4" :data="{name:'4'}" item-background="#ebeef4">
+                <template #title>
+                  <!-- 搜索框 -->
+                  <div style="
+                       width: 100%;
+                       display: flex;
+                       flex-direction: column;">
+
+                      <el-input
+                          v-model="searchKeywordOfTree"
+                          placeholder="请输入关键字查询"
+                          style="width: 100%; margin-bottom: 5px;"
+                      />
+
+                    <div style="flex: 1; /* 让树形结构占据剩余空间 */
+                         overflow-x: auto; /* 如果树形结构宽度超出屏幕宽度，显示横向滚动条 */">
+                      <!-- 使用 scoped-slot 渲染 -->
+                      <div style="width: 100%;overflow-x: auto">
+                        <div style="">
+                          <el-tree
+                              ref="treeRef"
+                              :data="filteredDataOfTree"
+                              style="width: 100%;max-width: 100%;"
+                              show-checkbox
+                              node-key="id"
+                              :expand-on-click-node="false"
+                              :default-expand-all="isExpandAllOfTree"
+                              :filter-node-method="filterNodeOfTree"
+                              :accordion="false"
+                          >
+                            <template #default="{ node, data }">
+                      <span class="custom-tree-node" style="">
+                        <span class="node-label">{{ node.label }}</span>
+                        <span class="node-actions">
+                          <el-icon @click="appendOfTree(data)" :style="{color:'#67c23a'}">
+                                <Plus/>
+                          </el-icon>
+                          <el-icon @click="removeOfTree(node, data)" :style="{color:'#f56c6c'}">
+                                <Delete/>
+                          </el-icon>
+                          <el-icon @click="editOfTree(node, data)" :style="{color:'#409eff'}">
+                                <Edit/>
+                          </el-icon>
+                        </span>
+                      </span>
+                            </template>
+                          </el-tree>
+                        </div>
+                      </div>
+                      <!-- 编辑对话框 -->
+                      <el-dialog
+                          v-model:visible="isEditDialogVisibleOfTree"
+                          title="编辑节点"
+                          :close-on-click-modal="false"
+                          :before-close="handleCloseOfTree"
+                      >
+                        <el-input
+                            v-model="editNodeLabelOfTree"
+                            placeholder="请输入新的节点名称"
+                            :autofocus="true"
+                        />
+                        <span slot="footer" class="dialog-footer">
+                      <el-button @click="isEditDialogVisibleOfTree = false">取消</el-button>
+                      <el-button type="primary" @click="saveEditOfTree">保存</el-button>
+                    </span>
+                      </el-dialog>
+                    </div>
                   </div>
-                  <div style="display: flex; flex-direction: row">
-                    <div style="flex: 1;margin-right: 3px;">
-                      <uploadPrivateAlgorithmFiless @addExtraModule="handleAddExtraModule"/>
+                </template>
+              </my-collapse-item>
+              <my-collapse-item name="5" :data="{name:'5'}" item-background="#ebeef4">
+                <template #title>
+                  <div style="padding: 10px;">
+              
+                    <div>
+                      <datasetManagement/>
                     </div>
-                    <div style="flex: 1;margin-left: 3px;">
-                      <managePrivateAlgorithm @deleteExtraModule="handleDeleteExtraModule"/>
+                  </div>
+                </template>
+              </my-collapse-item>
+
+              <my-collapse-item v-if="userRole === 'superuser'" name="6" :data="{name:'6'}" item-background="#ebeef4">
+                <template #title>
+                  <div style="padding: 10px;">
+                    <span style="font-size: 20px;" @click="openCodeEditPanel">系统组件源码</span>
+                  </div>
+                  <!-- 修改源码 -->
+                 <div>
+                   <!-- <a-button @click="openCodeEditPanel">系统组件源码</a-button> -->
+                   <a-modal v-model:open="codeEditDialogVisible" title="组件源码编辑" :footer="null" style="width: 60%">
+                     <editCodeEmbedded :moduleWithCode="moduleWithCode" :canOpenCodeEditor="canOpenCodeEditor"/>
+                   </a-modal>
+                 </div>
+                </template>
+                
+              </my-collapse-item>
+              <my-collapse-item v-if="userRole === 'superuser'" name="7" :data="{name:'7'}" item-background="#ebeef4">
+                <template #title>
+                  <div style="padding: 10px;">
+                    <span style="font-size: 20px;">系统模型库</span>
+                  </div>
+                </template>
+                <template #arrow="{ isActive }">
+                  <div style="align-items: center;padding-right: 10px;">
+                    <i :class="['fa', isActive ? 'fa-caret-down' : 'fa-caret-right']"></i>
+                  </div>
+                </template>
+                <div style="width: 100%;">
+                  <!-- 上传增值服务组件，只对系统用户可见 -->
+                  <!--            <el-divider style="height: 5px;background: #CDCFD0;margin-top: 16px;margin-bottom: 0;"/>-->
+                  <div v-if="userRole === 'superuser'"
+                       style="width: 100%;flex-direction: column;display: flex;">
+                    <div
+                        style="width: 100%;flex: 1;display: flex;
+                        flex-direction: column;align-items: center;justify-content: center;
+                        margin-right: 1px;"
+                    >
+                    <PublishModel :userRole="userRole" @resetModel="handleResetModel" @loadModel="handleLoadModel"/>
                     </div>
+              
                   </div>
                 </div>
-              </div>
-            </div>
+                
+              
+                
+              </my-collapse-item>
+              <my-collapse-item v-if="userRole === 'superuser'" name="8" :data="{name:'8'}" item-background="#ebeef4">
+                <template #title>
+                  <div style="padding: 10px;">
+                    <span style="font-size: 20px;">终端用户模型结构树</span>
+                  </div>
+                </template>
+                <template #arrow="{ isActive }">
+                  <div style="align-items: center;padding-right: 10px;">
+                    <i :class="['fa', isActive ? 'fa-caret-down' : 'fa-caret-right']"></i>
+                  </div>
+                </template>
+                <div class="custom-tree-container" style="width: 100%;">
+                  <!-- 搜索框 -->
+                  <el-input
+                      v-model="searchKeywordOfTree"
+                      placeholder="请输入关键字查询"
+                      style="width: 100%; margin-bottom: 5px;"
+                  />
+                  <!-- 使用 scoped-slot 渲染 -->
+                  <div style="width: 100%;overflow-x: auto">
+                    <div style="">
+                      <el-tree
+                          ref="treeRef"
+                          :data="filteredDataOfTree"
+                          style="width: 100%;max-width: 100%;"
+                          show-checkbox
+                          node-key="id"
+                          :expand-on-click-node="false"
+                          :default-expand-all="isExpandAllOfTree"
+                          :filter-node-method="filterNodeOfTree"
+                          :accordion="false"
+                      >
+                        <template #default="{ node, data }">
+                      <span class="custom-tree-node" style="">
+                        <span class="node-label">{{ node.label }}</span>
+                        <span class="node-actions">
+                          <el-icon @click="appendOfTree(data)" :style="{color:'#67c23a'}">
+                                <Plus/>
+                          </el-icon>
+                          <el-icon @click="removeOfTree(node, data)" :style="{color:'#f56c6c'}">
+                                <Delete/>
+                          </el-icon>
+                          <el-icon @click="editOfTree(node, data)" :style="{color:'#409eff'}">
+                                <Edit/>
+                          </el-icon>
+                        </span>
+                      </span>
+                        </template>
+                      </el-tree>
+                    </div>
+                  </div>
+                  <!-- 编辑对话框 -->
+                  <el-dialog
+                      v-model:visible="isEditDialogVisibleOfTree"
+                      title="编辑节点"
+                      :close-on-click-modal="false"
+                      :before-close="handleCloseOfTree"
+                  >
+                    <el-input
+                        v-model="editNodeLabelOfTree"
+                        placeholder="请输入新的节点名称"
+                        :autofocus="true"
+                    />
+                    <span slot="footer" class="dialog-footer">
+                      <el-button @click="isEditDialogVisibleOfTree = false">取消</el-button>
+                      <el-button type="primary" @click="saveEditOfTree">保存</el-button>
+                    </span>
+                  </el-dialog>
+                </div>
+              </my-collapse-item>
+            </my-collapse>
           </div>
-          </div>
-
         </el-aside>
 
         <!-- 可视化建模区以及结果可视化区 -->
-        <!-- <el-main @dragover.prevent ref="efContainerRef" id="efContainer "
-          style="height: auto; width: 600px; padding: 0px;"> -->
-        <el-main @dragover.prevent ref="efContainerRef" id="efContainer "
-                 style="height: auto; width: 600px;
-          border-radius: 8px;margin: 3px;padding: 2px;border: rgb(95,117,154) 1px solid;padding-bottom: 5px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);overflow-y: hidden">
-          <!-- 可视化建模区的主要内容 -->
-          <div
-              style=" position: relative; height: 32%; font-size: 20px; color: #003e50; font-weight: 500; font-family:Arial, Helvetica, sans-serif;  background-position: center;">
-            <div id="statusIndicator" class="status-indicator">未建立模型</div>
+        <el-main @dragover.prevent ref="efContainerRef" id="efContainer"
+                 style="padding: 0;height: 100%;background: white">
+          <div class="parent-containerOfElMain">
+            <!-- 建模部分 -->
+            <div class="modeling-areaOfElMain">
+              <div style="width: 100%;height: 100%;" @drop="onDrop">
+                <VueFlow
+                    v-model:nodes="modeling_nodeList"
+                    :edges="modeling_edgesList"
+                    :class="{ dark }"
+                    class="basic-flow"
+                    :default-viewport="{ zoom: 1 }"
+                    :min-zoom="0.5"
+                    :max-zoom="4"
+                    @dragover="onDragOver"
+                    @dragleave="onDragLeave"
+                    @node-click="handleNodeClick"
+                >
+                  <div id="statusIndicator" class="status-indicator">未建立模型</div>
+                  <!-- 背景 -->
+                  <DragDropzoneBackground
+                      :style="{backgroundColor: isDragOver ? '#e7f3ff' : 'transparent',transition: 'background-color 0.2s ease',}"
+                  >
+                    <p v-if="isDragOver">拖入到此</p>
+                  </DragDropzoneBackground>
+                  <!-- 基础操作栏 -->
+                  <Controls @interaction-change="onInteractionChangeOfControls" position="top-left" style="">
+                    <ControlButton title="重置" @click="modeling_resetTransform">
+                      <Icon name="reset"/>
+                    </ControlButton>
 
-            <!-- <el-button type="primary" style="font-size: 18px; width: 180px;" @click="drawer = true">打开功能区</el-button> -->
-            <!-- 可视化建模区中的算法节点 -->
-            <DraggableContainer :reference-line-visible="false">
-              <Vue3DraggableResizable :draggable="true" :resizable="false" v-for="(item, index) in nodeList"
-                                      :key="item.nodeId" class="node-info" :id="item.id"
-                                      :style="item.nodeContainerStyle"
-                                      style="background-image: url('../assets/interpolation-icon.svg')"
-                                      :ref="el => nodeRef[index] = el" @click="showResult(item)">
-                <!-- <el-tooltip effect="dark" content="通过节点中心的附着点拖拽节点，或右击打开参数配置" :teleported="false"> -->
-                <span>
-                    <!-- 右键点击可视化建模区中的算法节点弹出对应的参数配置对话框 -->
-                    <el-popover placement="bottom" :title="item.label + '参数配置'"
-                                @show="getExtraAlgorithm(item)" :teleported="true" :width="450" trigger="contextmenu"
-                                popper-style=";display: flex; flex-direction: column; align-content: left;">
-                      <!-- 调整算法参数 -->
-                      <!-- 可视化建模区中的各节点所具有的参数与代码中menuList2中的参数是相对应的 -->
-                      <el-row
-                          v-if="item.use_algorithm != null && item.id != '1.2' && item.id != '1.3' && item.id != '1.5' && (item.use_algorithm.indexOf('private')==-1) && (item.use_algorithm.indexOf('extra')==-1)"
-                          v-for="(value, key) in item.parameters[item.use_algorithm]"
-                          :key="item.parameters[item.use_algorithm].keys" style="margin-bottom: 20px">
-                        
-                        <el-col :span="8" style="align-content: center;"><span
-                            style="margin-left: 10px; font-size: 15px;">{{ labelsForParams[key] }}：</span></el-col>
-                        <el-col :span="16">
-                          <el-select v-model="item.parameters[item.use_algorithm][key]" collapse-tags
-                                     collapse-tags-tooltip :teleported="false" placeholder="请选择参数">
-                            <el-option
-                                v-for="item in recommendParams[key]"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value"
-                                style="width: 200px; height: auto; background-color: white;"
-                            />
-                          </el-select>
-                        </el-col>
-                      </el-row>
-                      <div
-                          v-if="item.use_algorithm != null && !item.optional && (String(item.label_display).indexOf('增值服务组件') === -1)">目前暂无可调参数</div>
-                      <!-- <div v-if="item.id === '4'">对数据源的配置请在数据源区域进行</div> -->
-                      <!-- 特征提取选择要显示的特征 -->
-                      <el-row v-if="item.id == '1.2'">
-                        <el-col :span="8" style=""><el-text style="font-size: 15px;">选择特征：<br><span
-                            style="font-size: 12px;">(共{{
-                            Object.keys(item.parameters[item.use_algorithm]).length
-                          }}个可选特征)</span></el-text></el-col>
-                        <el-col :span="16">
-                          <div>
-                            <el-select v-model="features" multiple collapse-tags collapse-tags-tooltip
-                                       :max-collapse-tags="3" popper-class="select"
-                                       placeholder="选择需要提取的特征" :teleported="false">
-                              <!-- <template #header>
-                                <el-checkbox
-                                  v-model="checkAll"
-                                  :indeterminate="indeterminate"
-                                  @change="handleCheckAll"
-                                >
-                                  All
-                                </el-checkbox>
-                              </template> -->
-                              <el-option v-for="(value, key) in item.parameters[item.use_algorithm]" :label="key"
-                                         :value="key" style="width: 200px; background-color: white; padding: 0px;"/>
-                            </el-select>
-                          </div>
-                        </el-col>
-                      </el-row>
+                    <ControlButton title="打乱" @click="modeling_updatePos">
+                      <Icon name="update"/>
+                    </ControlButton>
 
-                      <!-- 数据源的配置项 -->
-                      <div v-if="item.id == '4'">
-                        <a-radio-group v-model:value="loadingDataModel">
-                          <a-radio :value="1" style="margin-right: 20px">上传数据文件</a-radio>
-                          <a-radio :value="2">加载数据文件</a-radio>
-                        </a-radio-group>
-                        <div style="background-color: white; display: flex; flex-direction: column; padding: 20px">
-                          <!-- 上传数据文件和加载数据文件 -->
-                          <div>
-                            <div v-if="loadingDataModel === 1" style="position: relative">
-                              <a-space direction="vertical">
-                                <a-form :model="dataFileFormState" ref="fileUploadFormRef" @finish="onFinish">
-                                  <a-form-item label="文件名称" name="filename"
-                                               :rules="[{ required: true, message: '请输入文件名!' },
-                                  { pattern:/^[\u4e00-\u9fa5_a-zA-Z0-9]+$/, message: '请输入中英文/数字/下划线', trigger: 'blur' }]">
-                                    <a-input v-model:value="dataFileFormState.filename" placeholder="请输入文件名"/>
-                                    <!-- 提示文件名命名规则 -->
-                                    <div style="color: #999; font-size: 12px;">(只能包含中英文、数字、下划线)</div>
-                                  </a-form-item>
-                                  <a-form-item label="文件描述" name="description"
-                                               :rules="[{ required: true, message: '请输入文件描述!' },{ min: 1, max: 200, message: '长度应在1到200个字符之间!', trigger: 'blur' }]">
-                                    <a-input
-                                        v-model:value="dataFileFormState.description"
-                                        autofocus
-                                        placeholder="请输入文件描述"
-                                    />
-                                    <!-- 提示文件描述命名规则 -->
-                                    <div style="color: #999; font-size: 12px;">(长度不超过200字符)</div>
-                                  </a-form-item>
-                                  <a-form-item label="选择数据类型">
-                                    <a-radio-group v-model:value="dataFileFormState.multipleSensors">
-                                      <a-radio :value="'multiple'">多传感器数据</a-radio>
-                                      <a-radio :value="'single'">单传感器数据</a-radio>
-                                    </a-radio-group>
-                                  </a-form-item>
-                                  <a-form-item label="是否公开">
-                                    <a-radio-group v-model:value="dataFileFormState.isPublic">
-                                      <a-radio :value="'public'">是</a-radio>
-                                      <a-radio :value="'private'">否</a-radio>
-                                    </a-radio-group>
-                                  </a-form-item>
-                                  <a-form-item>
-                                    <div style="display: flex;flex-direction: row;">
-                                      <div>
-                                        <a-upload
-                                            :file-list="fileList"
-                                            :max-count="1"
-                                            @remove="handleRemove"
-                                            :before-upload="beforeUpload"
-                                        >
-                                      <a-button
-                                          style="margin-left: 0; width: 140px; font-size: 16px; background-color: #2082F9; color: white"
-                                          :icon="h(FolderOpenOutlined)">
-                                        选择本地文件
-                                      </a-button>
-                                    </a-upload>
-                                      </div>
-                                      <div style="margin-left: 10px;">
-                                        <el-popover
-                                            title="上传数据格式"
-                                            confirm-button-text="确认"
-                                            trigger="hover"
-                                            :width="500"
-                                        >
-                                      <template #default>
-                                        <p>目前系统可处理的数据格式为长度为2048的信号序列，<br>
-                                        如果为多传感器数据则确保其数据形状为（2048，传感器数量），其中2048为信号长度，<br>
-                                        请按照如上的数据格式，并以.npy或是.mat的文件格式上传。</p>
-                                      </template>
-                                      <template #reference>
-                                        <div>
-                                          <a class='datatype-trigger-icon'><question-circle-outlined/></a>
-                                        </div>
-                                      </template>
-                                    </el-popover>
-                                      </div>
-                                    </div>
-                                  </a-form-item>
-                                  <a-form-item>
-                                    <a-button type="primary" html-type="submit" :disabled="fileList?.length === 0"
-                                              :loading="uploading">
-                                    <UploadOutlined/>
-                                      {{ uploading ? "正在上传" : "上传至服务器" }}
-                                    </a-button>
-                                    
-                                  </a-form-item>
-                                </a-form>
-                              </a-space>
+                    <ControlButton title="背景" @click="modeling_toggleDarkMode">
+                      <Icon v-if="dark" name="sun"/>
+                      <Icon v-else name="moon"/>
+                    </ControlButton>
 
-                            </div>
-                            <div v-if="loadingDataModel == 2">
-                              <a-button
+                    <ControlButton title="垂直布局" @click="layoutGraph('LR')">
+                      <i :style="dark ? 'color: #ffffff' : 'color: #000000'" class="fa-solid fa-arrows-up-down"></i>
+                    </ControlButton>
+
+                    <ControlButton title="水平布局" @click="layoutGraph('TB')">
+                      <i :style="dark ? 'color: #ffffff' : 'color: #000000'" class="fa-solid fa-arrows-left-right"></i>
+                    </ControlButton>
+
+                    <ControlButton title="打印边、节点数据（object）" @click="modeling_test_logToObject">
+                      <Icon name="log"/>
+                    </ControlButton>
+
+                    <ControlButton title="测试保存模型到localStorage" @click="modeling_test_onSave">
+                      <Icon name="log"/>
+                    </ControlButton>
+
+                    <ControlButton title="测试恢复模型从localStorage" @click="modeling_test_onRestore">
+                      <Icon name="log"/>
+                    </ControlButton>
+                  </Controls>
+                  <!-- 功能操作栏 -->
+                  <Controls position="top-right" :show-zoom="false" :show-fit-view="false" :show-interactive="false"
+                            style="display: flex;flex-direction: row;right: 300px;">
+                            <ControlButton
+                        @click="outputConfig"
+                        class="control-operator-btn-default-css"
+                        :disabled="disabledStateOfControlBtn.clearModelOfViewFlowBtn"
+                        :style="{color: dark ? '#ffffff' : '#000000'}"
+                        title="下载报告">
+                      <i class="fa-solid fa-broom"></i>
+                      <span style="font-size: 10px;margin-top: 3px;">下载</span>
+                    </ControlButton>
+                    <ControlButton
+                        @click="clearModelOfViewFlow"
+                        class="control-operator-btn-default-css"
+                        :disabled="disabledStateOfControlBtn.clearModelOfViewFlowBtn"
+                        :style="{color: dark ? '#ffffff' : '#000000'}"
+                        title="清空模型">
+                      <i class="fa-solid fa-broom"></i>
+                      <span style="font-size: 10px;margin-top: 3px;">清空</span>
+                    </ControlButton>
+
+                    <ControlButton
+                        v-if="userRole === 'superuser'"
+                        @click="finishModelOfViewFlow"
+                        class="control-operator-btn-default-css"
+                        :disabled="disabledStateOfControlBtn.finishModelOfViewFlowBtn"
+                        :style="{color: dark ? '#ffffff' : '#000000'}"
+                        title="完成模型">
+                      <i class="fa-solid fa-check"></i>
+                      <span style="font-size: 10px;margin-top: 3px;">完成</span>
+                    </ControlButton>
+
+                    <ControlButton
+                        v-if="userRole === 'superuser'"
+                        @click="checkModelOfViewFlow"
+                        class="control-operator-btn-default-css"
+                        :disabled="disabledStateOfControlBtn.checkModelOfViewFlowBtn"
+                        :style="{color: dark ? '#ffffff' : '#000000'}"
+                        title="检查模型">
+                      <i class="fa-solid fa-magnifying-glass"></i>
+                      <span style="font-size: 10px;margin-top: 3px;">检查</span>
+                    </ControlButton>
+
+                    <ControlButton
+                        v-if="userRole === 'superuser'"
+                        @click="saveModelOfViewFlow"
+                        class="control-operator-btn-default-css"
+                        :disabled="disabledStateOfControlBtn.saveModelOfViewFlowBtn"
+                        :style="{color: dark ? '#ffffff' : '#000000'}"
+                        title="保存模型">
+                      <i class="fa-solid fa-floppy-disk"></i>
+                      <span style="font-size: 10px;margin-top: 3px;">保存</span>
+                    </ControlButton>
+                    <ControlButton
+                        @click="runModelOfViewFlow"
+                        class="control-operator-btn-default-css"
+                        :disabled="disabledStateOfControlBtn.runModelOfViewFlowBtn"
+                        :style="{color: dark ? '#ffffff' : '#000000'}"
+                        title="运行模型">
+                      <i class="fa-solid fa-power-off"></i>
+                      <span style="font-size: 10px;margin-top: 3px;">运行</span>
+                    </ControlButton>
+                    <ControlButton
+                        v-if="userRole === 'superuser'"
+                        @click="stopRunningModelOfViewFlow"
+                        class="control-operator-btn-default-css"
+                        :disabled="disabledStateOfControlBtn.stopRunningModelOfViewFlowBtn"
+                        :style="{color: dark ? '#ffffff' : '#000000'}"
+                        title="终止运行">
+                      <i class="fa-solid fa-stop"></i>
+                      <span style="font-size: 10px;margin-top: 3px;">终止</span>
+                    </ControlButton>
+                    <ControlButton
+                        @click="openConfigPanelOfModelNode"
+                        class="control-operator-btn-default-css"
+                        :disabled="disabledStateOfControlBtn.configPanelOfModelNodeBtn"
+                        :style="{color: dark ? '#ffffff' : '#000000'}"
+                        title="模型配置">
+                      <i class="fa-solid fa-gear"></i>
+                      <span style="font-size: 10px;margin-top: 3px;">配置</span>
+                    </ControlButton>
+                  </Controls>
+                  <!-- 自定义节点 -->
+                  <template #node-menu="props">
+                    <ModelingCustomNode :id="props.id" :data="props.data"/>
+                  </template>
+                  <!-- 自定义边 -->
+                  <template #edge-button="buttonEdgeProps">
+                    <ModelingCustomEdge
+                        :id="buttonEdgeProps.id"
+                        :source-x="buttonEdgeProps.sourceX"
+                        :source-y="buttonEdgeProps.sourceY"
+                        :target-x="buttonEdgeProps.targetX"
+                        :target-y="buttonEdgeProps.targetY"
+                        :source-position="buttonEdgeProps.sourcePosition"
+                        :target-position="buttonEdgeProps.targetPosition"
+                        :marker-end="buttonEdgeProps.markerEnd"
+                        :style="buttonEdgeProps.style"
+                        :remove-btn-disabled="removeBtnDisabled"
+                    />
+                  </template>
+                </VueFlow>
+              </div>
+            </div>
+
+            <!--配置部分-->
+            <div :class="['configPanelOfModelNode', { hidden: isHiddenConfigPanelOfNode }]">
+              <div class="closeConfigPanelBtnOfModelNode">
+                <button
+                    class="icon-buttonOfElMain"
+                    @click="closeConfigPanelOfModelNode"
+                >
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+              <div class="configAreaPanelOfModelNode">
+                <my-collapse
+                    v-model="activeNamesOfConfigPanelOfModelNode"
+                    :accordion="true"
+                    theme="light"
+                    style="background-color: #3c93f8"
+                    @item-click="onItemClickOfConfigPanelOfModelNode"
+                >
+                  <!-- 数据源配置 -->
+                  <my-collapse-item v-if="containsMenuSettings.includes('4')" name="4-" :data="{name:'4-'}"
+                                    item-background="#ebeef4">
+                    <template #title>
+                      <div style="padding: 6px;">
+                        <span style="font-size: 16px;">数据源配置</span>
+                      </div>
+                    </template>
+                    <template #arrow="{ isActive }">
+                      <div style="align-items: center;padding-right: 10px;">
+                        <i :class="['fa-solid', isActive ? 'fa-angle-down' : 'fa-angle-right']"></i>
+                      </div>
+                    </template>
+                    <div class="" style="width: 100%;background-color: white;">
+                      <div style="font-size: 20px">加载数据集</div>
+                          <a-button
                                   type="default"
                                   style="margin-top: 25px; margin-left: 0px; width: 160px; font-size: 16px;  background-color: #2082F9; color: white"
-                                  @click="switchDrawer"
-                                  :icon="h(FolderOutlined)"
-                              >查看已上传文件</a-button>
-                            </div>
-
-
-                            <!-- 确认上传文件的弹窗 -->
-                            <!-- <a-modal
-                              v-model:open="uploadConfirmDialog"
-                              title="提交所保存文件信息"
-                              :confirm-loading="uploadconfirmLoading"
-                              @ok="handleOk"
-                              
-                              okText="确定"
-                              cancelText="取消"
-                              :maskClosable="false"
-                              :zIndex="1000"
-                              style="top: 500px"
-                            >
-                              <a-space direction="vertical">
-                                <a-form :model="formState" :rules="fileNameRules" ref="formRef">
-                                  <a-form-item label="文件名称" name="filename">
-                                    <a-input v-model:value="formState.filename" placeholder="请输入文件名" />
-                                  </a-form-item>
-                                  <a-form-item label="文件描述" name="description">
-                                    <a-input
-                                      v-model:value="formState.description"
-                                      autofocus
-                                      placeholder="请输入文件描述"
-                                    />
-                                  </a-form-item>
-                                </a-form>
-                              </a-space>
-                            </a-modal> -->
-                            
-                          </div>
-                          <div></div>
+                                  @click="openDatasetLoadingPanel"
+                                  :icon="h(FolderOutlined)">
+                                  从数据库加载
+                          </a-button>
                           <!-- 分割线 -->
                           <!-- <div style="width: 2px; height: 136px; background-color: #808080; position: absolute; right: 185px; bottom: 0px; border-radius: 1px;"></div> -->
                           <!-- 显示已加载的数据名称 -->
-                          <div v-if="loadingDataModel === 2"
-                               style="display: flex; position: relative;width: 100%;height: 100%">
+                          <div style="display: flex; position: relative;width: 100%;height: 100%">
                             <!-- <div style="font-size: 18px; font-weight: 600">已加载数据</div> -->
                             <div class="highlight"
                                  :style="{color: getColor(usingDatafile), position: 'relative', 'margin-top': '30px'}"
-                                 :title="usingDatafile">已加载数据：{{ usingDatafile }}</div>
+                                 :title="usingDatafile">
+                                  已加载数据：{{ usingDatafile }}
+                            </div>
                           </div>
-                          
-                          
+                    </div>
+                    <el-dialog v-model="datasetManagementDialog" width="1000px">
+                      <template #header>
+                        <div>
+                          <p style="font-weight: bold; font-size: 20px">数据加载</p>
                         </div>
-                        <!-- <div class="aside-title">
-                          <img src="../assets/data-icon.svg" style="width: 30px; height: auto;"/><span>加载数据</span>
-                        </div> -->
-                        <!-- <div style="width: 250px; height: 200px; position: relative; background-color: white;">
-                          <uploadDatafile @switchDrawer="handleSwitchDrawer" :api="api" />
-                          <div class="highlight" :style="{color: getColor(usingDatafile)}" :title="usingDatafile">已加载数据：{{ usingDatafile }}</div>
-                  
-                        </div> -->
-                        <!-- <a-button @click="dataSourceSetting = true">打开数据源配置</a-button> -->
-                      </div>
+                      </template>
+                      
+                      <div style="display: flex; flex-direction: column;">
+                        <h2 style="margin-bottom: 25px; color: #253b45; text-align: left; font-size: 25px;">用户数据文件</h2>
+                        <div style="display: flex; flex-direction: row; width: 30%">
+     
+                          <el-input v-model="searchDataKeyword" placeholder="输入文件名" style="width: 50%">
+                          </el-input>
+                          
+                          <el-button type="primary" style="width: 20%; margin-left: 10px" @click="searchDataset">搜索</el-button>
+                        </div>
+                        <el-table :data="fetchedDataFiles" height="500" stripe width="100%">
+                          <el-table-column property="owner" label="文件上传者" show-overflow-tooltip/>
+                          <el-table-column property="dataset_name" label="文件名称" show-overflow-tooltip/>
+                          <el-table-column property="description" label="文件描述" show-overflow-tooltip/>
+                          <el-table-column label="操作">
+                            <template #default="scope">
+                              <el-button
+                                  size="small"
+                                  type="primary"
+                                  style="width: 50px"
+                                  @click="useDataset(scope.row)"
+                                  :loading="loadingData"
+                              >
+                                加载
+                              </el-button>
+                              
+                              <el-popconfirm title="你确定要删除该数据文件吗"
+                                            @confirm="deleteDatasetConfirm(scope.$index, scope.row)">
+                                <template #reference>
+                        
+                                </template>
+                                <template #actions="{ confirm, cancel }">
+                                  <el-row>
+                                    <el-col :span="12">
+                                      <el-button size="small" @click="cancel">取消</el-button>
+                                    </el-col>
+                                    <el-col :span="12">
+                                      <el-button
+                                          type="primary"
+                                          size="small"
+                                          @click="confirm"
+                                      >
+                                        确定
+                                      </el-button>
+                                    </el-col>
+                                  </el-row>
+                                </template>
+                              </el-popconfirm>
 
-                      <!-- 选择特征选择的规则以及设定规则的阈值 -->
-                      <div v-if="item.id == '1.3' && item.use_algorithm !== 'extra_feature_selection'">
+                              <el-button
+                                  size="small"
+                                  type="success"
+                                  style="width: 50px"
+                                  @click="browseDataset(scope.row)"
+                              >
+                                查看
+                              </el-button>
+                            </template>
+                          </el-table-column>
+                        </el-table>
+                      </div>
+                    </el-dialog>
+                  </my-collapse-item>
+                  <!-- 特征提取参数配置 -->
+                  <my-collapse-item v-if="containsMenuSettings.includes('1.2')" name="1.2-" :data="{name:'1.2-'}"
+                                    item-background="#ebeef4">
+                    <template #title>
+                      <div style="padding: 6px;">
+                        <span style="font-size: 16px;">特征提取参数配置</span>
+                      </div>
+                    </template>
+                    <template #arrow="{ isActive }">
+                      <div style="align-items: center;padding-right: 10px;">
+                        <i :class="['fa-solid', isActive ? 'fa-angle-down' : 'fa-angle-right']"></i>
+                      </div>
+                    </template>
+                    <div class="" style="width: 100%;background-color: white;">
+                      <div style="width: 100%;display: flex;flex-direction: column;">
+                        <div style="flex: 1;padding: 10px;width: 100%;">
+                          <el-text style="font-size: 15px;">选择特征<span
+                              style="font-size: 12px;">(共{{
+                              Object.keys(item.parameters[item.use_algorithm]).length
+                            }}个可选特征)</span></el-text>
+                        </div>
+                        <div style="flex: 1;width: 100%;padding-bottom: 10px;">
+                          <el-select v-model="features" multiple collapse-tags collapse-tags-tooltip
+                                     :max-collapse-tags="5" popper-class="select"
+                                     placeholder="选择需要提取的特征" :teleported="false" style="width: 90%;">
+                            <el-option v-for="(value, key) in item.parameters[item.use_algorithm]" :label="key"
+                                       :value="key" style="width: 200px; background-color: white;"/>
+                          </el-select>
+                        </div>
+                      </div>
+                    </div>
+                  </my-collapse-item>
+                  <!-- 特征选择参数配置-->
+                  <!-- 选择特征选择的规则以及设定规则的阈值 -->
+                  <my-collapse-item
+                      v-if="containsMenuSettings.includes('1.3') && item.use_algorithm !== 'extra_feature_selection'"
+                      name="1.3" :data="{name:'1.3'}"
+                      item-background="#ebeef4">
+                    <template #title>
+                      <div style="padding: 6px;">
+                        <span style="font-size: 16px;">特征选择参数配置</span>
+                      </div>
+                    </template>
+                    <template #arrow="{ isActive }">
+                      <div style="align-items: center;padding-right: 10px;">
+                        <i :class="['fa-solid', isActive ? 'fa-angle-down' : 'fa-angle-right']"></i>
+                      </div>
+                    </template>
+                    <div class="" style="width: 100%;">
+                      <div style="background-color: white; display: flex; flex-direction: column; padding: 20px">
                         <el-radio-group v-model="item.parameters[item.use_algorithm]['rule']">
                           <el-radio :value="1" size="large">规则一</el-radio>
                           <el-radio :value="2" size="large">规则二</el-radio>
@@ -725,729 +973,575 @@
                           <div style="margin-top: 5px; margin-bottom: 15px;">
                             设定阈值后，将选择重要性系数大于该阈值的特征
                           </div>
-
                           <el-form>
                             <el-form-item label="阈值">
-                              <!-- <el-select v-model="item.parameters[item.use_algorithm]['threshold1']" size='large' placeholder="请输入阈值" style="width: 250px;" :teleported="false">
-                                <el-option 
-                                v-for="item in recommendParams['threshold1'][item.use_algorithm]"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value"
-                                style="width: 200px; height: auto; background-color: white;" 
-                                />
-                              </el-select> -->
                               <el-input-number v-model="item.parameters[item.use_algorithm]['threshold1']"
                                                :precision="2" :step="0.05" :max="1" :min="0"/>
                             </el-form-item>
                           </el-form>
                         </div>
-                        <!-- <template #default>
-                          <div>
-                            当前暂无可调参数
-                          </div>
-                        </template> -->
                         <!-- 特征选择规则二 -->
                         <div v-if="item.parameters[item.use_algorithm]['rule'] == 2">
                           <div style="margin-top: 5px; margin-bottom: 15px;">
                             设定阈值后，将根据特征的重要性，由高到低地选择特征，直到所选特征的重要性的总和占所有特征的重要性比例不小于该阈值，其中所有特征的重要性占比为1
                           </div>
-
                           <el-form>
                             <el-form-item label="阈值">
-                              <!-- <el-select v-model="item.parameters[item.use_algorithm]['threshold2']" size='large' placeholder="请输入阈值" style="width: 250px;" :teleported="false">
-                                <el-option 
-                                v-for="item in recommendParams['threshold2'][item.use_algorithm]"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value"
-                                style="width: 200px; height: auto; background-color: white;" 
-                                />
-                              </el-select> -->
                               <el-input-number v-model="item.parameters[item.use_algorithm]['threshold2']"
                                                :precision="2" :step="0.05" :max="1" :min="0"/>
                             </el-form-item>
                           </el-form>
                         </div>
                       </div>
-
-                      <!-- 无量纲化参数设置 -->
-                      <div v-if="item.id == '1.5'">
-                        <div>是否使用模型训练时的标准化方法</div>
-                        <el-radio-group v-model="item.parameters[item.use_algorithm]['useLog']">
-                          <el-radio :value="true" size="large">是</el-radio>
-                          <el-radio :value="false" size="large">否</el-radio>
-                        </el-radio-group>
+                    </div>
+                  </my-collapse-item>
+                  <!-- 无量纲化参数设置 -->
+                  <my-collapse-item v-if="containsMenuSettings.includes('1.5')" name="1.5-" :data="{name:'1.5-'}"
+                                    item-background="#ebeef4">
+                    <template #title>
+                      <div style="padding: 6px;">
+                        <span style="font-size: 16px;">无量纲化参数设置</span>
                       </div>
-
-
-                      <!-- <div v-if="String(item.label_display).indexOf('私有') != -1" >
-                        
-                        <a-select
-                          v-model:value="item.parameters[item.use_algorithm]"
-                          style="width: 120px"
-                        >
-                          <a-select-option 
-                            v-for="option in privateAlgorithms" 
-                            :key="option.value"
-                            v-if="item.label === option.type"
-                            :value="option.value" 
-                            :label="option.label"
-                          >{{ option.label }}</a-select-option>
-                        </a-select>
-                      </div> -->
-                      <!-- 专有算法的参数设置 -->
-                      <div v-if="String(item.label_display).indexOf('增值服务组件') != -1">
-                        <el-form>
-                          <el-form-item :label="item.label_display" prop="algorithmType">
-
-                            <el-select v-if="item.label_display != '增值服务组件（无量纲化）'"
-                                       v-model="item.parameters[item.use_algorithm]"
-                                       placeholder="请选择算已上传的私有算法" :teleported="false" style="width: 250px;">
-                              <el-option v-for="item in privateAlgorithmList"
-                                         :key="item.label"
-                                         :label="item.label"
-                                         :value="item.label"
-                                         style="width: 200px; height: auto; background-color: white;"/>
-                            </el-select>
-
-                            <!-- 无量纲化的专有算法相较于其他不需要额外参数设置的算法要进行更多参数设定，因此绑定的参数也不一样 -->
-                            <el-select v-if="item.label_display == '增值服务组件（无量纲化）'"
-                                       v-model="item.parameters[item.use_algorithm]['algorithm']"
-                                       placeholder="请选择算已上传的私有算法" :teleported="false" style="width: 250px;">
-                              <el-option v-for="item in privateAlgorithmList"
-                                         :key="item.label"
-                                         :label="item.label"
-                                         :value="item.label"
-                                         style="width: 200px; height: auto; background-color: white;"/>
-                            </el-select>
-                          </el-form-item>
-                        </el-form>
-                        <!-- 专有算法的算法描述 -->
-                        <div>
-                          <span>算法描述：</span>
-                          <div>{{ extraAlgorithmStatement[item.parameters[item.use_algorithm]] }}</div>
-                        </div>
+                    </template>
+                    <template #arrow="{ isActive }">
+                      <div style="align-items: center;padding-right: 10px;">
+                        <i :class="['fa-solid', isActive ? 'fa-angle-down' : 'fa-angle-right']"></i>
                       </div>
-                      <template #reference>
+                    </template>
+                    <div class="" style="width: 100%;background-color: white;padding-top: 10px;">
+                      <div>是否使用模型训练时的标准化方法?</div>
+                      <el-radio-group v-model="item.parameters[item.use_algorithm]['useLog']">
+                        <el-radio :value="true" size="large">是</el-radio>
+                        <el-radio :value="false" size="large">否</el-radio>
+                      </el-radio-group>
+                    </div>
+                  </my-collapse-item>
+                  <!--小波变换参数配置-->
+                  <my-collapse-item v-if="containsMenuSettings.includes('1.4')" name="1.4-" :data="{name:'1.4-'}"
+                                    item-background="#ebeef4">
+                    <template #title>
+                      <div style="padding: 6px;">
+                        <span style="font-size: 16px;">小波变换参数配置</span>
+                      </div>
+                    </template>
+                    <template #arrow="{ isActive }">
+                      <div style="align-items: center;padding-right: 10px;">
+                        <i :class="['fa-solid', isActive ? 'fa-angle-down' : 'fa-angle-right']"></i>
+                      </div>
+                    </template>
+                    <div class="" style="width: 100%;">
+                      <div style="background-color: white; display: flex; flex-direction: column; padding-top: 20px;">
+                        <el-row
+                            v-for="(value, key) in item.parameters[item.use_algorithm]"
+                            :key="key" style="margin-bottom: 20px">
+                          <el-col :span="10" style="align-content: center;"><span
+                              style="margin-left: 10px; font-size: 15px;">{{ labelsForParams[key] }}：</span></el-col>
+                          <el-col :span="12">
+                            <el-select v-model="item.parameters[item.use_algorithm][key]" collapse-tags
+                                       collapse-tags-tooltip :teleported="false" placeholder="请选择参数">
+                              <el-option
+                                  v-for="item in recommendParams[key]"
+                                  :key="item.value"
+                                  :label="item.label"
+                                  :value="item.value"
+                                  style="width: 200px; height: auto; background-color: white;"
+                              />
+                            </el-select>
+                          </el-col>
+                        </el-row>
+                      </div>
+                    </div>
+                  </my-collapse-item>
+                  <!-- 其他常规配置 -->
+                  <div
+                      v-if="!containsMenuSettings.includes('4')
+                      && !containsMenuSettings.includes('1.2')
+                      && !containsMenuSettings.includes('1.3')
+                      && !containsMenuSettings.includes('1.4')
+                      && !containsMenuSettings.includes('1.5')"
+                      style="background-color: white; display: flex; flex-direction: column; padding-top: 30px;height: 100%;">
+                    暂无可调参数
+                  </div>
+                </my-collapse>
+              </div>
+            </div>
 
-                        <!-- 建模区中算法节点的形状 -->
-                        <!-- <el-tooltip effect="dark" content="通过节点中心的附着点拖拽节点，或右击打开参数配置" :teleported="false"> -->
-                          <div class="node-info-label font-style: italic;" :id=item.id>
-                            <!-- <span>{{ item.label_display }}</span> -->
-                            <!-- 节点的拖拽动作的识别点 -->
-                            <img :src="setIconOfAlgorithms(item.label)" alt="icon" width="50px" height="50px"/>
-                            <div style="
-                            position: absolute; left: 88px; top: 50%; width: 6px; height: 6px;
-                            border: 2px solid #80a5ba; 
-                            border-radius: 50%; 
-                            background-color: transparent;
-                            cursor: move;" @mouseup="handleMouseup($event, item)"></div>
-                            <div class="module-name" :title="item.label_display">{{ item.label_display }}</div>
-                            <!-- 删除节点的删除按钮 -->
-                            <el-button type="danger" icon="Delete" circle size="small" class="deleteButton"
-                                       @click="deleteNode(item.nodeId)" :disabled="modelSetup"/>
+            <!-- 运行结果部分 -->
+            <transition name="slide">
+              <div
+                  v-show="isResultVisibleOfElMain"
+                  class="result-areaOfElMain"
+                  :style="{ height: resultHeightOfElMain + 'px' }"
+              >
+                <!-- 运行结果头部，可拖动 -->
+                <div class="result-headerOfElMain" @mousedown="initDragOfElMain" @touchstart="initDragTouchOfElMain">
+                  <!--                  <span>运行结果部分</span>-->
+                  <div class="buttonsOfElMain">
+                    <button
+                        class="icon-buttonOfElMain"
+                        @click="closeResultOfElMain"
+                        aria-label="隐藏结果"
+                        @keydown.enter.prevent="closeResultOfElMain"
+                        @keydown.space.prevent="closeResultOfElMain"
+                    >
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 运行结果内容 -->
+                <div class="result-contentOfElMain">
+                  <!-- 模型运行结果展示区 -->
+                  <div class="resultsContainer"
+                       style="background-color: white;padding-bottom: 5px;height: 100%;width: 100%;overflow-y: auto;">
+                    <!-- 显示程序运行的进度条 -->
+                    <div v-if="processing"
+                         style="display: flex; justify-content: center; align-items: center; padding-top: 120px;">
+                      <span style="font-weight: 700; font-size: 22px">程序正在运行中</span>
+                      <el-progress :percentage="percentage" :indeterminate="true"/>
+                    </div>
+
+                    <!-- 点击在可视化建模区展示算法的具体介绍 -->
+                    <div style="width: 100%; height: 100%; background-color: white;"
+                         v-if="(showPlainIntroduction || showStatusMessage) && !processing">
+                      <el-scrollbar height="480px" style="background-color: white;">
+                        <a-button type="text" style="position: absolute; top: 5px; right: 5px"
+                                  v-if="showPlainIntroduction"
+                                  @click="showPlainIntroduction = false">关闭
+                        </a-button>
+                        <v-md-preview v-if="showPlainIntroduction" :text="introductionToShow"
+                                      style="text-align: left;"></v-md-preview>
+                        <v-md-preview v-if="showStatusMessage" :text="statusMessageToShow"
+                                      style="text-align: center; padding-top: 80px"></v-md-preview>
+                      </el-scrollbar>
+                    </div>
+
+                    <!-- 结果可视化区默认为自定义建模或是预定义模型的使用介绍 -->
+                    <div
+                        v-if="!showPlainIntroduction && !showStatusMessage && !canShowResults && !contrastVisible && !processing"
+                        style="background-color: white; height: 100%; width: auto">
+                      <el-scrollbar height="100%">
+                        <!-- 自定义建模 -->
+                        <div v-if="(userRole==='superuser' || userRole === 'user') && modelSelection === 'customModel'">
+                          <v-md-preview :text="howToCustomizeModel" style="text-align: left;"></v-md-preview>
+                          <div style="text-align: left; padding-left: 40px;">
+                            <h4>1.机器学习的故障诊断流程推荐</h4>
+                            <img src="../assets/customize-model-1.png" width="900px" alt="">
+                            <div>模版用例：
+                              <a-button @click="useModel(predefinedModel['templateModel1'])">用例1</a-button>
+                              <a-button>用例2</a-button>
+                            </div>
+                            <br>
+                            <h4>1.深度学习的故障诊断流程推荐</h4>
+                            <img src="../assets/customize-model-2.png" width="600px" alt="">
+                            <div>模版用例：
+                              <a-button @click="useModel(predefinedModel['templateModel1'])">用例1</a-button>
+                              <a-button>用例2</a-button>
+                            </div>
                           </div>
-                        <!-- </el-tooltip> -->
-                      </template>
-                    </el-popover>
-                  </span>
-                <!-- </el-tooltip> -->
-                <!-- @contextmenu="params_setting(item[parameters])" -->
-                <!-- 节点上的连线附着点 -->
-                <div class="node-drag" :id="item.id"></div>
-              </Vue3DraggableResizable>
-            </DraggableContainer>
-            <!-- <div style="width: 1000px; height: 100px; background-color: #88b6fb;"></div> -->
-            <!-- <div
-              style="position: absolute; right: 250px; bottom: 10px; width: 600px; height: auto;display: flex; justify-content: space-between; align-items: center;">
-         
-              <el-space size="large">
-
-                <el-button type="primary" round style="width: 125px; font-size: 17px; "
-                  @click="handleClear" icon="Refresh" class="operation-button">
-                  清空模型
-                </el-button>
-
-                <el-button v-if="!toRectifyModel" type="primary" :disabled="canCompleteModeling"
-                  round style="width: 125px; font-size: 17px;" @click="finishModeling"
-                  icon="Check" class="operation-button">
-                  完成建模
-                </el-button>
-              
-                <el-button v-if="toRectifyModel" type="primary" :disabled="canCompleteModeling"
-                  round style="width: 125px; font-size: 17px;" @click="rectifyModel"
-                  icon="Edit" class="operation-button">
-                  修改模型
-                </el-button>
-
-                
-                <el-button type="primary" :disabled="canCheckModel" @mouseover="checkModeling" round
-                  style="width: 125px; font-size: 17px; " @click="checkModel" icon="Search" class="operation-button">
-                  检查模型
-                </el-button>
-
-           
-                <el-button type="primary" :disabled="canSaveModel" @mouseover="saveModeling" round
-                  style="width: 125px; font-size: 17px;" @click="saveModelSetting(true, [])" icon="Finished" class="operation-button">
-                  保存模型
-                </el-button>
-              
-                <el-button type="success" round style="width: 125px; font-size: 17px; " @click="startProgram"
-                  icon="SwitchButton" :disabled="canStartProcess || processIsShutdown" @mouseover="startModeling" class="operation-button">
-                  开始运行
-                </el-button>
-                <el-button :disabled="canShutdown" type="danger" round style="width: 125px; font-size: 17px;"
-                  @click="shutDown" icon="Close" class="operation-button">
-                  终止运行
-                </el-button>
-              </el-space>
-
-            </div> -->
-            <div
-                style="position: absolute; right: 250px; bottom: 10px; width: 600px; height: auto;display: flex; justify-content: space-between; align-items: center;">
-
-              <el-space size="large">
-
-                <el-button type="primary" style="width: 125px; font-size: 17px; "
-                           @click="handleClear" icon="Refresh" class="operation-button">
-                  清空模型
-                </el-button>
-
-                <el-button v-if="!toRectifyModel" type="primary" :disabled="canCompleteModeling"
-                           style="width: 125px; font-size: 17px;" @click="finishModeling"
-                           icon="Check" class="operation-button">
-                  完成建模
-                </el-button>
-
-                <el-button v-if="toRectifyModel" type="primary" :disabled="canCompleteModeling"
-                           style="width: 125px; font-size: 17px;" @click="rectifyModel"
-                           icon="Edit" class="operation-button">
-                  修改模型
-                </el-button>
-
-
-                <el-button type="primary" :disabled="canCheckModel" @mouseover="checkModeling"
-                           style="width: 125px; font-size: 17px; " @click="checkModel" icon="Search"
-                           class="operation-button">
-                  检查模型
-                </el-button>
-
-
-                <el-button type="primary" :disabled="canSaveModel" @mouseover="saveModeling"
-                           style="width: 125px; font-size: 17px;" @click="saveModelSetting(true, [])" icon="Finished"
-                           class="operation-button">
-                  保存模型
-                </el-button>
-
-                <el-button type="success" style="width: 125px; font-size: 17px; " @click="startProgram"
-                           icon="SwitchButton" :disabled="canStartProcess || processIsShutdown"
-                           @mouseover="startModeling" class="operation-button">
-                  开始运行
-                </el-button>
-                <el-button :disabled="canShutdown" type="danger" style="width: 125px; font-size: 17px;"
-                           @click="shutDown" icon="Close" class="operation-button">
-                  终止运行
-                </el-button>
-              </el-space>
-
-            </div>
-          </div>
-          <!-- 模型运行结果展示区 -->
-          <div class="resultsContainer"
-               style="background-color: white;padding-bottom: 5px;">
-            <!-- 显示程序运行的进度条 -->
-            <div v-if="processing"
-                 style="display: flex; justify-content: center; align-items: center; padding-top: 120px;">
-              <span style="font-weight: 700; font-size: 22px">程序正在运行中</span>
-              <el-progress :percentage="percentage" :indeterminate="true"/>
-            </div>
-
-            <!-- 点击在可视化建模区展示算法的具体介绍 -->
-            <div style="width: 100%; height: 100%; background-color: white;"
-                 v-if="(showPlainIntroduction || showStatusMessage) && !processing">
-              <el-scrollbar height="480px" style="background-color: white;">
-                <a-button type="text" style="position: absolute; top: 5px; right: 5px" v-if="showPlainIntroduction"
-                          @click="showPlainIntroduction = false">关闭
-                </a-button>
-                <v-md-preview v-if="showPlainIntroduction" :text="introductionToShow"
-                              style="text-align: left;"></v-md-preview>
-                <v-md-preview v-if="showStatusMessage" :text="statusMessageToShow"
-                              style="text-align: center; padding-top: 80px"></v-md-preview>
-              </el-scrollbar>
-            </div>
-
-            <!-- 结果可视化区默认为自定义建模或是预定义模型的使用介绍 -->
-            <div
-                v-if="!showPlainIntroduction && !showStatusMessage && !canShowResults && !contrastVisible && !processing"
-                style="background-color: white; height: 100%; width: auto">
-              <el-scrollbar height="100%">
-                <!-- 自定义建模 -->
-                <div v-if="(userRole==='superuser' || userRole === 'user') && modelSelection === 'customModel'">
-                  <v-md-preview :text="howToCustomizeModel" style="text-align: left;"></v-md-preview>
-                  <div style="text-align: left; padding-left: 40px;">
-                    <h4>1.机器学习的故障诊断流程推荐</h4>
-                    <img src="../assets/customize-model-1.png" width="900px" alt="">
-                    <div>模版用例：
-                      <a-button @click="useModel(predefinedModel['templateModel1'])">用例1</a-button>
-                      <a-button>用例2</a-button>
-                    </div>
-                    <br>
-                    <h4>1.深度学习的故障诊断流程推荐</h4>
-                    <img src="../assets/customize-model-2.png" width="600px" alt="">
-                    <div>模版用例：
-                      <a-button @click="useModel(predefinedModel['templateModel1'])">用例1</a-button>
-                      <a-button>用例2</a-button>
-                    </div>
-                  </div>
-                </div>
-                <!-- 预定义模型 -->
-                <div v-if="userRole === 'superuser' && modelSelection === 'templateModel'">
-                  <v-md-preview :text="howToUseTemplateModel" style="text-align: left;"></v-md-preview>
-                </div>
-                <div v-if="userRole === 'user' && modelSelection === 'templateModel'">
-                  <v-md-preview :text="howToUseTemplateModel2" style="text-align: left;"></v-md-preview>
-                </div>
-              </el-scrollbar>
-            </div>
-
-            <!-- 当点击二级目录后，展示二级目录下各个算法的优劣比较 -->
-            <div v-if="contrastVisible && !processing"
-                 style="background-color: white; height: 100%; width: auto; position: relative;">
-
-              <el-scrollbar height="570px" style="background-color: white;">
-                <a-button type="text" style="position: absolute; top: 5px; right: 5px" @click="contrastVisible = false">
-                  关闭
-                </a-button>
-                <v-md-preview :text="contrastToShow" style="text-align: left;"></v-md-preview>
-              </el-scrollbar>
-            </div>
-
-            <!-- 结果可视化各组件的结果展示 -->
-            <el-scrollbar height="600px" v-if="canShowResults && !processing" style="background-color: white;">
-
-              <!-- 用户反馈对话框 -->
-              <div style="width: 100%; position: relative; z-index: 999;">
-                <span style="position: absolute; right: 30px; top: 55px;">
-                  <a-button circle :icon="h(EditOutlined)"
-                  @click="feedBackDialogVisible = true" ></a-button> 反馈
-                </span>
-                <a-modal v-model:open="feedBackDialogVisible" title="用户反馈" cancelText="取消" okText="提交" @ok="feedBack">
-                  <div style="font-weight: 600; font-size: 14px; margin-bottom: 20px">
-                    <p>当前使用的模型：{{ modelLoaded }}</p>
-                    <p>当前使用的数据：{{ usingDatafile }}</p>
-                  </div>
-                  <a-form :model="feedBackFormRefState" :rules="feedBackRules" ref="feedBackFormRef">
-                    <a-form-item label="当前模型中存在疑问的模块" name="module">
-                      <a-select style="width: 70%" placeholder="请选择组件" v-model:value="feedBackFormRefState.module">
-                        <a-select-option v-for="item in contentJson.modules" :value="item">
-                          {{ item }}
-                        </a-select-option>
-                      </a-select>
-                    </a-form-item>
-                    <a-form-item name="feedbackContent">
-                      <div>问题描述</div>
-                      <a-input style="width: 80%" v-model:value="feedBackFormRefState.feedbackContent"/>
-                    </a-form-item>
-                    <!-- <a-form-item>
-                      <a-button @click="feedBack"></a-button>
-                    </a-form-item> -->
-                  </a-form>
-                </a-modal>
-              </div>
-              <!-- 健康评估可视化 -->
-              <!-- 不同样本的评估结果 -->
-              <el-tabs type="border-card" tab-position="top" v-model="healthEvaluationOfExample"
-                       v-if="displayHealthEvaluation">
-                <el-tab-pane label="总结论" name="总结论">
-                  <div style="display:flex; flex-direction: row; align-items: center;">
-                    <div id="healthEvaluationPieChart" style="width: 600px; height: 500px"></div>
-                    <div style="width: 700px;">
-                      <el-text style="font-weight: bold; font-size: 18px;">{{
-                          finalSuggestion
-                        }}
-                      </el-text>
-                    </div>
-                    <!-- 绘制饼状图 -->
-                  </div>
-                </el-tab-pane>
-
-                <el-tab-pane v-for="(value, key) in resultsBarOfAllExamples" :key="key" :label="key" :name="key">
-                  <el-tabs type="border-card" tab-position="left" v-model="activeName1">
-                    <el-tab-pane label="层级有效指标" name="first">
-                      <!-- <img :src="healthEvaluationFigure1" alt="figure1" id="health_evaluation_figure_1"
-                        class="result_image" style="width: auto; height: 450px;" /> -->
-                      <el-image
-                          style="width: auto; height: 450px;"
-                          :src="resultsBarOfAllExamples[key]"
-                          :zoom-rate="1.2"
-                          :max-scale="7"
-                          :min-scale="0.2"
-                          :preview-src-list="[resultsBarOfAllExamples[key]]"
-                          :initial-index="4"
-                          fit="cover"
-                      />
-                    </el-tab-pane>
-                    <el-tab-pane label="指标权重" name="second">
-                      <!-- <img :src="healthEvaluationFigure2" alt="figure2" id="health_evaluation_figure_2"
-                        class="result_image" style="width: auto; height: 450px;" /> -->
-                      <el-image
-                          style="width: auto; height: 450px;"
-                          :src="levelIndicatorsOfAllExamples[key]"
-                          :zoom-rate="1.2"
-                          :max-scale="7"
-                          :min-scale="0.2"
-                          :preview-src-list="[levelIndicatorsOfAllExamples[key]]"
-                          :initial-index="4"
-                          fit="cover"
-                      />
-                    </el-tab-pane>
-                    <el-tab-pane label="评估结果" name="third">
-                      <div
-                          style="display:flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%">
-                        <el-image
-                            style="width: 800px; height: auto;"
-                            :src="statusOfExamples[key]"
-                            :zoom-rate="1.2"
-                            :max-scale="7"
-                            :min-scale="0.2"
-                            :preview-src-list="[statusOfExamples[key]]"
-                            :initial-index="4"
-                            fit="cover"
-                        />
-                        <br>
-
-                        <div style="width: 700px;">
-                          <el-text :v-model="suggestionOfAllExamples[key]" style="font-weight: bold; font-size: 18px;">
-                            {{
-                              suggestionOfAllExamples[key]
-                            }}
-                          </el-text>
                         </div>
+                        <!-- 预定义模型 -->
+                        <div v-if="userRole === 'superuser' && modelSelection === 'templateModel'">
+                          <v-md-preview :text="howToUseTemplateModel" style="text-align: left;"></v-md-preview>
+                        </div>
+                        <div v-if="userRole === 'user' && modelSelection === 'templateModel'">
+                          <v-md-preview :text="howToUseTemplateModel2" style="text-align: left;"></v-md-preview>
+                        </div>
+                      </el-scrollbar>
+                    </div>
+
+                    <!-- 当点击二级目录后，展示二级目录下各个算法的优劣比较 -->
+                    <div v-if="contrastVisible && !processing"
+                         style="background-color: white; height: 100%; width: auto; position: relative;">
+                      <el-scrollbar height="570px" style="background-color: white;">
+                        <a-button type="text" style="position: absolute; top: 5px; right: 5px"
+                                  @click="contrastVisible = false">
+                          关闭
+                        </a-button>
+                        <v-md-preview :text="contrastToShow" style="text-align: left;"></v-md-preview>
+                      </el-scrollbar>
+                    </div>
+
+                    <!-- 显示结果 -->
+                    <el-scrollbar height="600px" v-show="canShowResults && !processing" style="background-color: white;">
+                      <!-- 健康评估可视化 -->
+                      <!-- 不同样本的评估结果 -->
+                      <el-tabs type="border-card" tab-position="top" v-model="healthEvaluationOfExample"
+                               v-show="displayHealthEvaluation">
+                        <el-tab-pane label="总结论" name="总结论">
+                          <div style="display:flex; flex-direction: row; align-items: center;">
+                            <div id="healthEvaluationPieChart" style="width: 600px; height: 500px"></div>
+                            <div style="width: 700px;">
+                              <el-text style="font-weight: bold; font-size: 18px;">{{
+                                  finalSuggestion
+                                }}
+                              </el-text>
+                            </div>
+                            <!-- 绘制饼状图 -->
+                          </div>
+                        </el-tab-pane>
+
+                        <el-tab-pane v-for="(value, key) in resultsBarOfAllExamples" :key="key" :label="key"
+                                     :name="key">
+                          <el-tabs type="border-card" tab-position="left" v-model="activeName1">
+                            <el-tab-pane label="层级有效指标" name="first">
+                              <!-- <img :src="healthEvaluationFigure1" alt="figure1" id="health_evaluation_figure_1"
+                                class="result_image" style="width: auto; height: 450px;" /> -->
+                              <el-image
+                                  style="width: auto; height: 450px;"
+                                  :src="resultsBarOfAllExamples[key]"
+                                  :zoom-rate="1.2"
+                                  :max-scale="7"
+                                  :min-scale="0.2"
+                                  :preview-src-list="[resultsBarOfAllExamples[key]]"
+                                  :initial-index="4"
+                                  fit="cover"
+                              />
+                            </el-tab-pane>
+                            <el-tab-pane label="指标权重" name="second">
+                              <!-- <img :src="healthEvaluationFigure2" alt="figure2" id="health_evaluation_figure_2"
+                                class="result_image" style="width: auto; height: 450px;" /> -->
+                              <el-image
+                                  style="width: auto; height: 450px;"
+                                  :src="levelIndicatorsOfAllExamples[key]"
+                                  :zoom-rate="1.2"
+                                  :max-scale="7"
+                                  :min-scale="0.2"
+                                  :preview-src-list="[levelIndicatorsOfAllExamples[key]]"
+                                  :initial-index="4"
+                                  fit="cover"
+                              />
+                            </el-tab-pane>
+                            <el-tab-pane label="评估结果" name="third">
+                              <div
+                                  style="display:flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%">
+                                <el-image
+                                    style="width: 800px; height: auto;"
+                                    :src="statusOfExamples[key]"
+                                    :zoom-rate="1.2"
+                                    :max-scale="7"
+                                    :min-scale="0.2"
+                                    :preview-src-list="[statusOfExamples[key]]"
+                                    :initial-index="4"
+                                    fit="cover"
+                                />
+                                <br>
+
+                                <div style="width: 700px;">
+                                  <el-text :v-model="suggestionOfAllExamples[key]"
+                                           style="font-weight: bold; font-size: 18px;">
+                                    {{
+                                      suggestionOfAllExamples[key]
+                                    }}
+                                  </el-text>
+                                </div>
+                              </div>
+                              <!-- <img :src="healthEvaluationFigure3" alt="figure3" id="health_evaluation_figure_3"
+                                class="result_image" style="width: auto; height: 360px;" /> -->
+                            </el-tab-pane>
+                          </el-tabs>
+                        </el-tab-pane>
+
+                      </el-tabs>
+                      <!-- 特征提取可视化 -->
+                      <div v-show="displayFeatureExtraction" style="justify-content: center;">
+                        <el-tabs tab-position="left" type="border-card" v-model="featuresExtractionRawData">
+                          <el-tab-pane v-for="item in rawDataList" :key="item.snesor_no" :label="item.sensor_no"
+                                       :name="item.sensor_no">
+                            <div :id="item.sensor_no" style="width: 1300px; height: 400px;"></div>
+                            <!-- <div style="padding-left: 10px;text-align: left; font-size: 25px; color:darkgrey;">由原始信号提取特征：</div> -->
+                            <!-- 对应特征提取结果 -->
+                            <div :id="item.sensor_no + 'features'" style="width: 1300px; height: 400px;"></div>
+                          </el-tab-pane>
+                        </el-tabs>
                       </div>
-                      <!-- <img :src="healthEvaluationFigure3" alt="figure3" id="health_evaluation_figure_3"
-                        class="result_image" style="width: auto; height: 360px;" /> -->
-
-
-                    </el-tab-pane>
-                  </el-tabs>
-                </el-tab-pane>
-
-              </el-tabs>
-
-              <!-- 特征提取可视化 -->
-              <div v-if="displayFeatureExtraction" style="justify-content: center;">
-                <el-tabs tab-position="left" type="border-card" v-model="featuresExtractionRawData">
-                  <el-tab-pane v-for="item in rawDataList" :key="item.snesor_no" :label="item.sensor_no"
-                               :name="item.sensor_no">
-                    <div :id="item.sensor_no" style="width: 1300px; height: 400px"></div>
-                    <!-- <div style="padding-left: 10px;text-align: left; font-size: 25px; color:darkgrey;">由原始信号提取特征：</div> -->
-                    <!-- 对应特征提取结果 -->
-                    <div :id="item.sensor_no + 'features'" style="width: 1300px; height: 400px"></div>
-                  </el-tab-pane>
-                </el-tabs>
-                <!-- <div id="rawDataFigure" style="width: 900px; height: 400px"></div> -->
-                <!-- <el-table :data="transformedData" style="width: 96%; margin-top: 20px;"
-                 >
-                  <el-table-column v-for="column in columns" :key="column.prop" :prop="column.prop" :label="column.label"
-                  >
-                  </el-table-column>
-                </el-table> -->
-              </div>
-
-              <!-- 特征选择可视化 -->
-              <div v-if="displayFeatureSelection">
-                <el-tabs v-model="featuresSelectionTabs">
-                  <el-tab-pane label="特征选择结果" name="first">
-                    <el-scrollbar height="480px">
-                      <!-- <img :src="featureSelectionFigure" alt="feature_selection_figure1" class="result_image"
-                        style="width: 900px; height: 430px;" /> -->
-                      <el-image
-                          style="width: auto; height: 430px;"
-                          :src="featureSelectionFigure"
-                          :zoom-rate="1.2"
-                          :max-scale="7"
-                          :min-scale="0.2"
-                          :preview-src-list="[featureSelectionFigure]"
-                          :initial-index="4"
-                          fit="cover"
-                      />
-                      <br>
-                      <div style="width: 1000px; margin-left: 250px;">
+                      <!-- 特征选择可视化 -->
+                      <div v-show="displayFeatureSelection">
+                        <el-tabs v-model="featuresSelectionTabs">
+                          <el-tab-pane label="特征选择结果" name="first">
+                            <el-scrollbar height="480px">
+                              <el-image
+                                  style="width: auto; height: 430px;"
+                                  :src="featureSelectionFigure"
+                                  :zoom-rate="1.2"
+                                  :max-scale="7"
+                                  :min-scale="0.2"
+                                  :preview-src-list="[featureSelectionFigure]"
+                                  :initial-index="4"
+                                  fit="cover"
+                              />
+                              <br>
+                              <div style="width: 1000px; margin-left: 250px;">
                         <span style="font-weight: bold; font-size: 15px;">根据规则：{{ selectFeatureRule }}，选取特征结果为： {{
                             featuresSelected
                           }}</span>
+                              </div>
+                            </el-scrollbar>
+
+                          </el-tab-pane>
+
+                          <el-tab-pane label="相关系数矩阵热力图" name="second">
+                            <el-scrollbar height="480px">
+                              <el-image
+                                  style="width: auto; height: 500px;"
+                                  :src="correlationFigure"
+                                  :zoom-rate="1.2"
+                                  :max-scale="7"
+                                  :min-scale="0.2"
+                                  :preview-src-list="[correlationFigure]"
+                                  :initial-index="4"
+                                  fit="cover"
+                              />
+                            </el-scrollbar>
+
+                          </el-tab-pane>
+
+                        </el-tabs>
+
+                      </div>
+                      <!-- 故障诊断可视化 -->
+                      <div v-show="displayFaultDiagnosis" class="result-visualization-container">
+                        <v-md-preview style="padding: 0px; margin: 0px"
+                                      :text="faultDiagnosisResultsText"></v-md-preview>
+                        <span><a-button circle :icon="h(EditOutlined)"
+                                        @click="feedBackDialogVisible = true"></a-button> 反馈</span>
+                        <!-- 用户填写反馈的对话框 -->
+                        <a-modal v-model:open="feedBackDialogVisible" title="用户反馈" cancelText="取消" okText="确定">
+                          <div style="font-weight: 600; font-size: 14px">
+                            <p>当前使用的模型：{{ modelLoaded }}</p>
+                            <p>当前使用的数据：{{ usingDatafile }}</p>
+                          </div>
+                          <a-form>
+                            <a-form-item label="当前模型中存在疑问的模块">
+
+                              <a-select>
+                                <a-select-option v-for="item in contentJson.modules" :value="item">
+                                  {{ item }}
+                                </a-select-option>
+                              </a-select>
+                            </a-form-item>
+                            <a-form-item>
+                              <div>问题描述</div>
+                              <a-input>
+                              </a-input>
+                            </a-form-item>
+                          </a-form>
+                        </a-modal>
+                        <el-tabs v-model="faultDiagnosisResultOption" tab-position="top">
+                          <el-tab-pane key="1" label="连续样本指标变化">
+                            <!-- 连续样本指标变化的折线图 -->
+                            <div id="indicatorVaryingFigure" style="width: 1200px; height: 500px"></div>
+                          </el-tab-pane>
+                          <el-tab-pane key="2" label="不同类型样本占比">
+                            <!-- 故障样本与非故障样本数量饼状图 -->
+                            <div id="faultExampleRatioFigure" style="width: 1200px; height: 500px"></div>
+                          </el-tab-pane>
+                          <el-tab-pane key="3" label="原始信号波形图">
+                            <div style="width: 1200px; height: 500px">
+                              <el-image
+                                  style="width: auto; height: 450px;"
+                                  :src="faultDiagnosisFigure"
+                                  :zoom-rate="1.2"
+                                  :max-scale="7"
+                                  :min-scale="0.2"
+                                  :preview-src-list="[faultDiagnosisFigure]"
+                                  :initial-index="4"
+                                  fit="cover"
+                              />
+                            </div>
+
+                          </el-tab-pane>
+                        </el-tabs>
+
+                        <!-- <img :src="faultDiagnosisFigure" alt="fault_diagnosis_figure" class="result_image"
+                          style="width: auto; height: 450px;" /> -->
+
+                      </div>
+                      <!-- 故障故障预测可视化 -->
+                      <div v-show="displayFaultRegression" style="margin-top: 20px; font-size: 18px;">
+                        <div style="width: 1000px; margin-left: 250px;  font-weight: bold">
+                          经故障诊断算法，目前该部件<span :v-model="faultRegression"
+                                                         style="font-weight: bold; color: red;">{{
+                            faultRegression
+                          }}</span>
+                          <span v-if="!haveFault" :v-model="timeToFault" style="font-weight: bold;">根据故障预测算法预测，该部件{{
+                              timeToFault
+                            }}后会出现故障</span>
+                        </div>
+                        <br>
+
+                        <el-image
+                            style="width: auto; height: 450px;"
+                            :src="faultRegressionFigure"
+                            :zoom-rate="1.2"
+                            :max-scale="7"
+                            :min-scale="0.2"
+                            :preview-src-list="[faultRegressionFigure]"
+                            :initial-index="4"
+                            fit="cover"
+                        />
+                      </div>
+
+                      <el-tabs v-model="activeName3" v-show="displayInterpolation" type="border-card">
+                        <el-tab-pane v-for="item in interpolationResultsOfSensors" :key="item.name" :label="item.label"
+                                     :name="item.name">
+                          <el-image
+                              style="width: auto; height: 450px;"
+                              :src="interpolationFigures[item.name - 1]"
+                              :zoom-rate="1.2"
+                              :max-scale="7"
+                              :min-scale="0.2"
+                              :preview-src-list="[interpolationFigures[item.name - 1]]"
+                              :initial-index="4"
+                              fit="cover"
+                          />
+                        </el-tab-pane>
+                      </el-tabs>
+                      <!-- 无量纲化可视化 -->
+                      <div v-show="displayNormalization" style="font-size: 18px;">
+                        <!-- 针对提取到的特征进行的无量纲化得到的结果 -->
+                        <div v-if="normalizationResultType == 'table'">
+                          <div style="font-size: large;">原数据</div>
+                          <el-table :data="normalizationFormdataRaw" style="width: 96%; margin-top: 20px;"
+                          >
+                            <el-table-column v-for="column in normalizationColumns" :key="column.prop"
+                                             :prop="column.prop"
+                                             :label="column.label"
+                                             :width="column.width">
+                            </el-table-column>
+                          </el-table>
+                          <br>
+                          <div style="font-size: large;">标准化后数据</div>
+                          <el-table :data="normalizationFormdataScaled" style="width: 96%; margin-top: 20px;"
+                          >
+                            <el-table-column v-for="column in normalizationColumns" :key="column.prop"
+                                             :prop="column.prop"
+                                             :label="column.label"
+                                             :width="column.width">
+                            </el-table-column>
+                          </el-table>
+                        </div>
+                        <!-- 针对原始信号序列进行无量纲化得到的结果 -->
+                        <el-tabs v-model="activeName4" v-if="normalizationResultType == 'figure'" type="border-card">
+                          <el-tab-pane v-for="item in normalizationResultsSensors" :key="item.name" :label="item.label"
+                                       :name="item.name">
+                            <el-image
+                                style="width: 900; height: 450px;"
+                                :src="normalizationResultFigures[item.name - 1]"
+                                :zoom-rate="1.2"
+                                :max-scale="7"
+                                :min-scale="0.2"
+                                :preview-src-list="[normalizationResultFigures[item.name - 1]]"
+                                :initial-index="4"
+                                fit="cover"
+                            />
+                          </el-tab-pane>
+                        </el-tabs>
+
+                      </div>
+                      <!-- 小波降噪可视化 -->
+                      <!-- <img :src="denoiseFigure" alt="denoise_figure" class="result_image"
+                        style="width: 900px; height: 450px;" /> -->
+                      <el-tabs v-model="activeName2" v-show="displayDenoise" type="border-card">
+                        <el-tab-pane v-for="item in waveletResultsOfSensors" :key="item.name" :label="item.label"
+                                     :name="item.name">
+                          <el-image
+                              style="width: auto; height: 450px;"
+                              :src="denoiseFigures[item.name - 1]"
+                              :zoom-rate="1.2"
+                              :max-scale="7"
+                              :min-scale="0.2"
+                              :preview-src-list="[denoiseFigures[item.name - 1]]"
+                              :initial-index="4"
+                              fit="cover"
+                          />
+                        </el-tab-pane>
+                      </el-tabs>
+                      <!-- 展示用户文件中原始数据 -->
+                      <div v-if="displayRawDataWaveform" style="padding: 20px; position: relative;">
+                        <el-button text
+                                   style="color: green;position: absolute; right: 10px; top: 10px; width: 90px; height: 50px"
+                                   @click="displayRawDataWaveform = false">关闭
+                        </el-button>
+                        <p style="text-align: left; color: red; font-weight: bolder; font-size: 18px">
+                          已上传数据文件内容浏览</p>
+                        <p style="font-size: 18px">文件名：{{ currentDataBrowsing }}</p>
+                        <el-image
+                            style="width: auto; height: 450px;"
+                            :src="rawDataWaveform"
+                            :zoom-rate="1.2"
+                            :max-scale="7"
+                            :min-scale="0.2"
+                            :preview-src-list="[rawDataWaveform]"
+                            :initial-index="4"
+                            fit="cover"
+                        />
+
                       </div>
                     </el-scrollbar>
-
-                  </el-tab-pane>
-
-                  <el-tab-pane label="相关系数矩阵热力图" name="second">
-                    <el-scrollbar height="480px">
-                      <!-- <img :src="correlationFigure" alt="correlation_figure" class="result_image"
-                      style="width: auto; height: 500px;" /> -->
-                      <el-image
-                          style="width: auto; height: 500px;"
-                          :src="correlationFigure"
-                          :zoom-rate="1.2"
-                          :max-scale="7"
-                          :min-scale="0.2"
-                          :preview-src-list="[correlationFigure]"
-                          :initial-index="4"
-                          fit="cover"
-                      />
-                    </el-scrollbar>
-
-                  </el-tab-pane>
-
-                </el-tabs>
-
-              </div>
-
-              
-              <!-- 故障诊断可视化 -->
-              <div v-if="displayFaultDiagnosis" class="result-visualization-container">
-                <!-- <div style="font-weight: bold;">
-                  故障诊断结果为： 由输入的振动信号，根据故障诊断算法得知该部件<span :v-model="faultDiagnosis"
-                    style="font-weight: bold; color: red;">{{
-                      faultDiagnosis }}</span>
-                </div> -->
-                <v-md-preview style="padding: 0px; margin: 0px" :text="faultDiagnosisResultsText"></v-md-preview>
-                
-                <!-- 用户填写反馈的对话框 -->
-                
-                <el-tabs v-model="faultDiagnosisResultOption" tab-position="top">
-                  <el-tab-pane key="1" label="连续样本指标变化">
-                    <!-- 连续样本指标变化的折线图 -->
-                    <div id="indicatorVaryingFigure" style="width: 1200px; height: 500px"></div>
-                  </el-tab-pane>
-                  <el-tab-pane key="2" label="不同类型样本占比">
-                    <!-- 故障样本与非故障样本数量饼状图 -->
-                    <div id="faultExampleRatioFigure" style="width: 1200px; height: 500px"></div>
-                  </el-tab-pane>
-                  <el-tab-pane key="3" label="原始信号波形图">
-                    <div style="width: 1200px; height: 500px">
-                      <el-image
-                          style="width: auto; height: 450px;"
-                          :src="faultDiagnosisFigure"
-                          :zoom-rate="1.2"
-                          :max-scale="7"
-                          :min-scale="0.2"
-                          :preview-src-list="[faultDiagnosisFigure]"
-                          :initial-index="4"
-                          fit="cover"
-                      />
-                    </div>
-
-                  </el-tab-pane>
-                </el-tabs>
-
-                <!-- <img :src="faultDiagnosisFigure" alt="fault_diagnosis_figure" class="result_image"
-                  style="width: auto; height: 450px;" /> -->
-
-              </div>
-              <!-- 故障故障预测可视化 -->
-              <div v-if="displayFaultRegression" style="margin-top: 20px; font-size: 18px;">
-                <div style="width: 1000px; margin-left: 250px;  font-weight: bold">
-                  经故障诊断算法，目前该部件<span :v-model="faultRegression" style="font-weight: bold; color: red;">{{
-                    faultRegression
-                  }}</span>
-                  <span v-if="!haveFault" :v-model="timeToFault" style="font-weight: bold;">根据故障预测算法预测，该部件{{
-                      timeToFault
-                    }}后会出现故障</span>
+                  </div>
                 </div>
-                <br>
-                <!-- <img :src="faultRegressionFigure" alt="fault_regression_figure" class="result_image"
-                  style="width: auto; height: 450px;" /> -->
-                <el-image
-                    style="width: auto; height: 450px;"
-                    :src="faultRegressionFigure"
-                    :zoom-rate="1.2"
-                    :max-scale="7"
-                    :min-scale="0.2"
-                    :preview-src-list="[faultRegressionFigure]"
-                    :initial-index="4"
-                    fit="cover"
-                />
               </div>
-              <!-- 插值处理结果可视化 -->
-              <!-- <div v-if="displayInterpolation" style="margin-top: 20px; font-size: 18px;">
-                <br>
-                <img :src="interpolationFigure" alt="interpolation_figure" class="result_image"
-                  style="width: 900px; height: 450px;" />
-              </div> -->
-              <el-tabs v-model="activeName3" v-if="displayInterpolation" type="border-card">
-                <el-tab-pane v-for="item in interpolationResultsOfSensors" :key="item.name" :label="item.label"
-                             :name="item.name">
-                  <!-- <img :src="interpolationFigures[item.name - 1]" alt="figure" id="figure"
-                  class="result_image" style="width: 900px; height: 450px;" /> -->
-                  <el-image
-                      style="width: auto; height: 450px;"
-                      :src="interpolationFigures[item.name - 1]"
-                      :zoom-rate="1.2"
-                      :max-scale="7"
-                      :min-scale="0.2"
-                      :preview-src-list="[interpolationFigures[item.name - 1]]"
-                      :initial-index="4"
-                      fit="cover"
-                  />
-                </el-tab-pane>
-              </el-tabs>
-              <!-- 无量纲化可视化 -->
-              <div v-if="displayNormalization" style="font-size: 18px;">
-                <!-- 针对提取到的特征进行的无量纲化得到的结果 -->
-                <div v-if="normalizationResultType == 'table'">
-                  <div style="font-size: large;">原数据</div>
-                  <el-table :data="normalizationFormdataRaw" style="width: 96%; margin-top: 20px;"
+            </transition>
+
+            <!-- 控制按钮 -->
+            <div class="control-buttonsOfElMain">
+              <button
+                  class="icon-buttonOfElMain"
+                  :style="dark ? 'color: #ffffff;' : 'color: #000000;'"
+                  @click="showResultOfElMain"
+                  v-if="!isResultVisibleOfElMain"
+                  aria-label="显示结果"
+                  @keydown.enter.prevent="showResultOfElMain"
+                  @keydown.space.prevent="showResultOfElMain"
+              >
+                <i class="fa-solid fa-angles-up"></i>
+              </button>
+            </div>
+
+
+            <!-- 输出结果配置面板 -->
+            <el-dialog v-model="outputConfigVisible" title="模型输出" style="width: 40%; min-height: 30%">
+              <div style="display: flex; flex-direction: column; justify-content: left;">
+                  <!-- <span style="">选择需要输出的结果</span>
+                  <el-check-group v-model="moduleResultToGenerateList">
+                    <el-checkbox v-for="node in nodeList" :key="node.id" :label="node.label" :value="node.label"/>
+                  </el-check-group> -->
+                <div
+                  style="
+                    padding: 30px;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: flex-start;
+                  "
+                >
+                  <div style="font-size: 16px; margin-right: 30px; display: flex; flex-direction: row; align-items: center;">
+                    <p>选择需要输出的结果（至少选择一项）：</p>
+                  </div>
+                  <el-checkbox
+                    v-model="selectAllModuleToGenerateResult"
+                    @change="toggleSelectAll"
+                    style="margin-right: 50px"
+                    >全选</el-checkbox
                   >
-                    <el-table-column v-for="column in normalizationColumns" :key="column.prop" :prop="column.prop"
-                                     :label="column.label"
-                                     :width="column.width">
-                    </el-table-column>
-                  </el-table>
-                  <br>
-                  <div style="font-size: large;">标准化后数据</div>
-                  <el-table :data="normalizationFormdataScaled" style="width: 96%; margin-top: 20px;"
-                  >
-                    <el-table-column v-for="column in normalizationColumns" :key="column.prop" :prop="column.prop"
-                                     :label="column.label"
-                                     :width="column.width">
-                    </el-table-column>
-                  </el-table>
+                  <div style="max-width: 70%">
+                    <el-checkbox-group v-model="moduleResultToGenerateList" :min="1">
+                    <!--  -->
+                      <el-checkbox v-for="module in contentJson.modules" :key="module" :label="module" :value="module"/>
+                    </el-checkbox-group>
+                  </div>
                 </div>
-                <!-- 针对原始信号序列进行无量纲化得到的结果 -->
-                <el-tabs v-model="activeName4" v-if="normalizationResultType == 'figure'" type="border-card">
-                  <el-tab-pane v-for="item in normalizationResultsSensors" :key="item.name" :label="item.label"
-                               :name="item.name">
-                    <!-- <img :src="normalizationResultFigures[item.name - 1]" alt="figureOfSensor" id="figure"
-                    class="result_image" style="width: 900px; height: 450px;" /> -->
-                    <el-image
-                        style="width: 900; height: 450px;"
-                        :src="normalizationResultFigures[item.name - 1]"
-                        :zoom-rate="1.2"
-                        :max-scale="7"
-                        :min-scale="0.2"
-                        :preview-src-list="[normalizationResultFigures[item.name - 1]]"
-                        :initial-index="4"
-                        fit="cover"
-                    />
-                  </el-tab-pane>
-                </el-tabs>
-
+                <div style="">
+                  <el-button style="width: 180px" @click="generateConclusion">生成输出报告</el-button>
+                 
+                </div>
               </div>
-              <!-- 小波降噪可视化 -->
-
-              <!-- <img :src="denoiseFigure" alt="denoise_figure" class="result_image"
-                style="width: 900px; height: 450px;" /> -->
-              <el-tabs v-model="activeName2" v-if="displayDenoise" type="border-card">
-                <el-tab-pane v-for="item in waveletResultsOfSensors" :key="item.name" :label="item.label"
-                             :name="item.name">
-                  <!-- <img :src="denoiseFigures[item.name - 1]" alt="figure" id="figure"
-                  class="result_image" style="width: 900px; height: 450px;" /> -->
-                  <el-image
-                      style="width: auto; height: 450px;"
-                      :src="denoiseFigures[item.name - 1]"
-                      :zoom-rate="1.2"
-                      :max-scale="7"
-                      :min-scale="0.2"
-                      :preview-src-list="[denoiseFigures[item.name - 1]]"
-                      :initial-index="4"
-                      fit="cover"
-                  />
-                </el-tab-pane>
-              </el-tabs>
-
-              <!-- 展示用户文件中原始数据 -->
-              <div v-if="displayRawDataWaveform" style="padding: 20px; position: relative;">
-                <el-button text
-                           style="color: green;position: absolute; right: 10px; top: 10px; width: 90px; height: 50px"
-                           @click="displayRawDataWaveform = false">关闭
-                </el-button>
-                <p style="text-align: left; color: red; font-weight: bolder; font-size: 18px">已上传数据文件内容浏览</p>
-                <p style="font-size: 18px">文件名：{{ currentDataBrowsing }}</p>
-                <el-image
-                    style="width: auto; height: 450px;"
-                    :src="rawDataWaveform"
-                    :zoom-rate="1.2"
-                    :max-scale="7"
-                    :min-scale="0.2"
-                    :preview-src-list="[rawDataWaveform]"
-                    :initial-index="4"
-                    fit="cover"
-                />
-
-              </div>
-
-            </el-scrollbar>
-
+            </el-dialog>
           </div>
-
         </el-main>
 
-
         <!-- 以抽屉的形式打开用户历史模型 -->
-        <el-drawer v-model="modelsDrawer" direction="ltr" size="35%">
-
-          <div style="display: flex; flex-direction: column; ">
-            <el-col>
-
-              <h2 style=" margin-bottom: 25px; color: #253b45;">系统模型库</h2>
-              <span style="font-size: 15px; color:#a1a2b1">*当前用户权限为{{
-                  userRole === 'user' ? '普通用户，可以使用系统中的模型' : '系统用户，可以添加模型和删除本用户添加的模型'
-                }}</span>
-              <el-table :data="fetchedModelsInfo" height="500" stripe style="width: 100%">
-                <el-table-column :width="100" property="author" label="模型作者"/>
-                <el-table-column :width="200" property="model_name" label="模型名称" show-overflow-tooltip/>
-                <el-table-column :width="260" label="操作">
-                  <template #default="scope">
-                    <el-button size="small" type="primary" style="width: 50px;" @click="useModel(scope.row)">
-                      使用
-                    </el-button>
-                    <el-button size="small" type="danger" style="width: 50px;" v-if="userRole === 'superuser'"
-                               @click="deleteModel(scope.$index, scope.row)">
-                      删除
-                    </el-button>
-                    <el-popover placement="bottom" :width='500' trigger="click">
-                      <el-descriptions :title="modelName" :column="3" direction="vertical"
-                      >
-                        <el-descriptions-item label="使用模块" :span="3">
-                          <el-tag size="small" v-for="algorithm in modelAlgorithms">{{ algorithm }}</el-tag>
-                        </el-descriptions-item>
-                        <el-descriptions-item label="算法参数" :span="3">
-                          <div v-for="item in modelParams">{{ item.模块名 }}: {{ item.算法 }}</div>
-                        </el-descriptions-item>
-                      </el-descriptions>
-                      <template #reference>
-                        <el-button size="small" type="info" style="width: 80px" @click="showModelInfo(scope.row)">
-                          查看模型
-                        </el-button>
-                      </template>
-                    </el-popover>
-                  </template>
-                </el-table-column>
-              </el-table>
-
-              <el-dialog v-model="deleteModelConfirmVisible" title="提示" width="500">
-                <span style="font-size: 20px;">确定删除该模型吗？</span>
-                <template #footer>
-                  <el-button
-                      style="width: 150px"
-                      @click="deleteModelConfirmVisible = false"
-                  >取消
-                  </el-button
-                  >
-                  <el-button
-                      style="width: 150px; margin-right: 70px"
-                      type="primary"
-                      @click="deleteModelConfirm"
-                  >确定
-                  </el-button
-                  >
-                </template>
-              </el-dialog>
-            </el-col>
-          </div>
-        </el-drawer>
+        
 
         <!-- 以抽屉的形式打开用户历史数据 -->
         <el-drawer v-model="dataDrawer" direction="ltr" size="45%">
@@ -1473,13 +1567,6 @@
                     <el-popconfirm title="你确定要删除该数据文件吗"
                                    @confirm="deleteDatasetConfirm(scope.$index, scope.row)">
                       <template #reference>
-                        <!-- <el-button
-                          size="small"
-                          type="danger"
-                          style="width: 50px"
-                        >
-                          删除组件
-                        </el-button> -->
                         <el-button
                             size="small"
                             type="danger"
@@ -1517,79 +1604,2293 @@
                   </template>
                 </el-table-column>
               </el-table>
-
-              <!-- <el-dialog
-                v-model="deleteDatasetConfirmVisible"
-                title="提示"
-                width="500"
-              >
-                <span style="font-size: 20px">确定删除该数据文件吗？</span>
-                <template #footer>
-                  <el-button
-                    style="width: 150px"
-                    @click="deleteDatasetConfirmVisible = false"
-                    >取消</el-button
-                  >
-                  <el-button
-                    style="width: 150px; margin-right: 70px"
-                    type="primary"
-                    @click="deleteDatasetConfirm"
-                    >确定</el-button
-                  >
-                </template>
-              </el-dialog> -->
             </el-col>
 
           </div>
 
         </el-drawer>
-
       </el-container>
-
     </el-container>
-    <el-dialog v-model="dialogModle" title="保存模型" draggable width="30%">
-      <el-form :model="modelInfoForm" :rules="rules">
-        <el-form-item label="模型名称" :label-width='140' prop="name"
+
+    <a-modal
+        v-model:open="dialogModle"
+        title="保存模型" width="30%"
+        footer=""
+    >
+      <el-form
+          :model="modelInfoForm"
+          :rules="rules"
+          ref="modelInfoFormRef">
+        <el-form-item
+            label="模型名称"
+            :label-width='140'
+            prop="name"
         >
-          <el-input style="width: 160px;" v-model="modelInfoForm.name" autocomplete="off"/>
+          <el-input
+              style="width: 160px;"
+              v-model="modelInfoForm.name"
+              autocomplete="off"/>
+        </el-form-item>
+          
+        <el-form-item 
+          label="模型描述" 
+          :label-width='140' 
+          prop="description"
+        >
+          <el-input style="width: 160px;" v-model="modelInfoForm.description"/>
+        </el-form-item>
+
+        <!--      选择挂载的树节点-->
+
+        <el-form-item
+            label="适配部件"
+            :label-width='140'
+            prop="classify"
+        >
+          <a-tree-select
+              v-model:value="modelInfoForm.class"
+              show-search
+              style="width: 100%"
+              :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+              placeholder="请选择适配部位分类"
+              allow-clear
+              tree-default-expand-all
+              :tree-data="dataSourceOfTree"
+              tree-node-filter-prop="label"
+          >
+            <template #title="{ value: val, label }">
+              <b v-if="val === 'parent 1-1'" style="color: #08c">sss</b>
+              <template v-else>{{ label }}</template>
+            </template>
+          </a-tree-select>
         </el-form-item>
       </el-form>
       <span class="dialog-footer">
-        <el-button style="margin-left: 85px; width: 150px;" @click="dialogModle = false">取消</el-button>
-        <el-button style="width: 150px;" type="primary" @click="saveModelConfirm">确定</el-button>
-      </span>
-    </el-dialog>
+                <el-button style="margin-left: 85px; width: 150px;" @click="dialogModle = false">取消</el-button>
+                <el-button style="width: 150px;" type="primary" @click="saveModelConfirm(modelInfoFormRef)">确定</el-button>
+              </span>
+    </a-modal>
   </div>
 </template>
 
 <script lang="ts" setup>
 
-import {onMounted, nextTick, ref, h, reactive} from 'vue'
+import {computed, h, nextTick, onMounted, reactive, ref, watch} from 'vue'
 import {jsPlumb} from 'jsplumb'
-import {Action, ElNotification, ElMessage, ElMessageBox} from "element-plus";
+import {Action, ElButton, ElDialog, ElInput, ElMessage, ElMessageBox, ElNotification, ElTree} from "element-plus";
 import axios from 'axios';
-import {DraggableContainer} from "@v3e/vue3-draggable-resizable";
-import {computed} from 'vue';
 import {useRouter} from 'vue-router';
 import api from '../utils/api.js'
 import {
-  labelsForAlgorithms,
-  plainIntroduction,
-  labelsForParams,
   contrastOfAlgorithm,
+  labelsForAlgorithms,
+  labelsForParams,
+  plainIntroduction,
   predefinedModel
 } from '../components/constant.ts'
 import * as echarts from 'echarts';
-import {EditOutlined, UploadOutlined} from "@ant-design/icons-vue";
-import {message} from "ant-design-vue";
+import {
+  EditOutlined,
+  FolderOpenOutlined,
+  FolderOutlined,
+  QuestionCircleOutlined,
+  UploadOutlined
+} from "@ant-design/icons-vue";
 import type {UploadProps} from "ant-design-vue";
+import {message} from "ant-design-vue";
 import {Rule} from "ant-design-vue/es/form";
 import uploadPrivateAlgorithmFiless from '../components/uploadPrivateAlgorithmFiles.vue'
 import managePrivateAlgorithm from '../components/managePrivateAlgorithm.vue';
-import {FolderOutlined, FolderOpenOutlined, QuestionCircleOutlined} from '@ant-design/icons-vue';
-import {pa} from 'element-plus/es/locales.mjs';
-import {multipleCascaderProps} from 'ant-design-vue/es/vc-cascader/Cascader';
 
+///////////////////////////////////////////////////////////////////////////////sidebar start
+//菜单相关
+import MyCollapse from "../components/MyCollapse.vue"
+import MyCollapseItem from "../components/MyCollapseItem.vue"
+//拖拽组件相关
+import DragModelItem from "./DragModelItem.vue"
+import type Node from 'element-plus/es/components/tree/src/model/node'
+//////////////////////////////////////////////////////////////////模型管理相关
+import PublishModel from './PublishModel.vue';
+//////////////////////////////////////////////////////////////////用户数据编辑相关
+import datasetManagement from './datasetManagement.vue';
+//////////////////////////////////////////////////////////////////系统组件源码编辑相关
+import editCodeEmbedded from './editCodeEmbedded.vue';
+//下载报告
+
+//模型管理
+// 当子组件删除模型，并且该模型已经被加载，则需要重置模型
+const handleResetModel = (modelName: string) => {
+  if (modelLoaded.value == modelName) {
+    modelLoaded.value = '无'
+    modelHasBeenSaved = false
+    canStartProcess.value = true
+    handleClear()
+  }
+}
+// 点击子组件publishModel的历史模型表格中使用按钮复现用户历史模型
+const handleLoadModel = (row: any) => {
+  console.log('接受子组件数据',row)
+  modelLoaded.value = row.model_name
+  //后端传来的数据恢复画布信息
+  let objects = JSON.parse(row.model_info)
+  console.log('objects',objects)
+  //要执行两遍才会渲染上
+  restoreCanvas(objects)
+  console.log('第一次渲染:', modeling_nodeList.value)
+  // 使用setTimeout等待0.5秒
+  setTimeout(() => {
+    // 0.5秒后执行的操作
+
+    restoreCanvas(objects)
+    console.log('第二次渲染:', modeling_nodeList.value)
+  }, 500);
+// console.log('点击历史模型复现：', row)
+
+// if (nodeList.value.length != 0) {
+//   nodeList.value.length = 0
+// }
+handleClear()
+updateStatus('当前模型已保存')
+modelHasBeenSaved = true
+canStartProcess.value = false
+modelLoaded.value = row.model_name
+modelLoadedId = String(row.id)
+// let objects
+// try {
+//   objects = JSON.parse(row.model_info)
+// } catch {
+//   objects = row.model_info
+// }
+
+// let connection = objects.connection      // 模型连线信息
+// let nodeList1 = objects.nodeList         // 模型节点信息
+
+// console.log('connection:', connection)
+// console.log('nodeList:', nodeList1)
+
+
+// 恢复节点
+// for (let node of nodeList1) {
+
+//   nodeList.value.push(node)
+
+//   if (node.label == '特征提取') {
+//     features.value.length = 0
+//     let params = node.parameters[node.use_algorithm]
+//     for (let [key, value] of Object.entries(params)) {
+//       if (value) {
+//         features.value.push(key)
+//       }
+//     }
+//   }
+// }
+// 用于将节点的id与节点的label对应起来
+// let idToLabelList = {'nodeId': [], 'nodeLabel': []}
+
+// 初始化每个节点的可连接状态
+// for (let node of nodeList.value) {
+
+//   let nodeId = node.id
+//   idToLabelList.nodeId.push(nodeId)
+//   idToLabelList.nodeLabel.push(node.label)
+
+//   nextTick(() => {
+//     // plumbIns.draggable(nodeId, { containment: "efContainer" })
+//     if (node.id === '2.2') {
+//       plumbIns.makeTarget(nodeId, deff.jsplumbTargetOptions)
+//       return
+//     }
+//     plumbIns.makeSource(nodeId, deff.jsplumbSourceOptions)
+//     // plumbIns.addEndpoint(nodeId, deff.jsplumbTargetOptions)
+//     if (node.id === '1' || node.id === '4') {
+//       return
+//     }
+//     plumbIns.makeTarget(nodeId, deff.jsplumbTargetOptions)
+//   })
+// }
+
+// 根据返回的模型的连接顺序，恢复模型中的连线
+// let connectionList = []
+// let connection2 = []   // 记录每个节点的id
+// let node_num = connection.length
+
+// 初始化connection2，用于记录每个节点的id
+// for (let i = 0; i < node_num; i++) {
+//   let label = connection[i]
+//   for (let j = 0; j < node_num; j++) {
+//     if (idToLabelList.nodeLabel[j] === label) {
+//       connection2[i] = idToLabelList.nodeId[j]
+//       break
+//     }
+//   }
+// }
+// console.log("connection2:", connection2)
+
+// saveModelSetting(false, connection)
+// contentJson.schedule = connection
+// modelSetup.value = true
+// // 如果只有一个节点，则不恢复连线，否则按照模型信息中各模块的连接顺序恢复连线
+// if (node_num == 1) {
+//   connectionList = []
+// } else {
+//   for (let i = 0; i < node_num - 1; i++) {
+//     connectionList.push({'soruce_id': connection2[i], 'target_id': connection2[i + 1]})
+//   }
+//   nextTick(() => {
+//     for (let line of connectionList) {
+//       plumbIns.connect({
+//         source: document.getElementById(line.soruce_id),
+//         target: document.getElementById(line.target_id)
+//       })
+//     }
+//   })
+// }
+}
+// 用户查看源文件
+const browseDataset = (row: { dataset_name: any; }) => {
+
+// 清除可视化区域内容
+resultsViewClear()
+canShowResults.value = true
+// 发送请求获取原始数据的波形图
+let filename = row.dataset_name
+
+api.get('user/browse_datafile/?filename=' + filename).then((response: any) => {
+  if (response.status === 200) {
+    displayRawDataWaveform.value = true
+    let data = response.data
+    let figure = data.figure_Base64
+
+    rawDataWaveform.value = 'data:image/png;base64,' + figure
+    currentDataBrowsing.value = filename
+
+    console.log('访问成功：')
+  } else {
+    ElMessage.error('访问文件失败')
+  }
+})
+    .catch((error: any) => {
+      console.log('访问文件失败：', error)
+    })
+}
+// 修改模型源码
+const canOpenCodeEditor = ref(true)
+let moduleWithCode: string[] = []
+const codeEditDialogVisible = ref(false)
+
+const openCodeEditPanel = () => {
+  codeEditDialogVisible.value = true
+}
+// 用户选择数据库中的数据集
+const datasetManagementDialog = ref(false)
+const searchDataKeyword = ref('')
+// 子组件向父组件发送数据
+// const emit = defineEmits(["switchDrawer"]);
+const openDatasetLoadingPanel = () => {
+  let url = 'user/fetch_datafiles/'
+  api.get(url)
+      .then((response: any) => {
+        let datasetInfo = response.data
+        modelsDrawer.value = false;
+        fetchedDataFiles.value = []
+        
+        for (let item of datasetInfo) {
+          fetchedDataFiles.value.push(item)
+        }
+        
+        // dataDrawer.value = true
+        datasetManagementDialog.value = true
+        // emit("switchDrawer", fetchedDatasetsInfo);
+      })
+
+  // fetchData.forEach(element => {
+  //   fetchedDataFiles.value.push(element)
+  // });
+
+};
+//////////////////////////////////////////////////////////////////菜单面板--start
+const activeNamesOfMenuPanel = ref(['1'])// 当前展开项
+//点击了那个菜单项
+const onItemClickOfMycollapse = (data) => {
+  // console.log("=========================================================================")
+  // console.log(data.name)
+}
+//////////////////////////////////////////////////////////////////菜单面板--end
+///////////////////////////////////////////////////////////////////////////////sidebar end
+
+///////////////////////////////////////////////////////////////////////////////树--start
+interface Tree {
+  id: number
+  label: string
+  children?: Tree[]
+}
+
+const treeRef = ref<InstanceType<typeof ElTree>>()
+
+let idOfTree = 1000
+
+//是否展开全部
+let isExpandAllOfTree = ref(false)
+
+// 搜索关键字
+const searchKeywordOfTree = ref('')
+// 是否显示编辑对话框
+const isEditDialogVisibleOfTree = ref(false)
+// 当前编辑的节点
+const editingNodeOfTree = ref<Tree | null>(null)
+// 编辑框中的节点名称
+const editNodeLabelOfTree = ref('')
+
+// 数据源
+const dataSourceOfTree = ref<Tree[]>([
+  {
+    value: 1,
+    label: '某型号轨道列车',
+    disabled: true, // 禁用该节点
+    children: [
+      {
+        value: 11,
+        label: '转向架',
+        disabled: true, // 禁用该节点
+        children: [
+          {
+            value: 111,
+            label: '构架系统',
+            disabled: true, // 禁用该节点
+            children: [
+              {
+                value: 1111,
+                label: '构架组成',
+                disabled: true, // 禁用该节点
+                children: [
+                  {value: 11111, label: '侧梁组成'},
+                  {value: 11112, label: '空气弹簧座板'},
+                  {value: 11113, label: '高度阀调整杆安装销'},
+                  {value: 11114, label: '扣板组成'},
+                  {value: 11115, label: '端梁座'},
+                  {value: 11116, label: '弹簧座'},
+                  {value: 11117, label: '弹簧座板'},
+                  {value: 11118, label: '闸线架支座'},
+                  {value: 11119, label: '线夹座'},
+                  {value: 11120, label: '止挡座组成'},
+                  {value: 11121, label: '安全吊链座'},
+                  {value: 11122, label: '侧梁工艺块'},
+                  {value: 11123, label: '长筋板'},
+                  {value: 11124, label: '托板组成'},
+                  {value: 11125, label: '短扣板'},
+                  {value: 11126, label: '压差阀座'},
+                  {value: 11127, label: '转向架铭牌'},
+                  {value: 11128, label: '构架序列号标志牌'},
+                  {value: 11129, label: '短筋板'},
+                ],
+              },
+              {
+                value: 1112,
+                label: '构架衡量组成',
+                disabled: true, // 禁用该节点
+                children: [
+                  {value: 1113, label: '横梁钢管组成'},
+                  {value: 1114, label: '牵引电机吊座组成'},
+                  {value: 1115, label: '齿轮箱吊座组成'},
+                  {value: 1116, label: '构架牵引拉杆座'},
+                  {value: 1117, label: '纵向连接梁'},
+                  {value: 1118, label: '横向止挡组成'},
+                  {value: 1119, label: '横梁组成垂直挡'},
+                  {value: 1120, label: '构架外牵引拉杆座'},
+                ],
+              },
+              {
+                value: 1121,
+                label: '构架端梁组成',
+                disabled: true, // 禁用该节点
+                children: [
+                  {value: 1122, label: '端梁安装梁'},
+                  {value: 1123, label: '端梁安装座组成'},
+                ],
+              },
+            ],
+          },
+          {
+            value: 112,
+            label: '转向架附件',
+            disabled: true, // 禁用该节点
+            children: [
+              {value: 113, label: '转向架排障装置'},
+              {value: 114, label: '轮缘润滑装置'},
+            ],
+          },
+          {
+            value: 115,
+            label: '牵引装置系统',
+            disabled: true, // 禁用该节点
+            children: [
+              {value: 116, label: '中心销'},
+              {value: 117, label: '牵引梁组成'},
+              {value: 118, label: '牵引拉杆组成'},
+              {value: 119, label: '下盖'},
+            ],
+          },
+          // ... 其他子项
+        ],
+      },
+      {
+        value: 12,
+        label: '车体',
+        disabled: true, // 禁用该节点
+        children: [
+          {value: 121, label: '车顶'},
+          {value: 122, label: '车身侧面'},
+          {value: 123, label: '车身底部'},
+        ],
+      },
+      {
+        value: 13,
+        label: '电气系统',
+        disabled: true, // 禁用该节点
+        children: [
+          {value: 131, label: '牵引供电系统'},
+          {value: 132, label: '辅助供电系统'},
+          {value: 133, label: '列车控制系统'},
+        ],
+      },
+      {
+        value: 14,
+        label: '车内设施',
+        disabled: true, // 禁用该节点
+        children: [
+          {value: 141, label: '座椅和客舱布局'},
+          {value: 142, label: '餐饮和服务设施'},
+          {value: 143, label: '信息显示和广播系统'},
+        ],
+      },
+    ],
+  },
+])
+
+// 搜索过滤后的数据
+const filteredDataOfTree = ref<Tree[]>(dataSourceOfTree.value)
+
+// 添加子节点
+const appendOfTree = (data: Tree) => {
+  console.log("添加节点方法执行...")
+
+  const newChild = {id: idOfTree++, label: 'New Node', children: []}
+  if (!data.children) {
+    data.children = []
+  }
+  data.children.push(newChild)
+  dataSourceOfTree.value = [...dataSourceOfTree.value]  // 更新数据源，刷新树
+}
+
+// 删除节点
+const removeOfTree = (node: Node, data: Tree) => {
+  console.log("删除节点方法执行...")
+  console.log(node)
+
+  const parent = node.parent
+  const children: Tree[] = parent.data.children || parent.data
+  const index = children.findIndex((d) => d.id === data.id)
+  if (index !== -1) {
+    children.splice(index, 1)
+    dataSourceOfTree.value = [...dataSourceOfTree.value]  // 更新数据源，刷新树
+  }
+}
+
+// 编辑节点
+const editOfTree = (node: Node, data: Tree) => {
+  console.log("编辑节点方法执行...")
+  console.log(node)
+
+  editingNodeOfTree.value = data
+  editNodeLabelOfTree.value = data.label
+  isEditDialogVisibleOfTree.value = true
+}
+
+// 保存编辑
+const saveEditOfTree = () => {
+  if (editingNodeOfTree.value) {
+    editingNodeOfTree.value.label = editNodeLabelOfTree.value
+    dataSourceOfTree.value = [...dataSourceOfTree.value] // 更新树数据
+    isEditDialogVisibleOfTree.value = false
+  }
+}
+
+// 关闭编辑对话框时清理状态
+const handleCloseOfTree = () => {
+  editingNodeOfTree.value = null
+  editNodeLabelOfTree.value = ''
+}
+
+// 递归过滤节点数据
+const filterDataOfTree = (nodes: Tree[], keyword: string): Tree[] => {
+  return nodes
+      .filter((node) => node.label.toLowerCase().includes(keyword.toLowerCase()))  // 匹配节点名称
+      .map((node) => {
+        // 递归过滤子节点
+        if (node.children) {
+          node.children = filterDataOfTree(node.children, keyword)
+        }
+        return node
+      })
+}
+
+// 处理搜索输入
+watch(searchKeywordOfTree, (val) => {
+  treeRef.value!.filter(val)
+})
+
+// const handleSearchOfTree = () => {
+//   if (searchKeywordOfTree.value != '') {
+//     filteredDataOfTree.value = filterDataOfTree(dataSourceOfTree.value, searchKeywordOfTree.value)
+//   } else {
+//     filteredDataOfTree.value = dataSourceOfTree.value  // 清空搜索时恢复原始数据
+//   }
+// }
+
+const filterNodeOfTree = (value: string, data: Tree) => {
+  if (!value) return true
+  return data.label.includes(value)
+}
+/////////////////////////////////////////////////////////////////////////////////树end
+
+///////////////////////////////////////////////////////////////////////////////el-main分割start
+//onMounted中还有相关的初始化方法
+import {onBeforeUnmount} from 'vue'
+import throttle from 'lodash/throttle'
+// 控制运行结果区域的显示与隐藏
+const isResultVisibleOfElMain = ref(true)
+const resultHeightOfElMain = ref(window.innerHeight / 2) // 默认高度
+const previousHeightOfElMain = ref(resultHeightOfElMain.value)
+// 拖动调整高度
+const MIN_HEIGHT_OF_EL_MAIN = 30
+let MAX_HEIGHT_OF_EL_MAIN = window.innerHeight - 60
+
+let startYOfElMain = 0
+let startHeightOfElMain = 0
+let draggingOfElMain = false
+
+// const toggleResultOfElMain = () => {
+//   if (isResultVisibleOfElMain.value) {
+//     // 保存当前高度
+//     previousHeightOfElMain.value = resultHeightOfElMain.value
+//   }
+//   isResultVisibleOfElMain.value = !isResultVisibleOfElMain.value
+// }
+
+//开启结果显示区域
+const showResultOfElMain = () => {
+  resultHeightOfElMain.value = previousHeightOfElMain.value
+  isResultVisibleOfElMain.value = true
+}
+
+//关闭结果显示区域
+const closeResultOfElMain = () => {
+  if (isResultVisibleOfElMain.value) {
+    previousHeightOfElMain.value = resultHeightOfElMain.value
+    isResultVisibleOfElMain.value = false
+  }
+}
+
+// 初始化拖动（鼠标）
+const initDragOfElMain = (event) => {
+  event.preventDefault()
+  startYOfElMain = event.clientY
+  startHeightOfElMain = resultHeightOfElMain.value
+  draggingOfElMain = true
+  window.addEventListener('mousemove', onDragOfElMain)
+  window.addEventListener('mouseup', stopDragOfElMain)
+}
+
+// 初始化拖动（触摸）
+const initDragTouchOfElMain = (event) => {
+  event.preventDefault()
+  if (event.touches.length !== 1) return
+  startYOfElMain = event.touches[0].clientY
+  startHeightOfElMain = resultHeightOfElMain.value
+  draggingOfElMain = true
+  window.addEventListener('touchmove', onDragTouchOfElMain, {passive: false})
+  window.addEventListener('touchend', stopDragOfElMain)
+}
+
+// 拖动处理（鼠标）
+const onDragOfElMain = throttle((event) => {
+  if (!draggingOfElMain) return
+  const dy = startYOfElMain - event.clientY
+  const newHeight = startHeightOfElMain + dy
+  if (newHeight >= MIN_HEIGHT_OF_EL_MAIN && newHeight <= MAX_HEIGHT_OF_EL_MAIN) {
+    resultHeightOfElMain.value = newHeight
+  }
+}, 16) // 每16ms触发一次，约60fps
+
+// 拖动处理（触摸）
+const onDragTouchOfElMain = throttle((event) => {
+  if (!draggingOfElMain) return
+  if (event.touches.length !== 1) return
+  event.preventDefault()
+  const dy = startYOfElMain - event.touches[0].clientY
+  const newHeight = startHeightOfElMain + dy
+  if (newHeight >= MIN_HEIGHT_OF_EL_MAIN && newHeight <= MAX_HEIGHT_OF_EL_MAIN) {
+    resultHeightOfElMain.value = newHeight
+  }
+}, 16)
+
+// 停止拖动
+const stopDragOfElMain = () => {
+  draggingOfElMain = false
+  window.removeEventListener('mousemove', onDragOfElMain)
+  window.removeEventListener('mouseup', stopDragOfElMain)
+  window.removeEventListener('touchmove', onDragTouchOfElMain)
+  window.removeEventListener('touchend', stopDragOfElMain)
+}
+
+// 更新最大高度
+const updateMaxHeightOfElMain = () => {
+  MAX_HEIGHT_OF_EL_MAIN = window.innerHeight - 60
+  if (resultHeightOfElMain.value > MAX_HEIGHT_OF_EL_MAIN) {
+    resultHeightOfElMain.value = MAX_HEIGHT_OF_EL_MAIN
+  }
+  if (previousHeightOfElMain.value > MAX_HEIGHT_OF_EL_MAIN) {
+    previousHeightOfElMain.value = MAX_HEIGHT_OF_EL_MAIN
+  }
+}
+
+// 创建一个节流版本的handleResize函数，每100毫秒最多执行一次，优化
+const throttledHandleResize = throttle(updateMaxHeightOfElMain, 100);
+
+// 持久化状态到 localStorage
+// const saveStateOfElMain = () => {
+//   localStorage.setItem('runResultHeightOfElMain', resultHeightOfElMain.value)
+//   localStorage.setItem('runResultVisibleOfElMain', isResultVisibleOfElMain.value)
+// }
+
+// 读取状态从 localStorage
+// const loadStateOfElMain = () => {
+//   const savedHeight = localStorage.getItem('runresultHeightOfElMain')
+//   const savedVisibility = localStorage.getItem('runResultVisibleOfElMain')
+//   if (savedHeight) {
+//     resultHeightOfElMain.value = parseInt(savedHeight, 10)
+//     previousHeightOfElMain.value = parseInt(savedHeight, 10)
+//   }
+//   if (savedVisibility !== null) {
+//     isResultVisibleOfElMain.value = savedVisibility === 'true'
+//   }
+// }
+
+onBeforeUnmount(() => {
+  window.removeEventListener('mousemove', onDragOfElMain)
+  window.removeEventListener('mouseup', stopDragOfElMain)
+  window.removeEventListener('touchmove', onDragTouchOfElMain)
+  window.removeEventListener('touchend', stopDragOfElMain)
+  window.removeEventListener('resize', throttledHandleResize);
+  // window.removeEventListener('resize', updateMaxHeightOfElMain)
+  // window.removeEventListener('beforeunload', saveStateOfElMain)
+})
+///////////////////////////////////////////////////////////////////////////////el-main分割end
+
+///////////////////////////////////////////////////////////////////////////////建模区start
+import {MarkerType, Panel, Position, useVueFlow, VueFlow} from '@vue-flow/core'
+// import {Background} from '@vue-flow/background'
+import {ControlButton, Controls} from '@vue-flow/controls'
+import Icon from '../components/vueflow/Icon.vue'
+import DragDropzoneBackground from '../components/vueflow/DragDropzoneBackground.vue'
+import ModelingCustomNode from '../components/vueflow/ModelingCustomNode.vue'
+import ModelingCustomEdge from "../components/vueflow/ModelingCustomEdge.vue";
+import {initialEdges, initialNodes, initialNodes2} from './vueflow/initial-elements.js'
+
+const {onInit, onNodeDragStop, onConnect, addEdges, addNodes, setViewport, toObject} = useVueFlow()
+const {screenToFlowCoordinate, onNodesInitialized, updateNode, getNodes, getEdges, fromObject} = useVueFlow()
+//节点
+// const modeling_nodes = ref(initialNodes)
+// const modeling_nodes2 = ref(initialNodes2)
+// const modeling_nodeList = ref([])
+const modeling_nodeList = ref([])
+
+//边
+// const modeling_edges = ref(initialEdges)
+const modeling_edgesList = ref([])
+//暗黑模式
+const dark = ref(false)
+
+onInit((vueFlowInstance) => {
+  // instance is the same as the return of `useVueFlow`
+  vueFlowInstance.fitView()
+})
+
+onNodeDragStop(({event, nodes, node}) => {
+  // console.log('Node Drag Stop', {event, nodes, node})
+})
+
+//连接时触发
+onConnect((connection) => {
+  console.log('Connection Connected', {connection})
+  connection.type = 'button'
+  connection.animated = true
+  connection.markerEnd = MarkerType.ArrowClosed
+  connection.data = {
+    text: 'custom edge',
+  }
+  connection.style = {}
+  addEdges(connection)
+})
+
+//需要交互锁定
+const removeBtnDisabled = ref(false)
+
+function onInteractionChangeOfControls(active) {
+  console.log("onInteractionChangeOfControls执行了...")
+  console.log(active)
+  removeBtnDisabled.value = active;
+}
+
+//TODO 随机打乱可能需要修改一下
+function modeling_updatePos() {
+  if (modeling_nodeList && modeling_nodeList.value.length > 0) {
+    modeling_nodeList.value = modeling_nodeList.value.map((node) => {
+      return {
+        ...node,
+        position: {
+          x: Math.random() * 400,
+          y: Math.random() * 400,
+        },
+      }
+    })
+  }
+}
+
+//TODO测试：在console输出边和节点的信息
+function modeling_test_logToObject() {
+  console.log(toObject())
+}
+
+//TODO测试：保存建模区的节点信息到localStorage
+function modeling_test_onSave() {
+  localStorage.setItem("saveKeyOfNodeInfo", JSON.stringify(toObject()))
+}
+
+//TODO测试：恢复建模区的节点信息从localStorage
+function modeling_test_onRestore() {
+  const flow = JSON.parse(localStorage.getItem("saveKeyOfNodeInfo"))
+  if (flow) {
+    fromObject(flow)
+  }
+}
+
+//重置坐标到(0,0)
+function modeling_resetTransform() {
+  setViewport({x: 0, y: 0, zoom: 1})
+}
+
+//切换深色模式
+function modeling_toggleDarkMode() {
+  dark.value = !dark.value
+}
+
+//侧边栏拖拽组件后，根据拖拽组件的信息获取要渲染的节点
+function getModelingNode(algorithm, node, nodeDataInfo) {
+  return {
+    id: node.id + '-' + algorithm,
+    type: 'menu',
+    data: {label: nodeDataInfo.label_display, toolbarPosition: Position.Top},
+    nodeInfo: nodeDataInfo, //这个是自定义的属性，原来vueflow没有
+    position: {x: 0, y: 0},
+    class: 'light',
+    style: {background: '#fff', borderRadius: '0px',},
+  };
+}
+
+//新增节点
+let dd_newNode = {}
+const stateOfDragNode = {
+  draggedType: ref(null),
+  isDragOver: ref(false),
+  isDragging: ref(false),
+}
+
+const {draggedType, isDragOver, isDragging} = stateOfDragNode
+
+watch(isDragging, (dragging) => {
+  document.body.style.userSelect = dragging ? 'none' : ''
+})
+
+// 参数编辑栏对应算法编辑内容
+const showParameterEdit = ref('')
+const algorithm = ref('')
+let item = reactive({})
+const findIndex = ref(null)
+
+const model_model = reactive([])
+// const dragEnd = ref(false)
+//which_init_method: 就是指的那个方法初始化的节点：handleDragend | handleDragendAdd
+function onDragStart(event, algorithms, node, which_init_method, type) {
+  // console.log("onDragStart执行了...", modeling_nodeList.value[findIndex].nodeInfo.parameters[modeling_nodeList.value[findIndex].nodeInfo.use_algorithm])
+  // console.log("onDragStart执行了...",event)
+  // let findIndex = modeling_nodeList.value.findIndex(item => item.nodeInfo.id == event.node.nodeInfo.id)
+  // console.log("algorithm:", findIndex)
+  let algorithm = algorithms
+  console.log("node:", node)
+
+  showParameterEdit.value = node.id
+  if (which_init_method == "handleDragend") {
+    const evClientX = event.clientX
+    const evClientY = event.clientY
+    let left
+    if (evClientX < 300)
+      left = evClientX + 'px'
+    else
+      left = evClientX - 300 + 'px'
+    let top = 50 + 'px'
+    const nodeId = node.id
+    const nodeInfo = {
+      label_display: labelsForAlgorithms[algorithm],   // 具体算法的名称
+      label: node.label,      // 算法模块名称，例如：插值处理
+      id: node.id, // 例如：插值处理的id=>1.1
+      nodeId,
+      nodeContainerStyle: {
+        left: left,
+        top: top,
+      },
+      use_algorithm: algorithm,
+      parameters: node.parameters,
+      optional: node.optional
+    }
+    // 针对时域或是频域特征给出不同的可选特征
+    if (nodeInfo.label_display.indexOf('时域和频域') > -1) {
+      features.value = ['均值', '方差', '标准差', '峰度', '偏度', '四阶累积量', '六阶累积量', '最大值', '最小值', '中位数', '峰峰值', '整流平均值', '均方根', '方根幅值',
+        '波形因子', '峰值因子', '脉冲因子', '裕度因子', '重心频率', '均方频率', '均方根频率', '频率方差', '频率标准差', '谱峭度的均值', '谱峭度的峰度']
+    } else {
+      if (nodeInfo.label_display.indexOf('时域特征') > -1) {
+        features.value = ['均值', '方差', '标准差', '峰度', '偏度', '四阶累积量', '六阶累积量', '最大值', '最小值', '中位数', '峰峰值', '整流平均值', '均方根', '方根幅值',
+          '波形因子', '峰值因子', '脉冲因子', '裕度因子']
+      } else if (nodeInfo.label_display.indexOf('频域特征') > -1) {
+        features.value = ['重心频率', '均方频率', '均方根频率', '频率方差', '频率标准差', '谱峭度的均值', '谱峭度的峰度']
+      }
+    }
+
+    dd_newNode = getModelingNode(algorithm, node, nodeInfo)
+    console.log("algorithm:", algorithm)
+    console.log("dd_newNode1", dd_newNode)
+    item = dd_newNode.nodeInfo
+  } else if (which_init_method == "handleDragendAdd") {
+    // 使用find方法查找具有特定alias的对象
+    console.log("现拖拽algorithm", algorithm)
+    const foundObject = fetchedExtraAlgorithmList.value.find(obj => obj.alias === algorithm)
+    const parametersKey = Object.keys(foundObject.parameters)[0]
+    // 如果找到了对象，复制其parameters的键
+    if (foundObject) {
+      console.log("找到的算法文件", parametersKey); // 输出: ['private_fault_diagnosis_deeplearning', 'private_fault_diagnosis_machine_learning']
+    }
+    node.parameters[parametersKey] = node.alias
+    console.log("node.parameters", node.parameters)
+    // 拖拽进来相对于地址栏偏移量
+    const evClientX = event.clientX
+    const evClientY = event.clientY
+    let left
+    if (evClientX < 300) {
+      left = evClientX + 'px'
+    } else {
+      left = evClientX - 300 + 'px'
+    }
+    let top = 50 + 'px'
+    const nodeId = node.id
+    const nodeInfo = {
+      label_display: node.alias,   // 具体算法的名称
+      label: node.label,      // 算法模块名称
+      id: node.id,
+      nodeId,
+      nodeContainerStyle: {
+        left: left,
+        top: top,
+      },
+      use_algorithm: parametersKey,
+      parameters: node.parameters,
+      optional: node.optional
+    }
+
+    // 针对时域或是频域特征给出不同的可选特征
+    // console.log(nodeInfo)
+    dd_newNode = getModelingNode(algorithm, node, nodeInfo)
+    item = dd_newNode.nodeInfo
+  }
+
+  if (event.dataTransfer) {
+    event.dataTransfer.setData('application/vueflow', type)
+    event.dataTransfer.effectAllowed = 'move'
+  }
+  draggedType.value = type
+  isDragging.value = true
+  document.addEventListener('drop', onDragEnd)
+
+  //TODO item = getModelingNode(algorithm, node, nodeInfo)
+  // console.log("item:")
+  
+
+}
+
+function onDragOver(event) {
+  console.log("onDragOver执行了...")
+  event.preventDefault()
+  if (draggedType.value) {
+    isDragOver.value = true
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move'
+    }
+  }
+ 
+}
+
+function onDragLeave() {
+  console.log("onDragLeave执行了...")
+  
+  isDragOver.value = false
+}
+
+function onDragEnd(event) {
+  console.log("onDragEnd执行了...")
+  
+  console.log('找到的索引',findIndex)
+  isDragging.value = false
+  isDragOver.value = false
+  draggedType.value = null
+  document.removeEventListener('drop', onDragEnd)
+}
+
+function onDrop(event) {
+  console.log('drop event', event)
+  //返回的是相对于建模坐标系的x,y，不是屏幕，(0,0)在初始化界面的左上角
+  const position = screenToFlowCoordinate({
+    x: event.clientX,
+    y: event.clientY,
+  })
+
+  //调整被拖拽节点的位置到鼠标中心
+  const {off} = onNodesInitialized(() => {
+    updateNode(dd_newNode.id, (node) => {
+      return ({
+        position: {
+          x: position.x - node.dimensions.width / 2,
+          y: position.y - node.dimensions.height / 2
+        },
+      })
+    })
+    off()
+  })
+
+  //算法模块不允许重复
+  if (modeling_nodeList.value.length > 0) {
+    console.log("modeling_nodeList", modeling_nodeList.value.length)
+    for (let i = 0; i < modeling_nodeList.value.length; i++) {
+      if (modeling_nodeList.value[i].nodeInfo.id == dd_newNode.nodeInfo.id) {
+        ElMessage({
+          message: '不允许出现同一类别的算法',
+          type: 'warning'
+        })
+        return;
+      }
+    }
+  }
+  console.log(dd_newNode);
+  console.log("dd_newNode.nodeInfo", dd_newNode.nodeInfo)
+  modeling_nodeList.value.push(dd_newNode)
+  findIndex.value = modeling_nodeList.value.findIndex(item => item.nodeInfo.id == dd_newNode.nodeInfo.id)
+  console.log("开始拖拽findIndex:", findIndex.value)
+  console.log("索引对应的节点", )
+}
+
+//节点被点击
+function handleNodeClick(event) {
+  // findIndex.value = modeling_nodeList.value.findIndex(item => item.nodeInfo.id == event.node.nodeInfo.id)
+  // console.log("findIndex:", findIndex.value)
+  // console.log("索引对应的节点", modeling_nodeList.value[findIndex.value].nodeInfo.parameters[modeling_nodeList.value[findIndex.value].nodeInfo.use_algorithm])
+  showParameterEdit.value = event.node.nodeInfo.id
+  //运行完毕showResul
+
+  let itemRusult = event.node.nodeInfo.label
+
+  // if (missionComplete.value) {
+  //   console.log('程序运行完成，输出结果：', event.node.nodeInfo)
+  //   let itemRusult = event.node.nodeInfo.label
+  //   if (itemRusult == '数据源') {
+  //     ElMessage.info('数据源模块没有结果可显示')
+  //     return
+  //   }
+  //   if (itemRusult != '层次逻辑回归评估' && itemRusult != '层次分析模糊综合评估' && itemRusult != '层次朴素贝叶斯评估' && itemRusult != '特征提取' && itemRusult != '特征选择' && itemRusult != '故障诊断'
+  //       && itemRusult != '故障预测' && itemRusult != '特征提取' && itemRusult != '插值处理' && itemRusult != '无量纲化' && itemRusult != '小波变换' && itemRusult != '健康评估'
+  //   ) {
+  //     showPlainIntroduction.value = false
+  //     showStatusMessage.value = false
+  //     show1.value = true
+  //     loading.value = true
+  //     canShowResults.value = false
+  //     isShow.value = false
+  //     setTimeout(function () {
+  //       isShow.value = true
+  //       show1.value = false
+  //       loading.value = false
+  //     }, 2500);
+  //     let moduleName = itemRusult
+  //     let url = 'http://127.0.0.1:8000/homepage?display=' + moduleName
+  //     axios.request({
+  //       method: 'GET',
+  //       url: url,
+  //     });
+  //     setTimeout(function () {
+  //       // 为 iframe 的 src 属性添加一个查询参数，比如当前的时间戳，以强制刷新
+  //       var iframe = document.getElementById('my_gradio_app');
+  //       var currentSrc = iframe.src;
+  //       var newSrc = currentSrc.split('?')[0]; // 移除旧的查询参数
+  //       iframe.src = newSrc + '?updated=' + new Date().getTime();
+  //     }, 2400);
+  //   } else {
+  //     resultsViewClear()
+  //     canShowResults.value = true
+  //     if (itemRusult == '层次分析模糊综合评估') {
+  //       let results_to_show = responseResults.层次分析模糊综合评估
+  //       healthEvaluationDisplay(results_to_show)
+  //     } else if (itemRusult == '特征提取') {
+  //       if (currentDisplayedItem != '特征提取') {
+  //         currentDisplayedItem = '特征提取'
+  //       } else {
+  //         displayFeatureExtraction.value = true  // 显示特征提取结果
+  //         return
+  //       }
+  //       let results_to_show = responseResults.特征提取
+  //       featureExtractionDisplay(results_to_show)
+  //     } else if (itemRusult == '特征选择') {
+  //       if (currentDisplayedItem != '特征选择') {
+  //         currentDisplayedItem = '特征选择'
+  //       } else {
+  //         displayFeatureSelection.value = true  // 显示特征选择结果
+  //         return
+  //       }
+  //       let results_to_show = responseResults.特征选择
+  //       featuresSelectionDisplay(results_to_show)
+  //     } else if (itemRusult == '故障诊断') {
+  //       if (currentDisplayedItem != '故障诊断') {
+  //         currentDisplayedItem = '故障诊断'
+  //       } else {
+  //         displayFaultDiagnosis.value = true
+  //         return
+  //       }
+  //       let results_to_show = responseResults.故障诊断
+  //       faultDiagnosisDisplay(results_to_show)
+  //     } else if (itemRusult == '故障预测') {
+  //       let results_to_show = responseResults.故障预测
+  //       faultRegressionDisplay(results_to_show)
+  //     } else if (itemRusult == '插值处理') {
+  //       let results_to_show = responseResults.插值处理
+  //       interpolationDisplay(results_to_show)
+  //     } else if (itemRusult == '无量纲化') {
+  //       let results_to_show = responseResults.无量纲化
+  //       normalizationDisplay(results_to_show)
+  //     } else if (itemRusult == '小波变换') {
+  //       let results_to_show = responseResults.小波变换
+  //       denoiseDisplay(results_to_show)
+  //     } else if (itemRusult == '层次朴素贝叶斯评估') {
+  //       let results_to_show = responseResults.层次朴素贝叶斯评估
+  //       healthEvaluationDisplay(results_to_show)
+  //     } else if (itemRusult == '层次逻辑回归评估') {
+  //       let results_to_show = responseResults.层次逻辑回归评估
+  //       healthEvaluationDisplay(results_to_show)
+  //     } else if (itemRusult == '健康评估') {
+  //       let results_to_show = responseResults.健康评估
+  //       healthEvaluationDisplay(results_to_show)
+  //     } else {
+  //       ElMessage({
+  //         message: '无效的算法模块',
+  //         type: 'error'
+  //       })
+  //     }
+  //   }
+  // }
+  showResult(itemRusult);
+}
+
+//建模区域中的功能操作菜单（清空模型、检查模型...）
+//控制各个按钮的disabled状态
+const disabledStateOfControlBtn = ref({
+  clearModelOfViewFlowBtn: false,
+  finishModelOfViewFlowBtn: false,
+  checkModelOfViewFlowBtn: false,
+  saveModelOfViewFlowBtn: false,
+  runModelOfViewFlowBtn: false,
+  stopRunningModelOfViewFlowBtn: false,
+  setModelConfigRunningModelOfViewFlowBtn: false,
+  configPanelOfModelNodeBtn: false
+})
+
+//控制各个按钮的显示和隐藏(暂时没有使用在任何地方)
+const isShowStateOfControlBtn = ref({
+  clearModelOfViewFlowBtn: false,
+  finishModelOfViewFlowBtn: false,
+  checkModelOfViewFlowBtn: false,
+  saveModelOfViewFlowBtn: false,
+  runModelOfViewFlowBtn: false,
+  stopRunningModelOfViewFlowBtn: false,
+  setModelConfigRunningModelOfViewFlowBtn: false
+})
+
+//清空模型
+function clearModelOfViewFlow() {
+  modeling_nodeList.value = []
+  modeling_edgesList.value = []
+  showParameterEdit.value = null
+  item = {}
+  adjacencyList.value = [];
+  inDegree.value = {};
+// 排序
+// 初始化顺序数组和已访问节点集合
+  order.value = [];
+  visited.value = new Set();
+  done.value = false
+  // features.value = []  // 特征提取选择的特征
+  features.value = ['均值', '方差', '标准差', '峰度', '偏度', '四阶累积量', '六阶累积量', '最大值', '最小值', '中位数', '峰峰值', '整流平均值', '均方根', '方根幅值',
+    '波形因子', '峰值因子', '脉冲因子', '裕度因子', '重心频率', '均方频率', '均方根频率', '频率方差', '频率标准差', '谱峭度的均值', '谱峭度的标准差', '谱峭度的峰度', '谱峭度的偏度']
+  jsonClear()    // 向后端发送的模型信息
+  isShow.value = false
+  plumbIns.deleteEveryConnection()
+  plumbIns.deleteEveryEndpoint()
+  linkedList.head = null
+  linkedList.tail = null
+  missionComplete.value = false // 程序处理完成
+  modelSetup.value = false   // 模型设置完成
+  showPlainIntroduction.value = false
+  showStatusMessage.value = false
+  modelHasBeenSaved = false  //复用历史模型，不做模型检查
+  toRectifyModel.value = false  // 禁用修改模型
+  canCompleteModeling.value = true
+  canCheckModel.value = true
+  canSaveModel.value = true
+  processIsShutdown.value = false
+  canStartProcess.value = true   // 不可运行程序
+  modelLoaded.value = '无'
+
+  updateStatus('未建立模型')
+
+  resultsViewClear()
+}
+
+//完成模型
+function finishModelOfViewFlow() {
+
+}
+
+//参数检查
+function checkModelParam() {
+  console.log("开始检查模型参数")
+  console.log('模型列表', modeling_nodeList.value)
+  for (let i = 0; i < modeling_nodeList.value.length; i++) {
+    let dict = modeling_nodeList.value[i]
+    console.log('dict.use_algorithm: ', dict.nodeInfo.use_algorithm)
+    if (!dict.nodeInfo.use_algorithm) {
+      return false
+    } else {
+      // 检查特征选择的规则参数
+      if (dict.nodeInfo.id == '1.3') {
+        console.log('检查到特征选择 ')
+        let threshold = false
+        // 检查选择特征的规则参数是否正确设置
+        let rule = dict.nodeInfo.parameters[dict.nodeInfo.use_algorithm].rule
+        console.log('rule: ', rule)
+        if (dict.nodeInfo.parameters[dict.nodeInfo.use_algorithm]['threshold' + rule]) {
+          console.log('规则参数通过: ')
+          threshold = true
+        }
+        if (!threshold) {
+          return false
+        }
+      } else if (dict.nodeInfo.id == '1.2') {
+        // 检查特征提取参数设置
+        if (!features.value.length) {
+          return false
+        }
+      } else {
+        // 检查一般算法模块的参数设置，参数设置不能为空
+        dict.nodeInfo.parameters[dict.nodeInfo.use_algorithm] = dict.nodeInfo.use_algorithm
+        let parameters = dict.nodeInfo.parameters[dict.nodeInfo.use_algorithm]
+        console.log('parameters: ', parameters)
+        if (!parameters) {
+          console.log('parameters is null')
+          return false
+        } else {
+          for (let key in parameters) {
+            console.log("parameters", parameters[key])
+            console.log("key....", key)
+            if (parameters[key] === '' || parameters[key] === null) {
+              console.log('parameters[key] is null: ', parameters[key])
+              return false
+            }
+          }
+        }
+      }
+    }
+  }
+  return true
+}
+
+//构建模块逻辑检查
+function checkModelOrder() {
+  console.log("开始检查模型逻辑")
+  let idToModule = {}
+  let algorithms = []
+  let algorithmSchedule = []
+  let moduleSchedule = []
+  let moduleStr
+  let algorithmStr
+  //针对单个模块 逻辑上的错误检查
+  console.log('content的长度', contentJson.schedule.length)
+
+  // 判断子串后是否有更多的文本
+  const moreText = (text, substring) => {
+    const position = text.indexOf(substring);
+    if (position === -1) {
+      return false;
+    }
+    const endPosition = position + substring.length;
+    return endPosition < text.length;
+  }
+
+  const includeHealthEvaluation = (moduleStr: string) => {
+    if (moduleStr.match('层次分析模糊综合评估')) {
+      return '层次分析模糊综合评估';
+    } else if (moduleStr.match('层次朴素贝叶斯评估')) {
+      return '层次朴素贝叶斯评估';
+    } else if (moduleStr.match('层次逻辑回归评估')) {
+      return '层次逻辑回归评估';
+    } else if (moduleStr.match('健康评估')) {
+      return '健康评估';
+    } else {
+      return '';
+    }
+  }
+
+// 判断一个子串后是否有另一个子串，其中subStrs2为包含需要寻找的子串的数组
+  const checkSubstrings = (str, subStr1, subStrs2) => {
+    const index1 = str.indexOf(subStr1);
+    if (index1 !== -1) {
+      // 如果 subStr1 存在
+      for (const subStr2 of subStrs2) {
+        const index2 = str.indexOf(subStr2, index1 + subStr1.length);
+        if (index2 !== -1) {
+          // 如果在 subStr1 之后找到了 subStr2 中的任何一个则返回true
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+
+
+
+  if (contentJson.schedule.length == 1) {
+    console.log('modeling_nodelist:',modeling_nodeList.value[0].nodeInfo.label)
+    moduleSchedule.push(modeling_nodeList.value[0].nodeInfo.label)  // 模块名称拼接的字符串
+    algorithmSchedule.push(modeling_nodeList.value[0].nodeInfo.label_display)  // 算法名称拼接的字符串
+    console.log('moduleSchedule: ', moduleSchedule)
+    console.log('algorithmSchedule: ', algorithmSchedule)
+    // 根据是否包含多传感器的算法，判断是否是针对多传感器的模型
+    if (algorithmSchedule.indexOf("多传感器") != -1) {
+      contentJson.multipleSensor = true  // 默认为false，即对单传感器数据的模型
+    }
+  } else{
+    //针对多个模块
+    // 形成表示具体算法模块连接顺序的字符串
+    for (let i = 0; i < modeling_nodeList.value.length; i++) {
+      let module = modeling_nodeList.value[i]
+      algorithmSchedule.push(module.nodeInfo.label_display)
+      moduleSchedule.push(module.nodeInfo.label)
+    }
+    moduleStr = Object.values(moduleSchedule).join('')   // 所有模块的名称按顺序拼接起来的字符串
+    algorithmStr = Object.values(algorithmSchedule).join('')  // 所有模块中的算法名称按顺序拼接起来的字符串
+    console.log('moduleStr', moduleStr)
+    console.log('algorithmStr', algorithmStr)
+  }
+  if (modeling_nodeList.value.length) {
+    // 首先判断模型中是否有数据源
+    if (!moduleStr.match('数据源')) {
+      ElMessage.error('模型中未包含数据源，请添加数据源模块')
+      return
+    } else {
+      if (modeling_nodeList.value.length == 1) {
+        ElMessage.error('模型中仅包含数据源，无法运行，请添加其他模块')
+        return
+      }
+      if (moduleStr.indexOf('数据源') > 0) {
+        ElMessage.error('数据源模块必须位于模型中第一个位置')
+        return
+      }
+    }
+    moduleStr = moduleStr.replace('数据源', '')
+    algorithmStr = algorithmStr.replace('数据源', '')
+    console.log('moduleStr: ', moduleStr)
+    console.log('algorithmStr: ', algorithmStr)
+    // 首先判断模型中是否存在除了数据源之外的1个以上的模块，如果模型中只有一个模块，判断其是否可以独立地运行而不需要其他模块的支持
+    if (modeling_nodeList.value.length == 2) {
+      if (!moduleStr.match('插值处理') && !moduleStr.match('特征提取') && !algorithmStr.match('GRU的故障诊断') && !algorithmStr.match('LSTM的故障诊断') && !algorithmStr.match('小波变换')
+          && !algorithmStr.match('一维卷积深度学习模型的故障诊断') && !algorithmStr.match('基于时频图的深度学习模型的故障诊断') && !moduleStr.match('无量纲化') && !algorithmStr.match('深度学习故障诊断')) {
+        let tip
+        if (moduleStr.match('故障诊断')) {
+          tip = '模型中包含故障诊断，建议在此之前进行特征提取和特征选择等操作'
+        } else if (moduleStr.match('层次分析模糊综合评估')) {
+          tip = '模型中包含层次分析模糊综合评估，建议在此之前进行特征提取和特征选择等操作'
+        } else if (moduleStr.match('特征选择')) {
+          tip = '模型中包含特征选择，建议在此之前进行特征提取等操作'
+        } else if (moduleStr.match('故障预测')) {
+          tip = '模型中包含故障预测，建议在此之前进行故障诊断'
+        }
+
+        ElMessage({
+          message: '该算法无法单独使用，请结合相应的算法,' + tip,
+          type: 'warning',
+          showClose: true
+        })
+
+        return
+      } else {
+        // 无量纲化要检查是否使用模型训练师使用的标准化方法，对输入的原始信号无法使用模型训练时使用的标准化方法进行无量纲化
+        if (moduleStr.match('无量纲化')) {
+          let node
+          for (let item of modeling_nodeList.value) {
+            if (item.nodeInfo.label == '无量纲化') {
+              node = item.nodeInfo
+              break
+            }
+          }
+          if (node?.parameters[node.use_algorithm]['useLog'] == true) {
+
+            ElMessageBox.alert('如果要使用模型训练时使用的标准化方法进行无量纲化，请确保无量纲化模块之前对数据进行了特征提取，或者在参数设置中选择不使用模型训练时使用的标准化方法', '提示', {
+              confirmButtonText: '确定',
+              draggable: true,
+              buttonSize: 'medium',
+            })
+
+            return
+          }
+        }
+        // 如果模块可以单独运行，再进行模型中各个模块的参数设置的检查
+        let checkParamsRight = checkModelParam()
+        let isLofical_completeness = toObject().nodes.length-toObject().edges.length
+        if (checkParamsRight && (isLofical_completeness==1)) {
+          ElMessage({
+            showClose: true,
+            message: '模型正常，可以保存并运行',
+            type: 'success'
+          })
+          modelCheckRight = true
+          updateStatus('模型建立并已通过模型检查')
+        } else {
+          ElMessage({
+            showClose: true,
+            message: '请确保所有具有参数的模块的参数设置正确',
+            type: 'warning'
+          })
+          return
+        }
+      }
+    } else {
+      // 检查模型中是否存在未被连接的模块
+      if (linkedList.length() != nodeList.value.length) {
+        ElMessage({
+          message: '请确保图中所有模块均已建立连接，且没有多余的模块',
+          type: 'warning'
+        })
+        return
+      } else {
+        // 模型正常连接的情况下进行模型逻辑以及模型参数的检查
+        if (algorithmStr.match('多传感器') && algorithmStr.match('单传感器')) {
+          ElMessage({
+            showClose: true,
+            message: '多传感器和单传感器的算法不能混合使用！',
+            type: 'warning'
+          })
+          return
+        }
+        if (moduleStr.match('故障诊断')) {
+          // 如果是深度学习模型的故障诊断
+          if (algorithmStr.match('深度学习模型的故障诊断') || algorithmStr.match('GRU的故障诊断') || algorithmStr.match('LSTM的故障诊断')) {
+            if (moduleStr.indexOf('故障诊断') > 0) {
+              // 检查深度学习模型的故障诊断之前是否包含不必要的模块
+              let preModuleText = moduleStr.substring(0, moduleStr.indexOf('故障诊断'))
+              if (preModuleText.match('特征提取') || preModuleText.match('特征选择') || preModuleText.match('无量纲化') || preModuleText.match('故障预测')) {
+                ElMessage({
+                  message: '深度学习模型的故障诊断不需要人工提取特征，因此其之前不需要包含如特征提取、特征选择等不必要的模块！',
+                  type: 'warning',
+                  showClose: true
+                })
+                return
+              }
+            }
+            // 如果使用深度学习模型的故障诊断之后有其他的模块
+            if (moreText(moduleStr, '故障诊断')) {
+              let nextModuleText = moduleStr.substring(moduleStr.indexOf('故障诊断'), moduleStr.length)  //故障诊断模块之后的其他模块名拼接的字符串
+              if (nextModuleText.match('故障预测') || nextModuleText.match('层次分析模糊综合评估') || nextModuleText.match('层次朴素贝叶斯评估') || nextModuleText.match('层次逻辑回归评估')) {
+                // 如果同时包含故障预测以及层次分析模糊综合评估
+                let current: string
+                if (nextModuleText.match('故障预测') && (nextModuleText.match('层次分析模糊综合评估') || nextModuleText.match('层次朴素贝叶斯评估') || nextModuleText.match('层次逻辑回归评估'))) {
+                  // 获取健康评估模块所在的位置
+                  let healthEvaluationIndex
+                  if (nextModuleText.match('层次分析模糊综合评估')) {
+                    healthEvaluationIndex = nextModuleText.indexOf('层次分析模糊综合评估')
+                  } else if (nextModuleText.match('层次朴素贝叶斯评估')) {
+                    healthEvaluationIndex = nextModuleText.indexOf('层次朴素贝叶斯评估')
+                  } else {
+                    healthEvaluationIndex = nextModuleText.indexOf('层次逻辑回归评估')
+                  }
+                  // 如果健康评估模块位置在深度学习的故障预测组件之后，需要进一步进行手工特征的提取
+                  if (nextModuleText.indexOf('故障预测') > healthEvaluationIndex) {
+                    ElMessage({
+                      message: '注意故障预测应该在层次分析模糊综合评估之前运行',
+                      type: 'warning',
+                      showClose: true
+                    })
+                    return
+                  } else {
+                    current = '故障预测'
+                  }
+                }
+
+                // 因为之前的深度学习模型的故障诊断无法为故障预测或是健康评估提供样本特征，因此需要进行特征提取和特征选择
+                if (nextModuleText.indexOf('故障预测') == -1) {
+                  current = includeHealthEvaluation(moduleStr)
+                  if (!current) {
+                    message.error('模型检查出错，请重新链接模型')
+                    return
+                  }
+                } else {
+                  current = '故障预测'
+                }
+                let preModuleText = nextModuleText.substring(0, nextModuleText.indexOf(current))
+                if (!preModuleText.match('特征提取特征选择') && !preModuleText.match('特征提取无量纲化特征选择') && !preModuleText.match('特征提取特征选择无量纲化')) {
+                  ElMessage({
+                    message: '建议在深度学习模型的故障诊断之后包含特征提取和特征选择模块',
+                    type: 'warning',
+                    showClose: true
+                  })
+                  return
+                }
+
+              }
+            }
+          } else {
+            // 如果是传统机器学习的故障诊断
+            let preModuleText = moduleStr.substring(0, moduleStr.indexOf('故障诊断'))
+
+            // 如果机器学习的故障诊断之前既不包含特征提取，也不包含特征选择
+            if (!preModuleText.match('特征提取') && !preModuleText.match('特征选择')) {
+              ElMessage({
+                message: '建议在故障诊断之前进行特征提取和特征选择',
+                type: 'warning',
+                showClose: true
+              })
+              let preModule = linkedList.searchPre('故障诊断') // 寻找故障诊断之前的节点，即不符合规则的节点
+
+              // 红色标明报错连线
+              let sourceId = labelToId(preModule.value)
+              let targetId = labelToId('故障诊断')
+
+              plumbIns.select({source: sourceId, target: targetId}).setPaintStyle({
+                stroke: '#E53935',
+                strokeWidth: 7,
+                outlineStroke: 'transparent',
+                outlineWidth: 5,
+
+              });
+              return
+            } else {
+              // 如果特征提取和特征选择同时存在
+              if (preModuleText.match('特征提取') && preModuleText.match('特征选择')) {
+                // 如果特征提取在特征选择之后，此时逻辑错误
+                if (preModuleText.indexOf('特征提取') > preModuleText.indexOf('特征选择')) {
+                  ElMessage({
+                    message: '建议在特征提取之后进行特征选择',
+                    type: 'warning',
+                    showClose: true
+                  })
+                  return
+                }
+              } else {
+                // 如果只包含特征选择
+                if (preModuleText.match('特征选择')) {
+                  ElMessage({
+                    message: '建议在特征提取之后再进行特征选择',
+                    type: 'warning',
+                    showClose: true
+                  })
+                  let preModule = linkedList.searchPre('特征选择') // 寻找特征选择之前的节点，即不符合规则的节点
+
+                  // 红色标明报错连线
+                  let sourceId = labelToId(preModule.value)
+                  let targetId = labelToId('特征选择')
+
+                  plumbIns.select({source: sourceId, target: targetId}).setPaintStyle({
+                    stroke: '#E53935',
+                    strokeWidth: 7,
+                    outlineStroke: 'transparent',
+                    outlineWidth: 5,
+
+                  });
+                  return
+                }
+                // 如果只包含特征提取
+                else if (preModuleText.match('特征提取')) {
+                  ElMessage({
+                    message: '因模型中包含机器学习的故障诊断，建议在特征提取之后进行特征选择',
+                    type: 'warning',
+                    showClose: true
+                  })
+                  let current = linkedList.search('特征提取') // 寻找特征选择之前的节点，即不符合规则的节点
+                  let next = current.next
+                  // 红色标明报错连线
+                  let sourceId = labelToId(current.value)
+                  let targetId = labelToId(next.value)
+
+                  plumbIns.select({source: sourceId, target: targetId}).setPaintStyle({
+                    stroke: '#E53935',
+                    strokeWidth: 7,
+                    outlineStroke: 'transparent',
+                    outlineWidth: 5,
+
+                  });
+                  return
+                }
+
+              }
+            }
+          }
+        }
+
+        if (moduleStr.match('特征提取故障诊断')) {
+          let sourceId = labelToId('特征提取')
+          let current = linkedList.search('特征提取')
+          let next = current.next.value
+          let targetId = labelToId(next)
+
+          let connection = plumbIns.getConnections({source: sourceId, traget: targetId})
+          console.log('connection: ', connection)
+
+          plumbIns.select({source: sourceId, target: targetId}).setPaintStyle({
+            stroke: '#E53935',
+            strokeWidth: 7,
+            outlineStroke: 'transparent',
+            outlineWidth: 5,
+
+          });
+          ElMessage({
+            showClose: true,
+            message: '因模型中包含故障诊断，建议在特征提取之后包含特征选择',
+            type: 'warning'
+          })
+          return
+        }
+        if (moduleStr.indexOf('小波变换') > 0) {
+          // 小波变换只能针对信号序列，之前不能已经进行了特征提取
+          let preModuleText = moduleStr.substring(0, moduleStr.indexOf('小波变换'))
+          if (preModuleText.match('特征提取')) {
+            ElMessage({
+              showClose: true,
+              message: '模型中对原始信号进行了特征提取，而小波变换只能针对信号序列',
+              type: 'warning'
+            })
+            let preModule = linkedList.searchPre('小波变换') // 寻找健康评估之前的节点，即不符合规则的节点
+
+            // 红色标明报错连线
+            let sourceId = labelToId(preModule.value)
+            let targetId = labelToId('小波变换')
+
+            let connection = plumbIns.getConnections({source: sourceId, traget: targetId})
+            console.log('connection: ', connection)
+
+            plumbIns.select({source: sourceId, target: targetId}).setPaintStyle({
+              stroke: '#E53935',
+              strokeWidth: 7,
+              outlineStroke: 'transparent',
+              outlineWidth: 5,
+
+            });
+            return
+          }
+        }
+        if (includeHealthEvaluation(moduleStr)) {
+
+          let healthEvaluation = includeHealthEvaluation(moduleStr)  //所包含的健康评估的组件名
+          if (!moduleStr.match('特征提取')) {
+            ElMessage({
+              showClose: true,
+              message: '因模型中包含层次分析模糊综合评估，建议在此之前包含特征提取',
+              type: 'warning'
+            })
+            let current = linkedList.searchPre(healthEvaluation) // 寻找健康评估之前的节点，即不符合规则的节点
+
+            // 红色标明报错连线
+            let sourceId = labelToId(current.value)
+            let targetId = labelToId(healthEvaluation)
+
+            let connection = plumbIns.getConnections({source: sourceId, traget: targetId})
+            console.log('connection: ', connection)
+
+            plumbIns.select({source: sourceId, target: targetId}).setPaintStyle({
+              stroke: '#E53935',
+              strokeWidth: 7,
+              outlineStroke: 'transparent',
+              outlineWidth: 5,
+            });
+            return
+          }
+          if (moreText(moduleStr, healthEvaluation)) {
+            let sourceId = labelToId(healthEvaluation)
+            let current = linkedList.search(healthEvaluation)
+            let next = current.next.value
+            let targetId = labelToId(next)
+
+            plumbIns.select({source: sourceId, target: targetId}).setPaintStyle({
+              stroke: '#E53935',
+              strokeWidth: 7,
+              outlineStroke: 'transparent',
+              outlineWidth: 5,
+
+            });
+            ElMessage({
+              showClose: true,
+              message: '注意健康评估之后无法连接更多的模块',
+              type: 'warning'
+            })
+            return
+          }
+
+        }
+        if (moduleStr.match('特征选择')) {
+          let preModuleText = moduleStr.substring(0, moduleStr.indexOf('特征选择'))
+          if (!preModuleText.match('特征提取')) {
+            ElMessage({
+              showClose: true,
+              message: '因模型中包含特征选择，建议在此之前包含特征提取',
+              type: 'warning'
+            })
+            let preModule = linkedList.searchPre('特征选择')
+            let sourceId = labelToId(preModule)
+            let targetId = labelToId('特征选择')
+
+            // 通过jsPlumb实例对象的select方法选择连线，并设置连线的样式
+            plumbIns.select({source: sourceId, target: targetId}).setPaintStyle({
+              stroke: '#E53935',
+              strokeWidth: 7,
+              outlineStroke: 'transparent',
+              outlineWidth: 5,
+
+            });
+
+            return
+          }
+        }
+        if (algorithmStr.match('深度学习模型的故障诊断') || algorithmStr.match('GRU的故障诊断') || algorithmStr.match('LSTM的故障诊断')) {
+          // 如果使用深度学习的故障诊断之前有其他模块，则要进行限定
+
+          if (moduleStr.indexOf('故障诊断') != 0) {
+            let preText = moduleStr.substring(0, moduleStr.indexOf('故障诊断'))
+            // 检查使用深度学习的故障诊断之前是否有特征提取等不合理的模块
+            if (preText.match('特征提取') || preText.match('特征选择') || preText.match('无量纲化')) {
+              ElMessage({
+                showClose: true,
+                message: '使用深度学习模型的故障诊断不需要进行特征提取或是特征选择，请删除相关模块！',
+                type: 'warning'
+              })
+              return
+            }
+
+          }
+        }
+        if (algorithmStr.match('多传感器') && algorithmStr.match('单传感器')) {
+          ElMessage({
+            showClose: true,
+            message: '针对单传感器的算法无法与针对多传感器的算法共用',
+            type: 'warning'
+          })
+          return
+        }
+        if (moduleStr.match('无量纲化')) {
+          let node
+          for (let item of nodeList.value) {
+            if (item.label.match('无量纲化')) {
+              node = item
+              break
+            }
+          }
+          let useLog = node.parameters[node.use_algorithm]['useLog']  // 获取无量纲化模块的参数
+          // 无量纲化处理前没有其他模块
+          if (moduleStr.indexOf('无量纲化') == 0) {
+            // 检查无量纲化参数设置是否合理
+            if (useLog == true) {
+
+              ElMessageBox.alert('如果要使用模型训练时使用的标准化方法进行无量纲化，请确保无量纲化模块之前对数据进行了特征提取，或者在参数设置中选择不使用模型训练时使用的标准化方法', '提示', {
+                confirmButtonText: '确定',
+                draggable: true,
+                buttonSize: 'medium',
+              })
+              return
+            }
+          } else {
+
+            // 检查无量纲化处理前的其他模块是否符合无量纲化的运行规则
+            let preModule = moduleStr.substring(0, moduleStr.indexOf('无量纲化'))
+            if (preModule.match('特征提取') && useLog == false) {
+              ElMessageBox.alert(
+                  '因为无量纲化模块之前已经进行了特征提取，请在无量纲化的参数设置中选择使用模型训练时使用的标准化方法进行无量纲化',
+                  '提示',
+                  {
+                    confirmButtonText: '确定',
+                    draggable: true,
+                    buttonSize: 'medium',
+                  }
+              )
+              return
+            } else if (!preModule.match('特征提取') && useLog == true) {
+              ElMessageBox.alert(
+                  '无量纲化模块之前未进行特征提取，因此无法使用模型训练时使用的标准化方法进行无量纲化，请在无量纲化的参数设置中选择不使用模型训练时使用的标准化方法进行无量纲化',
+                  '提示',
+                  {
+                    confirmButtonText: '确定',
+                    draggable: true,
+                    buttonSize: 'medium',
+                  }
+              )
+            }
+          }
+
+        }
+
+        // 检查模型中是否使用了深度学习模型的故障诊断
+        const useDeepLearningModule = (algorithmStr: string) => {
+          return algorithmStr.match('LSTM的故障诊断') || algorithmStr.match('GRU的故障诊断') || algorithmStr.match('一维卷积深度学习模型的故障诊断') || algorithmStr.match('时频图深度学习模型的故障诊断')
+        }
+        // 规定插值处理只能是在模型中的开始位置
+        if (moduleStr.match('插值处理')) {
+          if (moduleStr.indexOf('插值处理') != 0) {
+            ElMessage({
+              showClose: true,
+              message: '插值处理只能处在模型中的开始位置',
+              type: 'warning'
+            })
+            let preModule = linkedList.searchPre('插值处理')
+            let sourceId = labelToId(preModule)
+            let targetId = labelToId('插值处理')
+
+            // 通过jsPlumb实例对象的select方法选择连线，并设置连线的样式
+            plumbIns.select({source: sourceId, target: targetId}).setPaintStyle({
+              stroke: '#E53935',
+              strokeWidth: 7,
+              outlineStroke: 'transparent',
+              outlineWidth: 5,
+
+            });
+            return
+          }
+        }
+        if (moduleStr.match('故障预测')) {
+          // 故障预测之前必须进行故障诊断
+          if (moduleStr.indexOf('故障预测') <= 0) {
+            ElMessage({
+              showClose: true,
+              message: '故障预测之前需要进行故障预测',
+              type: 'warning'
+            })
+
+            return
+          } else {
+            let preModuleText = moduleStr.substring(0, moduleStr.indexOf('故障预测'))
+            if (!preModuleText.match('故障诊断')) {
+              ElMessage({
+                showClose: true,
+                message: '故障预测之前需要进行故障诊断',
+                type: 'warning'
+              })
+              // 将报错的连线标注为红色
+
+              let preModule = linkedList.searchPre('故障预测')
+              let sourceId = labelToId(preModule.value)
+              let targetId = labelToId('故障预测')
+
+              // 通过jsPlumb实例对象的select方法选择连线，并设置连线的样式0
+              plumbIns.select({source: sourceId, target: targetId}).setPaintStyle({
+                stroke: '#E53935',
+                strokeWidth: 7,
+                outlineStroke: 'transparent',
+                outlineWidth: 5,
+
+              });
+              return
+            }
+
+          }
+        }
+        if (moduleStr.match('故障诊断')) {
+          let useDeepLearning = useDeepLearningModule(algorithmStr)
+          if (moreText(moduleStr, '故障诊断')) {
+            // 机器学习的故障诊断之后只能是进行故障预测或是健康评估
+
+            if (!useDeepLearning && !checkSubstrings(moduleStr, '故障诊断', ['层次分析模糊综合评估', '故障预测', '层次朴素贝叶斯评估', '层次逻辑回归评估', '健康评估'])) {
+              ElMessage({
+                showClose: true,
+                message: '注意故障诊断之后仅能进行故障预测或是健康评估！',
+                type: 'warning'
+              })
+              // 将报错的连线标注为红色
+              let sourceId = labelToId('故障诊断')
+              let current = linkedList.search('故障诊断')
+              let next = current.next.value       // 寻找目标连线的源节点和目标节点
+              let targetId = labelToId(next)
+
+              // 通过jsPlumb实例对象的select方法选择连线，并设置连线的样式
+              plumbIns.select({source: sourceId, target: targetId}).setPaintStyle({
+                stroke: '#E53935',
+                strokeWidth: 7,
+                outlineStroke: 'transparent',
+                outlineWidth: 5,
+
+              });
+
+              return
+            }
+          }
+          // 如果模型中包含SVM的故障诊断，则需要先加入无量纲化操作
+          if (algorithmStr.match('SVM的故障诊断')) {
+            if (!moduleStr.match('无量纲化') || !checkSubstrings(moduleStr, '无量纲化', ['故障诊断'])) {
+              ElMessage({
+                showClose: true,
+                message: '因模型中包含SVM的故障诊断，需要在此之前加入z-score标准化操作',
+                type: 'warning'
+              })
+              // 将报错的连线标注为红色
+              let sourceId = labelToId('特征选择')
+              let current = linkedList.search('特征选择')
+              let next = current.next.value       // 寻找目标连线的源节点和目标节点
+              let targetId = labelToId(next)
+
+              // 通过jsPlumb实例对象的select方法选择连线，并设置连线的样式
+              plumbIns.select({source: sourceId, target: targetId}).setPaintStyle({
+                stroke: '#E53935',
+                strokeWidth: 7,
+                outlineStroke: 'transparent',
+                outlineWidth: 5,
+
+              });
+              return
+            } else {
+              if (!algorithmStr.match('z-score标准化')) {
+                ElMessage({
+                  showClose: true,
+                  message: '因模型中包含SVM的故障诊断，需要在此之前加入z-score标准化操作',
+                  type: 'warning'
+                })
+                return
+              }
+            }
+
+          }
+        }
+        // 进行模型参数设置的检查
+        let isLofical_completeness = toObject().nodes.length-toObject().edges.length
+        let checkParamsRight = checkModelParam()
+        if (checkParamsRight && (isLofical_completeness==1)) {
+          ElMessage({
+            showClose: true,
+            message: '模型正常，可以保存并运行',
+            type: 'success'
+          })
+          modelCheckRight = true
+          updateStatus('模型建立并已通过模型检查')
+        } else {
+          ElMessage({
+            showClose: true,
+            message: '请确保所有具有参数的模块的参数设置正确',
+            type: 'warning'
+          })
+          return
+        }
+      }
+    }
+  } else {
+    ElMessage({
+      message: '请先建立模型',
+      type: 'warning'
+    })
+    return
+  }
+};
+//检查模型
+function checkModelOfViewFlow() {
+  //检查时构建contentJson
+  if(modeling_nodeList.value.length>1){
+    buildContentJson()
+  }
+
+  console.log("检查模型时构建contentJson: ", contentJson)
+  // 进行模型参数设置和逻辑的检查
+  var check_order_right = checkModelOrder()
+  console.log("check_order_right: ", check_order_right)
+}
+
+//构建处理顺序
+// 构建邻接表和入度表
+const adjacencyList = ref([]);
+const inDegree = ref({});
+// 排序
+// 初始化顺序数组和已访问节点集合
+let order = ref([]);
+const visited = ref(new Set());
+
+// 函数用于递归地构建顺序
+function buildOrder(nodeId) {
+  if (!order.value.length) {
+    console.log("添加节点头", nodeId)
+    order.value.push(nodeId)
+  }
+  // 查找下一条边（从当前节点出发的边）
+  const nextNodes = toObject().edges.find(edge => edge.source == nodeId)?.target;
+  if (!nextNodes) {
+    return
+  }
+  // 将找到的边添加到顺序数组
+  order.value.push(nextNodes);
+  console.log("添加节点1", nextNodes)
+  // 递归地构建顺序
+  buildOrder(nextNodes)
+}
+
+//构建contentJson
+function buildContentJson() {
+  //初始化邻接表和入度表
+  adjacencyList.value = [];
+  inDegree.value = {};
+  // 排序
+  // 初始化顺序数组和已访问节点集合
+  order.value = [];
+  visited.value = new Set();
+  console.log('adjacencyList:', adjacencyList)
+  console.log('inDegree:', inDegree)
+  console.log('visit:', visited)
+  console.log('order:', order)
+  // 执行拓扑排序并获取节点的处理顺序
+  console.log("构建处理逻辑: ")
+  let isLofical_completeness = toObject().nodes.length-toObject().edges.length
+  if(isLofical_completeness != 1){
+   return
+  }else{
+    toObject().edges.forEach(edge => {
+      console.log("edge: ", edge)
+      const {source, target} = edge;
+      // 添加节点到节点数组，如果它还不在数组中
+      if (!adjacencyList.value.includes(source)) {
+        adjacencyList.value.push(source);
+      }
+      if (!adjacencyList.value.includes(target)) {
+        adjacencyList.value.push(target);
+      }
+      if (!inDegree[target]) {
+        inDegree[target] = 1;
+      }
+    });
+    console.log("邻接表: ", inDegree)
+    console.log("邻接表节点: ", adjacencyList)
+    // 找到起始节点
+    // 使用 filter() 方法移除在adjacencyList中作为键的键
+    const filteredKeys = adjacencyList.value.filter(key => !(key in inDegree));
+    console.log('头节点：', filteredKeys[0]);
+// 从第一个节点开始构建顺序
+//   const startNode = filteredKeys; // 假设第一个边的 source 是起始节点
+    buildOrder(filteredKeys[0]);
+    console.log('构建的顺序：', order); // 输出构建的顺序
+    jsonClear()
+    for (let i = 0; i < modeling_nodeList.value.length; i++) {
+      let dict = modeling_nodeList.value[i]
+      console.log('保存的dict.use_algorithm: ', dict.nodeInfo.use_algorithm)
+      if (!dict.nodeInfo.use_algorithm) {
+        ElMessage({
+          message: '请设置每个算法的必选属性',
+          type: 'error'
+        })
+        return
+      }
+
+      contentJson.algorithms[dict.nodeInfo.label] = dict.nodeInfo.use_algorithm
+      console.log("contentJson: ", contentJson)
+      if (!contentJson.modules.includes(dict.nodeInfo.label) && dict.nodeInfo.id !== '4') {
+        contentJson.modules.push(dict.nodeInfo.label);
+      }
+
+      // 选择特征提取需要提取的参数
+      if (dict.nodeInfo.id == '1.2') {
+        let params = dict.nodeInfo.parameters[dict.nodeInfo.use_algorithm]
+        if (!features.value.length) {
+          ElMessage({
+            message: '请设置每个算法的必选属性',
+            type: 'error'
+          })
+          return
+        }
+        features.value.forEach(element => {
+          if (params[element] == false) {
+            params[element] = true
+          }
+        });
+        contentJson.parameters[dict.nodeInfo.use_algorithm] = params
+        continue
+      }
+      contentJson.parameters[dict.nodeInfo.use_algorithm] = dict.nodeInfo.parameters[dict.nodeInfo.use_algorithm]
+
+    }
+
+    contentJson.schedule.length = 0
+// 建立处理顺序
+    console.log('新模型顺序: ', order)
+    //将顺序转化成中文名称
+    const lettersOnly = order.value.map(item => {
+      //处理单个字符串
+      return item.replace(/[^a-zA-Z_]/g, '')
+    })
+        .filter(item => item.length > 0); // 过滤掉空字符串
+    for (let i = 0; i < lettersOnly.length; i++) {
+      let obj = Object.keys(contentJson.algorithms).find(key => contentJson.algorithms[key] === lettersOnly[i])
+      contentJson.schedule.push(obj)
+    }
+    console.log('构建的contentJson', contentJson);
+  }
+}
+//保存模型
+function saveModelOfViewFlow() {
+  //显示保存模型表单
+  dialogModle.value = true
+
+}
+
+//运行模型
+function runModelOfViewFlow() {
+
+  if (!usingDatafile.value) {
+    ElMessage({
+      message: '请先加载数据',
+      type: 'warning'
+    })
+    return
+  }
+
+  const data = new FormData()
+  data.append("file_name", usingDatafile.value)  // 所使用的数据文件
+  data.append('params', JSON.stringify(contentJson))  // 模型信息
+  // console.log('params: ', contentJson)
+  if (usingDatafile.value == '无') {
+    ElMessage({
+      message: '当前加载的数据为空，请先加载数据文件',
+      type: 'error'
+    })
+    return
+  }
+  ElNotification.info({
+    title: 'Waiting',
+    message: '正在运行，请等待...'
+  })
+  canShutdown.value = false
+
+  percentage.value = 0; // 重置进度条
+
+  fastTimerId = setInterval(() => {
+    if (percentage.value < 50) {
+      percentage.value += 10;
+    } else {
+      // 达到50%时，清除快速定时器并启动慢速定时器
+      clearInterval(fastTimerId);
+      slowTimerId = setInterval(() => {
+        if (percentage.value < 90) {
+          percentage.value += 10;
+        } else {
+          // 达到100%时清除慢速定时器
+          clearInterval(slowTimerId);
+        }
+      }, 3000);
+    }
+  }, 1000);
+
+  // 显示进度条
+  resultsViewClear()
+  processing.value = true
+  showStatusMessage.value = false
+  showPlainIntroduction.value = false
+
+  api.post('user/run_with_datafile_on_cloud/', data,
+      {
+        headers: {"Content-Type": 'multipart/form-data'},
+        cancelToken: source.token, // 将cancelToken传递给axios
+      }
+  ).then((response) => {
+    if (response.data.code == 401) {
+      ElMessageBox.alert('登录状态已失效，请重新登陆', '提示', {
+        confirmButtonText: '确定',
+        callback: (action: Action) => {
+          router.push('/')
+        },
+      })
+    }
+    if (response.data.code === 200) {
+
+      if (!processIsShutdown.value) {
+        ElNotification.success({
+          title: 'Success',
+          message: '程序运行完成',
+        })
+        responseResults = response.data.results
+        missionComplete.value = true
+        statusMessageToShow.value = statusMessage.success
+
+      } else {
+        processIsShutdown.value = false
+      }
+    } else if (response.data.code == 404) {
+      statusMessageToShow.value = statusMessage.error
+      ElMessage({
+        message: response.data.message,
+        type: 'warning'
+      })
+    }
+    clearInterval(fastTimerId);
+    clearInterval(slowTimerId);
+    setTimeout(function () {
+      processing.value = false
+    }, 700)
+    percentage.value = 100;
+    canShutdown.value = true
+
+    resultsViewClear()
+
+    showStatusMessage.value = true
+    showPlainIntroduction.value = false
+  })
+      .catch(error => {
+
+        if (error.response) {
+          // 请求已发出，服务器响应了状态码，但不在2xx范围内
+          console.log(error.response.status); // HTTP状态码
+          console.log(error.response.statusText); // 状态消息
+
+        } else if (error.request) {
+          // 请求已发起，但没有收到响应
+          console.log(error.request);
+        } else {
+          // 设置请求时触发了错误
+          console.error('Error', error.message);
+        }
+
+        ElNotification.error({
+          title: 'Error',
+          message: '运行出错，' + error.response.data?.message,
+        })
+        loading.value = false
+        processing.value = false
+
+        canShutdown.value = true
+        statusMessageToShow.value = statusMessage.error
+        resultsViewClear()
+        showStatusMessage.value = true
+        missionComplete.value = false
+
+      })
+}
+
+//终止运行
+function stopRunningModelOfViewFlow() {
+
+}
+
+//配置模型
+function setModelConfigRunningModelOfViewFlow() {
+}
+
+//实现自动垂直水平布局功能、打乱功能
+import {useRunProcess} from './vueflow/useRunProcess'
+import {useShuffle} from './vueflow/useShuffle'
+import {useLayout} from './vueflow/useLayout'
+import CustomForm from "@/components/vueflow/CustomForm.vue";
+
+const cancelOnError = ref(true)
+const shuffle = useShuffle()
+const {graph, layout, previousDirection} = useLayout()
+const {run, stop, reset, isRunning} = useRunProcess({graph, cancelOnError})
+const {fitView} = useVueFlow()
+
+async function shuffleGraph() {
+  if (modeling_nodeList && modeling_nodeList.value.length > 0) {
+    await stop()
+    reset(modeling_nodeList.value)
+    modeling_edgesList.value = shuffle(modeling_nodeList.value)
+    nextTick(() => {
+      layoutGraph(previousDirection.value)
+    })
+    closeResultOfElMain()
+  }
+}
+
+async function layoutGraph(direction) {
+  if (modeling_nodeList && modeling_nodeList.value.length > 0) {
+    await stop()
+    reset(modeling_nodeList.value)
+    modeling_nodeList.value = layout(modeling_nodeList.value, modeling_edgesList.value, direction)
+    nextTick(() => {
+      fitView()
+    })
+    closeResultOfElMain()
+  }
+}
+
+//配置菜单模块start
+const isHiddenConfigPanelOfNode = ref(false)
+//包含那些菜单(添加的是：拖拽组件nodeInfo.id)
+const containsMenuSettings = ref([])
+//监控（浅监控，只是观察添加和删除的变化）的modeling_nodeList变化
+watch(modeling_nodeList, (newVal, oldVal) => {
+  const addedItems = newVal.filter(item => !oldVal.includes(item));
+  if (addedItems.length) {
+    console.log('添加的元素:', addedItems);
+    addedItems.forEach(item => {
+      containsMenuSettings.value.push(item.nodeInfo.id);
+    })
+  } else {
+    const removedItems = oldVal.filter(item => !newVal.includes(item));
+    if (removedItems.length) {
+      console.log('删除的元素:', removedItems);
+      removedItems.forEach(item => {
+        let id = containsMenuSettings.value.indexOf(item.nodeInfo.id)
+        if (id != -1) {
+          containsMenuSettings.value.splice(id, 1)
+        }
+      })
+    }
+  }
+  console.log("containsMenuSettings: ", containsMenuSettings)
+}, {deep: false});
+
+//打开配置菜单
+function openConfigPanelOfModelNode() {
+  if (isHiddenConfigPanelOfNode.value) {
+    isHiddenConfigPanelOfNode.value = false;
+  }
+}
+
+//关闭配置菜单
+function closeConfigPanelOfModelNode() {
+  if (!isHiddenConfigPanelOfNode.value) {
+    isHiddenConfigPanelOfNode.value = true;
+  }
+}
+
+//配置菜单控制面板激活
+const activeNamesOfConfigPanelOfModelNode = ref([])
+
+function onItemClickOfConfigPanelOfModelNode(data) {
+
+}
+
+//配置菜单模块end
+
+///////////////////////////////////////////////////////////////////////////////建模区end
+///////////////////////////////////////////////////////////////////////////////以下还是原来的
 // 删除增值服务组件时需要刷新增值组件列表
 const handleDeleteExtraModule = () => {
   getExtraAlgorithmMao();
@@ -1650,7 +3951,6 @@ const options_modules = ref([
 
 ])
 
-
 //构造增值组件菜单,复制速度不能过快，foreach和map太快会直接覆盖到前面的内容
 function updateOptionsWithBackendData(data) {
   // 清空 fetchedExtraAlgorithmList，准备存储新数据
@@ -1681,7 +3981,6 @@ function updateOptionsWithBackendData(data) {
 
 }
 
-
 //获取用户的增值组件列表
 const getExtraAlgorithmMao = () => {
   api.get("/user/user_fetch_extra_algorithm/").then((response: any) => {
@@ -1705,12 +4004,7 @@ const handleDragendAdd = (ev, algorithm, node) => {
   // 使用find方法查找具有特定alias的对象
   console.log("现拖拽algorithm", algorithm)
   const foundObject = fetchedExtraAlgorithmList.value.find(obj => obj.alias === algorithm)
-  // const parametersKey = Object.keys(foundObject.parameters)[0]
-  const machineLearning = foundObject.machineLearning
-  const parametersKey = machineLearning === 'ml' ? 'private_fault_diagnosis_machine_learning' : 'private_fault_diagnosis_deeplearning'
-  console.log("参数的键", parametersKey)
-  console.log("foundObject: ", foundObject)
-  console.log("foundObject.parameters: ", foundObject.parameters)
+  const parametersKey = Object.keys(foundObject.parameters)[0]
   // 如果找到了对象，复制其parameters的键
   if (foundObject) {
     console.log("找到的算法文件", parametersKey); // 输出: ['private_fault_diagnosis_deeplearning', 'private_fault_diagnosis_machine_learning']
@@ -1726,7 +4020,7 @@ const handleDragendAdd = (ev, algorithm, node) => {
   } else {
     left = evClientX - 300 + 'px'
   }
-  console.log("node.label: ", node.label)
+
   let top = 50 + 'px'
   const nodeId = node.id
   const nodeInfo = {
@@ -1814,7 +4108,6 @@ const getRadioButtonStyle = (value) => {
     };
   }
 }
-
 
 // 建模区中各个算法节点的图标url
 const setIconOfAlgorithms = (label: string) => {
@@ -1909,7 +4202,6 @@ const fileNameRules: Record<string, Rule[]> = {
   ],
 }
 
-
 // 文件名不能为'无'
 // function validateFilename(rule, value, callback) {
 //   if (value === '无') {
@@ -1922,7 +4214,6 @@ const fileNameRules: Record<string, Rule[]> = {
 
 // 确认上传文件
 const onFinish = () => {
-
   uploadconfirmLoading.value = true;
   const formData = new FormData();
   formData.append("file", fileList.value[0]);
@@ -1964,11 +4255,9 @@ const onFinish = () => {
 
 };
 
-
 const fileList = ref<UploadProps["fileList"]>([]);  // 文件列表
 const uploading = ref<boolean>(false);
 const loadingDataModel = ref<number>(1)
-
 
 // 移除文件列表中的文件
 const handleRemove: UploadProps["onRemove"] = (file) => {
@@ -1977,7 +4266,6 @@ const handleRemove: UploadProps["onRemove"] = (file) => {
   newFileList.splice(index, 1);
   fileList.value = newFileList;
 };
-
 
 const beforeUpload: UploadProps["beforeUpload"] = (file) => {
   const allowedTypes = ['.npy', '.mat'];
@@ -1995,26 +4283,25 @@ const beforeUpload: UploadProps["beforeUpload"] = (file) => {
   return false;
 };
 
-
 // 文件类型检查，只允许mat或是npy格式的文件
 // const handleUploadDataFile = () => {
 //   let file = fileList.value[0]
 //   let filename = file.name
-//   const ext = filename.split('.').pop().toLowerCase();  
+//   const ext = filename.split('.').pop().toLowerCase();
 //   if (ext != 'mat' && ext != 'npy') {
 //     ElMessage({
 //       message: '文件格式错误，请上传mat或npy文件',
 //       type: 'error',
 //     })
-//     return  
+//     return
 //   }
 //   uploadConfirmDialog.value = true
 
 // };
 
-
 // 子组件向父组件发送数据
-const emit = defineEmits(["switchDrawer"]);
+// const emit = defineEmits(["switchDrawer"]);
+
 const switchDrawer = () => {
   let url = 'user/fetch_datafiles/'
   api.get(url)
@@ -2037,7 +4324,6 @@ const switchDrawer = () => {
   // });
 
 };
-
 
 const operationHelpDialogVisible = ref(false)  // 用户操作指南对话框
 const userHelpDialogVisible = ref(false)       // 用户使用教程对话框
@@ -2121,6 +4407,13 @@ const rules = {
     {required: true, message: "请输入模型名", trigger: "blur"},
     // { pattern:/^[\u4e00-\u9fa5_a-zA-Z0-9]+$/, message: '请输入中英文/数字/下划线', trigger: 'blur' },
     {validator: validateModelname, trigger: 'blur'}
+  ],
+  description: [
+    {required: true, message: "请输入模型描述", trigger: "blur"},
+    {min: 1, max: 300, message: '长度应在1到300个字符之间', trigger: 'blur'}
+  ],
+  classify: [
+    {required: true, message: "请选择分类", trigger: "blur"},
   ]
 }
 
@@ -2133,7 +4426,7 @@ function validateModelname(rule, value, callback) {
   }
 }
 
-// 在使用教程中滚动到指定部分的方法  
+// 在使用教程中滚动到指定部分的方法
 const scrollTo = (sectionId: any) => {
   if (userHelpDialogScrollbar.value) {
     const element = userHelpDialogScrollbar.value.querySelector(`#${sectionId}`);
@@ -2168,159 +4461,160 @@ const canShutdown = ref(true)
 
 // menuList2是为了显示算法列表，以及完成算法参数定义等操作，所定义的数据结构
 // 其中节点的id为算法的id，label为算法的名称，parameters为算法的参数，use_algorithm为当前该模块所使用的算法名称，tip_show为是否显示提示信息的标志，tip为提示信息
-const menuList2 = ref([{
-  label: '数据预处理', id: '1', options: [
-    {
-      label: '插值处理', id: '1.1', use_algorithm: null, parameters: {
-        'neighboring_values_interpolation': {},
-        'bicubic_interpolation': {},
-        'lagrange_interpolation': {},
-        'newton_interpolation': {},
-        'linear_interpolation': {},
-        'deeplearning_interpolation': {},
-      }, tip_show: false, tip: '对输入信号进行插值', optional: false
-    },
-    {
-      label: '特征提取', id: '1.2', use_algorithm: null, parameters: {
-        'time_domain_features': {
-          均值: false,
-          方差: false,
-          标准差: false,
-          偏度: false,
-          峰度: false,
-          四阶累积量: false,
-          六阶累积量: false,
-          最大值: false,
-          最小值: false,
-          中位数: false,
-          峰峰值: false,
-          整流平均值: false,
-          均方根: false,
-          方根幅值: false,
-          波形因子: false,
-          峰值因子: false,
-          脉冲因子: false,
-          裕度因子: false
-        },
-        'frequency_domain_features': {
-          重心频率: false,
-          均方频率: false,
-          均方根频率: false,
-          频率方差: false,
-          频率标准差: false,
-          谱峭度的均值: false,
-          谱峭度的峰度: false,
-        },
-        'time_frequency_domain_features': {
-          均值: false,
-          方差: false,
-          标准差: false,
-          峰度: false,
-          偏度: false,
-          四阶累积量: false,
-          六阶累积量: false,
-          最大值: false,
-          最小值: false,
-          中位数: false,
-          峰峰值: false,
-          整流平均值: false,
-          均方根: false,
-          方根幅值: false,
-          波形因子: false,
-          峰值因子: false,
-          脉冲因子: false,
-          裕度因子: false,
-          重心频率: false,
-          均方频率: false,
-          均方根频率: false,
-          频率方差: false,
-          频率标准差: false,
-          谱峭度的均值: false,
-          谱峭度的峰度: false,
-        },
-        'time_domain_features_multiple': {
-          均值: false,
-          方差: false,
-          标准差: false,
-          偏度: false,
-          峰度: false,
-          四阶累积量: false,
-          六阶累积量: false,
-          最大值: false,
-          最小值: false,
-          中位数: false,
-          峰峰值: false,
-          整流平均值: false,
-          均方根: false,
-          方根幅值: false,
-          波形因子: false,
-          峰值因子: false,
-          脉冲因子: false,
-          裕度因子: false
-        },
-        'frequency_domain_features_multiple': {
-          重心频率: false,
-          均方频率: false,
-          均方根频率: false,
-          频率方差: false,
-          频率标准差: false,
-          谱峭度的均值: false,
-          谱峭度的峰度: false,
-        },
-        'time_frequency_domain_features_multiple': {
-          均值: false,
-          方差: false,
-          标准差: false,
-          峰度: false,
-          偏度: false,
-          四阶累积量: false,
-          六阶累积量: false,
-          最大值: false,
-          最小值: false,
-          中位数: false,
-          峰峰值: false,
-          整流平均值: false,
-          均方根: false,
-          方根幅值: false,
-          波形因子: false,
-          峰值因子: false,
-          脉冲因子: false,
-          裕度因子: false,
-          重心频率: false,
-          均方频率: false,
-          均方根频率: false,
-          频率方差: false,
-          频率标准差: false,
-          谱峭度的均值: false,
-          谱峭度的峰度: false
-        },
-      }, tip_show: false, tip: '手工提取输入信号的特征', optional: true
-    },
-    {
-      label: '无量纲化', id: '1.5', use_algorithm: null, parameters: {
-        'max_min': {useLog: false},
-        'z-score': {useLog: false},
-        'robust_scaler': {useLog: false},
-        'max_abs_scaler': {useLog: false},
-      }, tip_show: false, tip: '对输入数据进行无量纲化处理', optional: true
-    },
-    {
-      label: '特征选择', id: '1.3', use_algorithm: null, parameters: {
-        'feature_imp': {rule: 1, threshold1: 0.1, threshold2: 0.1},
-        'mutual_information_importance': {rule: 1, threshold1: 0.1, threshold2: 0.1},
-        'correlation_coefficient_importance': {rule: 1, threshold1: 0.1, threshold2: 0.1},
-        'feature_imp_multiple': {rule: 1, threshold1: 0.1, threshold2: 0.1},
-        'mutual_information_importance_multiple': {rule: 1, threshold1: 0.1, threshold2: 0.1},
-        'correlation_coefficient_importance_multiple': {rule: 1, threshold1: 0.1, threshold2: 0.1},
-      }, tip_show: false, tip: '对提取到的特征进行特征选择', optional: true
-    },
-    {
-      label: '小波变换', id: '1.4', use_algorithm: null, parameters: {
-        'wavelet_trans_denoise': {'wavelet': '', 'wavelet_level': ''},
-      }, tip_show: false, tip: '对输入信号进行小波变换', optional: true
-    }
-  ], tip_show: false, tip: '包含添加噪声、插值以及特征提取等'
-},
+const menuList2 = ref([
+  {
+    label: '数据预处理', id: '1', options: [
+      {
+        label: '插值处理', id: '1.1', use_algorithm: null, parameters: {
+          'neighboring_values_interpolation': {},
+          'bicubic_interpolation': {},
+          'lagrange_interpolation': {},
+          'newton_interpolation': {},
+          'linear_interpolation': {},
+          'deeplearning_interpolation': {},
+        }, tip_show: false, tip: '对输入信号进行插值', optional: false
+      },
+      {
+        label: '特征提取', id: '1.2', use_algorithm: null, parameters: {
+          'time_domain_features': {
+            均值: false,
+            方差: false,
+            标准差: false,
+            偏度: false,
+            峰度: false,
+            四阶累积量: false,
+            六阶累积量: false,
+            最大值: false,
+            最小值: false,
+            中位数: false,
+            峰峰值: false,
+            整流平均值: false,
+            均方根: false,
+            方根幅值: false,
+            波形因子: false,
+            峰值因子: false,
+            脉冲因子: false,
+            裕度因子: false
+          },
+          'frequency_domain_features': {
+            重心频率: false,
+            均方频率: false,
+            均方根频率: false,
+            频率方差: false,
+            频率标准差: false,
+            谱峭度的均值: false,
+            谱峭度的峰度: false,
+          },
+          'time_frequency_domain_features': {
+            均值: false,
+            方差: false,
+            标准差: false,
+            峰度: false,
+            偏度: false,
+            四阶累积量: false,
+            六阶累积量: false,
+            最大值: false,
+            最小值: false,
+            中位数: false,
+            峰峰值: false,
+            整流平均值: false,
+            均方根: false,
+            方根幅值: false,
+            波形因子: false,
+            峰值因子: false,
+            脉冲因子: false,
+            裕度因子: false,
+            重心频率: false,
+            均方频率: false,
+            均方根频率: false,
+            频率方差: false,
+            频率标准差: false,
+            谱峭度的均值: false,
+            谱峭度的峰度: false,
+          },
+          'time_domain_features_multiple': {
+            均值: false,
+            方差: false,
+            标准差: false,
+            偏度: false,
+            峰度: false,
+            四阶累积量: false,
+            六阶累积量: false,
+            最大值: false,
+            最小值: false,
+            中位数: false,
+            峰峰值: false,
+            整流平均值: false,
+            均方根: false,
+            方根幅值: false,
+            波形因子: false,
+            峰值因子: false,
+            脉冲因子: false,
+            裕度因子: false
+          },
+          'frequency_domain_features_multiple': {
+            重心频率: false,
+            均方频率: false,
+            均方根频率: false,
+            频率方差: false,
+            频率标准差: false,
+            谱峭度的均值: false,
+            谱峭度的峰度: false,
+          },
+          'time_frequency_domain_features_multiple': {
+            均值: false,
+            方差: false,
+            标准差: false,
+            峰度: false,
+            偏度: false,
+            四阶累积量: false,
+            六阶累积量: false,
+            最大值: false,
+            最小值: false,
+            中位数: false,
+            峰峰值: false,
+            整流平均值: false,
+            均方根: false,
+            方根幅值: false,
+            波形因子: false,
+            峰值因子: false,
+            脉冲因子: false,
+            裕度因子: false,
+            重心频率: false,
+            均方频率: false,
+            均方根频率: false,
+            频率方差: false,
+            频率标准差: false,
+            谱峭度的均值: false,
+            谱峭度的峰度: false
+          },
+        }, tip_show: false, tip: '手工提取输入信号的特征', optional: true
+      },
+      {
+        label: '无量纲化', id: '1.5', use_algorithm: null, parameters: {
+          'max_min': {useLog: false},
+          'z-score': {useLog: false},
+          'robust_scaler': {useLog: false},
+          'max_abs_scaler': {useLog: false},
+        }, tip_show: false, tip: '对输入数据进行无量纲化处理', optional: true
+      },
+      {
+        label: '特征选择', id: '1.3', use_algorithm: null, parameters: {
+          'feature_imp': {rule: 1, threshold1: 0.1, threshold2: 0.1},
+          'mutual_information_importance': {rule: 1, threshold1: 0.1, threshold2: 0.1},
+          'correlation_coefficient_importance': {rule: 1, threshold1: 0.1, threshold2: 0.1},
+          'feature_imp_multiple': {rule: 1, threshold1: 0.1, threshold2: 0.1},
+          'mutual_information_importance_multiple': {rule: 1, threshold1: 0.1, threshold2: 0.1},
+          'correlation_coefficient_importance_multiple': {rule: 1, threshold1: 0.1, threshold2: 0.1},
+        }, tip_show: false, tip: '对提取到的特征进行特征选择', optional: true
+      },
+      {
+        label: '小波变换', id: '1.4', use_algorithm: null, parameters: {
+          'wavelet_trans_denoise': {'wavelet': '', 'wavelet_level': ''},
+        }, tip_show: false, tip: '对输入信号进行小波变换', optional: true
+      }
+    ], tip_show: false, tip: '包含添加噪声、插值以及特征提取等'
+  },
   {
     label: '故障检测', id: '2', options: [
       {
@@ -2369,55 +4663,7 @@ const menuList2 = ref([{
       },
     ]
   },
-  // {
-  //   label: '增值组件', id: '-1', options: [
-  //     {
-  //       label: '插值处理', id: '1.1', use_algorithm: null, parameters: {
-  //         'private_interpolation': '',
-  //       }, tip_show: false, tip: '使用专有插值处理方法', optional: false
-  //     } ,
-  //     {label: '特征提取', id: '1.2', use_algorithm: null, parameters: {
-  //       'private_feature_extraction':'',
-  //       }},
-  //     {
-  //       label: '无量纲化', id: '1.5', use_algorithm: null, parameters: {
-  //         'private_scaler': {useLog: false, algorithm: ''}
-  //       }, tip_show: false, tip: '使用专有无量纲化处理方法', optional: true
-  //     },
-  //     {
-  //       label: '特征选择', id: '1.3', use_algorithm: null, parameters: {
-  //         'extra_feature_selection': {rule: 1, threshold1: 0.1, threshold2: 0.1}
-  //       }, tip_show: false, tip: '使用专有特征选择方法', optional: true
-  //     },
-  //     {
-  //       label: '小波变换', id: '1.4', use_algorithm: null, parameters: {
-  //         'extra_wavelet_transform': ''
-  //       }, tip_show: false, tip: '对输入信号进行小波变换', optional: true
-  //     },
-  //     {
-  //       label: '故障诊断', id: '2.1', use_algorithm: null, parameters: {
-
-  //         'private_fault_diagnosis_deeplearning': '',
-  //         'private_fault_diagnosis_machine_learning': '',
-  //       }, tip_show: false, tip: '使用专有故障诊断方法', optional: false
-  //     },
-  //     {
-  //       label: '故障预测', id: '2.2', use_algorithm: null, parameters: {
-
-  //         'private_fault_prediction': {}
-  //       }, tip_show: false, tip: '使用专有故障预测方法', optional: false
-  //     },
-  //     {
-  //       label: '健康评估', id: '3.4', use_algorithm: null, parameters: {
-  //         'extra_health_evaluation': ''
-  //       }, tip_show: false, tip: '使用专有健康评估的评价方法', optional: false
-  //     },
-
-  //   ],
-  // },
-
 ]);
-
 
 // 该方法用于判断是否显示可视化建模区的背景图片
 const background_IMG = () => {
@@ -2515,10 +4761,6 @@ const recommendParams = {
 const introductionToShow = ref('# 你好世界')  // 需要展示在可视化建模区的算法介绍
 const showPlainIntroduction = ref(false)
 
-// 点击标签页切换单传感器和多传感器算法
-// const handleClick = (tab, event) => {
-//   console.log(tab, event)
-// }
 
 // 算法介绍，点击算法选择区内的具体算法，将其算法介绍展示在可视化建模区
 const showIntroduction = (algorithm: string) => {
@@ -2527,11 +4769,11 @@ const showIntroduction = (algorithm: string) => {
   showPlainIntroduction.value = true
   introductionToShow.value = plainIntroduction[algorithm]
 
+  showResultOfElMain(); //这里加了一句显示结果展示区域(若被隐藏)
 }
 
-
 // 算法选择菜单下拉展示
-const menuDetailsSecond = ref({})
+const menuDetailsSecond = ref<{ [key: string]: boolean }>({});
 
 const menuDetailsThird = ref({})
 
@@ -2561,7 +4803,6 @@ const clickAtSecondMenu = (option: any) => {
 // 特征提取所选择的特征
 // const features = ref(['均值', '方差', '标准差', '峰度', '偏度', '四阶累积量', '六阶累积量', '最大值', '最小值', '中位数', '峰峰值', '整流平均值', '均方根', '方根幅值',
 //   '波形因子', '峰值因子', '脉冲因子', '裕度因子', '重心频率', '均方频率', '均方根频率', '频率方差', '频率标准差', '谱峭度的均值', '谱峭度的峰度'])
-
 const features = ref([])
 
 //双向链表用于存储调用的模块顺序
@@ -2697,8 +4938,16 @@ const userRole = ref('');  // 用户登录时所选择的角色，用于区分�
 // 将建立模型的连线操作、用户名设置、区分普通用户和系统用户的功能, 挂在到onMounted中
 const linkedList = new LinkedList()
 onMounted(() => {
-  username.value = window.localStorage.getItem('username') || '用户名未设置'
-  userRole.value = window.localStorage.getItem('role') || '无效的用户'
+  //新增的elmain start
+  // loadStateOfElMain()
+  // 添加resize事件监听器，使用节流后的函数
+  // window.addEventListener('resize', updateMaxHeightOfElMain)
+  window.addEventListener('resize', throttledHandleResize);
+  // window.addEventListener('beforeunload', saveStateOfElMain)
+  //新增的elmain start
+
+  username.value = window.sessionStorage.getItem('username') || '用户名未设置'
+  userRole.value = window.sessionStorage.getItem('role') || '无效的用户'
   // console.log('username: ', username.value)
   console.log('userRole: ', userRole.value)
   //获取用户上传的增值组件并构造对应的目录结构体
@@ -2902,7 +5151,7 @@ const checkModel = () => {
       const sourceId = connection.sourceId;
       const targetId = connection.targetId;
 
-      // 如果源元素ID不在connectionsMap中，则初始化为空数组  
+      // 如果源元素ID不在connectionsMap中，则初始化为空数组
       if (!connectionsMap[sourceId]) {
         connectionsMap[sourceId] = [];
       }
@@ -2911,10 +5160,10 @@ const checkModel = () => {
 
     // 寻找用户建立的模型流程逻辑上的第一个元素
     function findStartElement(connectionsMap: any) {
-      // 创建一个集合来存储所有元素的ID  
+      // 创建一个集合来存储所有元素的ID
       const allElements = new Set(Object.keys(connectionsMap).concat(...Object.values(connectionsMap).map(list => list)));
 
-      // 遍历所有元素，查找没有入度的元素  
+      // 遍历所有元素，查找没有入度的元素
       for (const elementId of allElements) {
         let hasIncomingConnection = false;
         for (const connections of Object.values(connectionsMap)) {
@@ -2928,7 +5177,7 @@ const checkModel = () => {
         }
       }
 
-      // 如果没有找到没有入度的元素，则可能图不是线性的，或者connectionsMap构建有误  
+      // 如果没有找到没有入度的元素，则可能图不是线性的，或者connectionsMap构建有误
       throw new Error("未找到起点元素.");
     }
 
@@ -2939,7 +5188,7 @@ const checkModel = () => {
 
       const connections = connectionsMap[currentElementId];
 
-      // 建立模型时，模型序列是线性的 
+      // 建立模型时，模型序列是线性的
       if (connections && connections.length > 0) {
         return connections[0]; // 返回序列中的下一个元素ID
       }
@@ -2948,13 +5197,13 @@ const checkModel = () => {
 
     // 生成所建立模型的运行流程
     function traverseLinearSequence(startElementId, connectionsMap, visited = new Set(), order = []) {
-      // 检查是否已访问过当前元素  
+      // 检查是否已访问过当前元素
       if (visited.has(startElementId)) {
         return;
       }
 
-      visited.add(startElementId); // 标记为已访问  
-      order.push(startElementId); // 将元素添加到顺序数组中  
+      visited.add(startElementId); // 标记为已访问
+      order.push(startElementId); // 将元素添加到顺序数组中
 
       let nextElementId = findNextElementIdInSequence(startElementId, connectionsMap);
 
@@ -3023,11 +5272,11 @@ const checkModel = () => {
   const checkSubstrings = (str, subStr1, subStrs2) => {
     const index1 = str.indexOf(subStr1);
     if (index1 !== -1) {
-      // 如果 subStr1 存在  
+      // 如果 subStr1 存在
       for (const subStr2 of subStrs2) {
         const index2 = str.indexOf(subStr2, index1 + subStr1.length);
         if (index2 !== -1) {
-          // 如果在 subStr1 之后找到了 subStr2 中的任何一个则返回true  
+          // 如果在 subStr1 之后找到了 subStr2 中的任何一个则返回true
           return true;
         }
       }
@@ -3097,8 +5346,10 @@ const checkModel = () => {
           }
         }
         // 如果模块可以单独运行，再进行模型中各个模块的参数设置的检查
-        let checkParamsRight = checkModelParams()
-        if (checkParamsRight) {
+        let checkParamsRight = checkModelParam()
+        let isLofical_completenessed = toObject().nodes.length-toObject().edges.length
+        console.log('isLofical_completenessed: ', isLofical_completenessed)
+        if (checkParamsRight && isLofical_completenessed!=1) {
           ElMessage({
             showClose: true,
             message: '模型正常，可以保存并运行',
@@ -3133,15 +5384,6 @@ const checkModel = () => {
           })
           return
         }
-        // if (moduleStr.match('特征选择故障诊断') && !moduleStr.match('特征提取特征选择故障诊断') && !moduleStr.match('特征提取特征选择无量纲化故障诊断')
-        //     && !moduleStr.match('特征提取无量纲化特征选择故障诊断') && !algorithmStr.match('深度学习模型的故障诊断') && !algorithmStr.match('GRU的故障诊断') && !algorithmStr.match('LSTM的故障诊断')) {
-        //   ElMessage({
-        //     showClose: true,
-        //     message: '因模型中包含故障诊断，建议在特征选择之前包含特征提取',
-        //     type: 'warning'
-        //   })
-        //   return
-        // } 
         if (moduleStr.match('故障诊断')) {
           // 如果是深度学习模型的故障诊断
           if (algorithmStr.match('深度学习模型的故障诊断') || algorithmStr.match('GRU的故障诊断') || algorithmStr.match('LSTM的故障诊断')) {
@@ -3236,7 +5478,7 @@ const checkModel = () => {
             //     type: 'warning',
             //     showClose: true
             //   })
-            //   return 
+            //   return
             // }
             // 如果机器学习的故障诊断之前既不包含特征提取，也不包含特征选择
             if (!preModuleText.match('特征提取') && !preModuleText.match('特征选择')) {
@@ -3570,41 +5812,7 @@ const checkModel = () => {
           }
 
         }
-        // if ((algorithmStr.match('LSTM的故障诊断') || algorithmStr.match('GRU的故障诊断')) && (checkSubstrings(moduleStr, '故障诊断', ['故障预测', '健康评估']))){
-        //   let nextModuleText = moduleStr.substring(moduleStr.indexOf('故障诊断'), moduleStr.length)
-        //   if (!nextModuleText.match('特征提取') && !nextModuleText.match('特征选择')){
-        //     ElMessage({
-        //       message: '注意深度学习的算法并不能为线性回归的故障预测或是健康评估提供需要的特征。',
-        //       type: 'warning',
-        //       showClose: true
-        //     })
-        //     return
-        //   }
-        //   // ElMessage({
-        //   //   message: '注意深度学习的算法并不能为线性回归的故障预测或是健康评估提供需要的特征。',
-        //   //   type: 'warning',
-        //   //   showClose: true
-        //   // })
 
-        //   let sourceId = labelToId('故障诊断')
-        //   let current = linkedList.search('故障诊断')
-        //   // 红色表明报错连线
-        //   let next = current.next.value       // 寻找目标连线的源节点和目标节点
-        //   let targetId = labelToId(next)
-
-        //   // let connection = plumbIns.getConnections({ source: sourceId, traget: targetId })
-        //   // console.log('connection: ', connection)
-
-        //   // 通过jsPlumb实例对象的select方法选择连线，并设置连线的样式
-        //   plumbIns.select({ source: sourceId, target: targetId }).setPaintStyle({
-        //     stroke: '#E53935',
-        //     strokeWidth: 7,
-        //     outlineStroke: 'transparent',
-        //     outlineWidth: 5,
-
-        //   });
-        //   return
-        // }
         // 检查模型中是否使用了深度学习模型的故障诊断
         const useDeepLearningModule = (algorithmStr: string) => {
           return algorithmStr.match('LSTM的故障诊断') || algorithmStr.match('GRU的故障诊断') || algorithmStr.match('一维卷积深度学习模型的故障诊断') || algorithmStr.match('时频图深度学习模型的故障诊断')
@@ -3769,26 +5977,26 @@ const checkModel = () => {
 let processing = ref(false)
 let percentage = ref(0)
 // let timerId = null
-let fastTimerId = null; // 快速定时器ID  
-let slowTimerId = null; // 慢速定时器ID  
+let fastTimerId = null; // 快速定时器ID
+let slowTimerId = null; // 慢速定时器ID
 
 let responseResults = {}  // 从后端接收到的模型运行的结果数据
 
 const username = ref('')  // 显示在用户界面中的用户名
 
 
-// 拦截器拦截axios请求，如果请求被取消，则不发送请求  
-// axios.interceptors.request.use(config => {  
-//   // 如果请求被取消，则不发送请求  
-//   if (config.cancelToken) {  
-//     config.cancelToken = source.token;  
-//   }  
-//   return config;  
-// });  
+// 拦截器拦截axios请求，如果请求被取消，则不发送请求
+// axios.interceptors.request.use(config => {
+//   // 如果请求被取消，则不发送请求
+//   if (config.cancelToken) {
+//     config.cancelToken = source.token;
+//   }
+//   return config;
+// });
 let cancel;
 
 const source = axios.CancelToken.source();
-cancel = source.cancel; // 暴露cancel函数  
+cancel = source.cancel; // 暴露cancel函数
 
 
 //上传文件后，点击开始运行以运行程序
@@ -3819,19 +6027,19 @@ const startProgram = () => {
   })
   canShutdown.value = false
 
-  percentage.value = 0; // 重置进度条  
+  percentage.value = 0; // 重置进度条
 
   fastTimerId = setInterval(() => {
     if (percentage.value < 50) {
       percentage.value += 10;
     } else {
-      // 达到50%时，清除快速定时器并启动慢速定时器  
+      // 达到50%时，清除快速定时器并启动慢速定时器
       clearInterval(fastTimerId);
       slowTimerId = setInterval(() => {
         if (percentage.value < 90) {
           percentage.value += 10;
         } else {
-          // 达到100%时清除慢速定时器  
+          // 达到100%时清除慢速定时器
           clearInterval(slowTimerId);
         }
       }, 3000);
@@ -3944,10 +6152,10 @@ const shutDown = () => {
       showStatusMessage.value = true
       canShutdown.value = true
       // canStartProcess.value = false
-      // cancel('Operation canceled by the user.');  
+      // cancel('Operation canceled by the user.');
     }
   }).catch(function (error: any) {
-    // 处理错误情况  
+    // 处理错误情况
     ElNotification.error({
       title: 'ERROR',
       message: '请求终端进程失败'
@@ -4125,7 +6333,6 @@ const deleteNode = (nodeId) => {
   }
 }
 
-
 // 处理可视化建模区中拖拽节点的操作
 const handleMouseup = (ev, data) => { // 在图表中拖拽节点时，设置他的新的位置
 
@@ -4135,8 +6342,8 @@ const handleMouseup = (ev, data) => { // 在图表中拖拽节点时，设置他
       let node = nodeList.value[i]
       if (node.id === data.id) {
         // setTimeout(()=>{
-        //   data.nodeContainerStyle.left = ev.clientX - 290 
-        //   data.nodeContainerStyle.top = ev.clientY - 80 
+        //   data.nodeContainerStyle.left = ev.clientX - 290
+        //   data.nodeContainerStyle.top = ev.clientY - 80
         // }, 2)
         nodeList.value[i].nodeContainerStyle.left = ev.clientX - 355 + 'px'
         nodeList.value[i].nodeContainerStyle.top = ev.clientY - 105 + 'px'
@@ -4155,6 +6362,8 @@ const dialogFormVisible = ref(false)  // 控制保存模型对话框的弹出，
 // 提交的模型相关信息
 const modelInfoForm = ref({
   name: '',
+  description: '',
+  class: []
 })
 
 // 检查模型参数设置
@@ -4208,7 +6417,7 @@ const checkModelParams = () => {
   return true
 }
 
-//保存模型，并取消拖拽动作                 
+//保存模型，并取消拖拽动作
 const saveModelSetting = (saveModel, schedule) => {
 
   done.value = true
@@ -4292,55 +6501,72 @@ const saveModelSetting = (saveModel, schedule) => {
   dialogModle.value = saveModel
 }
 
+//检查保存模型的表单
+const checkForm = () => {
+  if ((modelInfoForm.value.name === '')  |  (modelInfoForm.value.class.length==0)  | (modelInfoForm.value.description=='')) {
+    alert('请补充完整信息')
+    return false
+  }else{
+    return true
+  }
+}
+
 // 完成模型名称等信息的填写后，确定保存模型
-const saveModelConfirm = () => {
-  // 将模型信息保存到数据库
-  let data = new FormData()
-  data.append('model_name', modelInfoForm.value.name)
-  let nodelistInfo = nodeList.value
-  let modelInfo = {"nodeList": nodelistInfo, "connection": contentJson.schedule}
-  data.append('model_info', JSON.stringify(modelInfo))
+const saveModelConfirm = async (formEl: FormInstance | undefined) => {
+  if(!checkForm()){
+    console.log("执行保存表单失败")
+    return
+  }else{
 
-  api.post('/user/save_model/', data,
-      {
-        headers: {"Content-Type": 'multipart/form-data'}
+    console.log('modelInfoForm1: ', modelInfoForm.value)
+    // 将模型信息保存到数据库
+    let data = new FormData()
+    data.append('model_name', modelInfoForm.value.name)
+    let nodelistInfo = toObject()
+    let modelInfo = {"nodeList": nodelistInfo, "connection": contentJson.schedule}
+    data.append('model_info', JSON.stringify(modelInfo))
+    data.append('description', modelInfoForm.value.description)
+    api.post('/user/save_model/', data,
+        {
+          headers: {"Content-Type": 'multipart/form-data'}
+        }
+    ).then((response: any) => {
+      if (response.data.code == 401) {
+        ElMessageBox.alert('登录状态已失效，请重新登陆', '提示', {
+          confirmButtonText: '确定',
+          callback: (action: Action) => {
+            router.push('/')
+          },
+        })
       }
-  ).then((response) => {
-    if (response.data.code == 401) {
-      ElMessageBox.alert('登录状态已失效，请重新登陆', '提示', {
-        confirmButtonText: '确定',
-        callback: (action: Action) => {
-          router.push('/')
-        },
-      })
-    }
-    if (response.data.message == 'save model success') {
-      ElMessage({
-        message: '保存模型成功',
-        type: 'success'
-      })
+      if (response.data.message == 'save model success') {
+        ElMessage({
+          message: '保存模型成功',
+          type: 'success'
+        })
 
-      fetchModels()
-      modelsDrawer.value = false       // 关闭历史模型抽屉
-      dialogFormVisible.value = false    // 关闭提示窗口
-      dialogModle.value = false
-      canStartProcess.value = false     // 保存模型成功可以运行
-      modelSetup.value = true                 // 模型保存完成
-      modelLoaded.value = modelInfoForm.value.name  // 保存模型后，显示当前模型名称
-      updateStatus('当前模型已保存')
-    } else if (response.data.code == 400) {
+        fetchModels()
+        modelsDrawer.value = false       // 关闭历史模型抽屉
+        dialogFormVisible.value = false    // 关闭提示窗口
+        dialogModle.value = false
+        canStartProcess.value = false     // 保存模型成功可以运行
+        modelSetup.value = true                 // 模型保存完成
+        modelLoaded.value = modelInfoForm.value.name  // 保存模型后，显示当前模型名称
+        updateStatus('当前模型已保存')
+      } else if (response.data.code == 400) {
+        ElMessage({
+          message: '已有同名模型，保存模型失败',
+          type: 'error'
+        })
+      }
+    }).catch(error => {
       ElMessage({
-        message: '已有同名模型，保存模型失败',
+        message: '保存模型请求失败',
         type: 'error'
       })
-    }
-  }).catch(error => {
-    ElMessage({
-      message: '保存模型请求失败',
-      type: 'error'
+      console.log('save model error: ', error)
     })
-    console.log('save model error: ', error)
-  })
+  }
 }
 
 const show1 = ref(false)
@@ -4353,7 +6579,7 @@ const healthEvaluation = ref('')
 const displayHealthEvaluation = ref(false)
 const activeName1 = ref('first')
 const healthEvaluationOfExample = ref('样本1')
-const resultsBarOfAllExamples = ref<Object>({});
+const resultsBarOfAllExamples = ref({});
 const levelIndicatorsOfAllExamples = ref({});
 const statusOfExamples = ref({});
 const suggestionOfAllExamples = ref({});
@@ -4362,42 +6588,142 @@ const finalSuggestion = ref('');
 // const healthEvaluationFigure2 = ref('data:image/png;base64,')
 // const healthEvaluationFigure3 = ref('data:image/png;base64,')
 
-const healthEvaluationDisplay = (results_object) => {
+// const healthEvaluationDisplay = (results_object) => {
 
-  // 各个样本健康评估的可视化结果
-  displayHealthEvaluation.value = true
+//   // 各个样本健康评估的可视化结果
+//   displayHealthEvaluation.value = true
 
-  let figure1 = results_object.层级有效指标_Base64
-  let figure2 = results_object.二级指标权重柱状图_Base64
-  let figure3 = results_object.评估结果柱状图_Base64
-  let suggestions = results_object.评估建议
+//   let figure1 = results_object.层级有效指标_Base64
+//   let figure2 = results_object.二级指标权重柱状图_Base64
+//   let figure3 = results_object.评估结果柱状图_Base64
+//   let suggestions = results_object.评估建议
 
-  resultsBarOfAllExamples.value = {}
-  figure1.forEach((element: string, index: number) => {
-    // console.log("element: ", element)
-    // console.log("index: ", index)
-    resultsBarOfAllExamples.value[`样本${index + 1}`] = 'data:image/png;base64,' + element
-  });
-  levelIndicatorsOfAllExamples.value = {}
-  figure2.forEach((element: string, index: number) => {
-    levelIndicatorsOfAllExamples.value[`样本${index + 1}`] = 'data:image/png;base64,' + element
-  });
-  statusOfExamples.value = {};
-  figure3.forEach((element: string, index: number) => {
-    statusOfExamples.value[`样本${index + 1}`] = 'data:image/png;base64,' + element
-  });
-  suggestionOfAllExamples.value = {};
-  suggestions.forEach((element: string, index: number) => {
-    suggestionOfAllExamples.value[`样本${index + 1}`] = element
-  });
+//   figure1.forEach((element: string, index: number) => {
+//     // console.log("element: ", element)
+//     // console.log("index: ", index)
+//     resultsBarOfAllExamples.value[`样本${index + 1}`] = 'data:image/png;base64,' + element
+//   });
+//   figure2.forEach((element: string, index: number) => {
+//     levelIndicatorsOfAllExamples.value[`样本${index + 1}`] = 'data:image/png;base64,' + element
+//   });
+//   figure3.forEach((element: string, index: number) => {
+//     statusOfExamples.value[`样本${index + 1}`] = 'data:image/png;base64,' + element
+//   });
+//   suggestions.forEach((element: string, index: number) => {
+//     suggestionOfAllExamples.value[`样本${index + 1}`] = element
+//   });
 
-  // 最终评估结果
-  finalSuggestion.value = results_object.最终评估结果
-  let statusOfAllExamples: Object = results_object.各样本状态隶属度
+//   // 最终评估结果
+//   finalSuggestion.value = results_object.最终评估结果
+//   let statusOfAllExamples: Object = results_object.各样本状态隶属度
 
-  nextTick(() => {
-    // 绘制故障样本与非故障样本数量饼状图
-    var pieChartDom = document.getElementById('healthEvaluationPieChart');
+//   nextTick(() => {
+//     // 绘制故障样本与非故障样本数量饼状图
+//     var pieChartDom = document.getElementById('healthEvaluationPieChart');
+//     var pieChart = echarts.init(pieChartDom);
+//     var pieChartOption;
+
+//     pieChartOption = {
+//       title: {
+//         text: '评估结果中不同状态所属的样本数量比例',
+//         // subtext: 'Fake Data',
+//         left: 'center'
+//       },
+//       tooltip: {
+//         trigger: 'item'
+//       },
+//       legend: {
+//         orient: 'vertical',
+//         left: 'left'
+//       },
+//       series: [
+//         {
+//           name: '样本数量',
+//           type: 'pie',
+//           radius: '50%',
+//           data: [
+//             // { value: 580, name: 'Email' },
+//             // { value: 484, name: 'Union Ads' },
+//             // { value: 300, name: 'Video Ads' }
+//           ],
+//           emphasis: {
+//             itemStyle: {
+//               shadowBlur: 10,
+//               shadowOffsetX: 0,
+//               shadowColor: 'rgba(0, 0, 0, 0.5)'
+//             }
+//           }
+//         }
+//       ],
+//       dataZoom: [
+//         {
+//           type: 'inside', // 使用鼠标滚轮来缩放
+//           start: 0,
+//           end: 100,
+//         },/*
+//         {
+//           show: true,
+//           type: 'slider', // 在图表下方显示滑动条
+//           start: 0,
+//           end: 100,
+//         },*/
+//       ],
+//     };
+//     for (let [key, value] of Object.entries(statusOfAllExamples)) {
+//       pieChartOption.series[0].data.push({value: value, name: key})
+//     }
+//     console.log("pieChartOption.series[0].data: ", pieChartOption.series[0].data)
+//     pieChart.setOption(pieChartOption);
+//   })
+//   // healthEvaluation.value = results_object.评估建议
+//   // healthEvaluationFigure1.value = 'data:image/png;base64,' + figure1
+//   // healthEvaluationFigure2.value = 'data:image/png;base64,' + figure2
+//   // healthEvaluationFigure3.value = 'data:image/png;base64,' + figure3
+
+// }
+
+const healthEvaluationDisplay = async(results_object: any) => {
+
+// 各个样本健康评估的可视化结果
+// displayHealthEvaluation.value = true
+
+let figure1 = results_object.层级有效指标_Base64
+let figure2 = results_object.二级指标权重柱状图_Base64
+let figure3 = results_object.评估结果柱状图_Base64
+let suggestions = results_object.评估建议
+
+// 显示各个样本健康评估的可视化结果
+resultsBarOfAllExamples.value = {}
+figure1.forEach((element: string, index: number) => {
+  // console.log("element: ", element)
+  // console.log("index: ", index)
+  resultsBarOfAllExamples.value[`样本${index + 1}`] = 'data:image/png;base64,' + element
+});
+levelIndicatorsOfAllExamples.value = {}
+figure2.forEach((element: string, index: number) => {
+  levelIndicatorsOfAllExamples.value[`样本${index + 1}`] = 'data:image/png;base64,' + element
+});
+statusOfExamples.value = {};
+figure3.forEach((element: string, index: number) => {
+  statusOfExamples.value[`样本${index + 1}`] = 'data:image/png;base64,' + element
+});
+suggestionOfAllExamples.value = {};
+suggestions.forEach((element: string, index: number) => {
+  suggestionOfAllExamples.value[`样本${index + 1}`] = element
+});
+
+// 最终评估结果
+finalSuggestion.value = results_object.最终评估结果
+resultsToGenerateConclusion['healthEvaluation']['text'] = finalSuggestion.value
+let statusOfAllExamples: Object = results_object.各样本状态隶属度
+
+nextTick(() => {
+  // 绘制故障样本与非故障样本数量饼状图
+  var pieChartDom = document.getElementById('healthEvaluationPieChart');
+  let existingChart = echarts.getInstanceByDom(pieChartDom);
+
+  if(!existingChart){
+
     var pieChart = echarts.init(pieChartDom);
     var pieChartOption;
 
@@ -4437,15 +6763,28 @@ const healthEvaluationDisplay = (results_object) => {
     for (let [key, value] of Object.entries(statusOfAllExamples)) {
       pieChartOption.series[0].data.push({value: value, name: key})
     }
-    console.log("pieChartOption.series[0].data: ", pieChartOption.series[0].data)
+    // console.log("pieChartOption.series[0].data: ", pieChartOption.series[0].data)
     pieChart.setOption(pieChartOption);
-  })
-  // healthEvaluation.value = results_object.评估建议
-  // healthEvaluationFigure1.value = 'data:image/png;base64,' + figure1
-  // healthEvaluationFigure2.value = 'data:image/png;base64,' + figure2
-  // healthEvaluationFigure3.value = 'data:image/png;base64,' + figure3
+
+    // 将echart以Base64图像编码的形式存放到resultPicturesToGenerateConclusion中
+    var imgSrc = pieChart.getDataURL({
+        type: 'png',  // 可选 'jpeg'
+        backgroundColor: '#fff',
+        excludeComponents: ['toolbox']
+    });
+    // 向最终报告添加健康评估的结果
+    resultsToGenerateConclusion['healthEvaluation']['imageBase64'] = imgSrc
+  }
+
+})
+// healthEvaluation.value = results_object.评估建议
+// healthEvaluationFigure1.value = 'data:image/png;base64,' + figure1
+// healthEvaluationFigure2.value = 'data:image/png;base64,' + figure2
+// healthEvaluationFigure3.value = 'data:image/png;base64,' + figure3
 
 }
+
+
 
 
 // 特征提取结果展示
@@ -4457,87 +6796,255 @@ const rawDataList = ref<Object[]>([])
 const featuresSeriesList = ref<Object[]>([])
 const featuresExtractionRawData = ref('传感器 1')
 
-const featureExtractionDisplay = (resultsObject) => {
+// const featureExtractionDisplay = (resultsObject) => {
 
 
-  // 获取后端传回的提取的特征
-  let featuresWithName = Object.assign({}, resultsObject.features_with_name)
-  let featuresName = featuresWithName.features_name
-  let featuresToDrawLineChart = Object.assign({}, resultsObject.featuresToDrawLineChart)
-  // let featuresGroupBySensor = Object.assign(featuresWithName.features_extracted_group_by_sensor)
+//   // 获取后端传回的提取的特征
+//   let featuresWithName = Object.assign({}, resultsObject.features_with_name)
+//   let featuresName = featuresWithName.features_name
+//   let featuresToDrawLineChart = Object.assign({}, resultsObject.featuresToDrawLineChart)
+//   // let featuresGroupBySensor = Object.assign(featuresWithName.features_extracted_group_by_sensor)
 
-  console.log("featuresToDrawLineChart: ", featuresToDrawLineChart)
+//   console.log("featuresToDrawLineChart: ", featuresToDrawLineChart)
 
-  let num_frames = resultsObject.num_examples
-  // 根据帧数num_frames生成x坐标的坐标轴
-  let x_axis = []
-  for (let i = 0; i < num_frames; i++) {
-    x_axis.push('样本' + (i + 1) + `(${i * 2048}~${(i + 1) * 2048 - 1})`)
-  }
+//   let num_frames = resultsObject.num_examples
+//   // 根据帧数num_frames生成x坐标的坐标轴
+//   let x_axis = []
+//   for (let i = 0; i < num_frames; i++) {
+//     x_axis.push('样本' + (i + 1) + `(${i * 2048}~${(i + 1) * 2048 - 1})`)
+//   }
 
-  // let datas = []        // 表格中每一行的数据
-  // featuresName.unshift('传感器')  // 表格的列名
-  // for (const sensor in featuresGroupBySensor) {
-  //   let featuresOfSensor = featuresGroupBySensor[sensor].slice()
-  //   featuresOfSensor.unshift(sensor)
-  //   datas.push(featuresOfSensor)
-  // }
-  // console.log("........datas: ", datas)
+//   // let datas = []        // 表格中每一行的数据
+//   // featuresName.unshift('传感器')  // 表格的列名
+//   // for (const sensor in featuresGroupBySensor) {
+//   //   let featuresOfSensor = featuresGroupBySensor[sensor].slice()
+//   //   featuresOfSensor.unshift(sensor)
+//   //   datas.push(featuresOfSensor)
+//   // }
+//   // console.log("........datas: ", datas)
 
-  // datas是每个传感器的每一帧样本所提取到的特征
+//   // datas是每个传感器的每一帧样本所提取到的特征
 
-  // 特征表格
-  // columns.value.length = 0
-  // 将特征名作为列名
-  // featuresName.forEach(element => {
-  //   columns.value.push({ prop: element, label: element, width: 180 })
-  // });
+//   // 特征表格
+//   // columns.value.length = 0
+//   // 将特征名作为列名
+//   // featuresName.forEach(element => {
+//   //   columns.value.push({ prop: element, label: element, width: 180 })
+//   // });
 
-  // 转换各特征值数据为对象数组，以作为表格数据进行显示
-  // datas.forEach(data => {
-  //   transformedData.value = data.map((row, index) => {
-  //     const obj = {};
-  //     columns.value.forEach((column, colIndex) => {
-  //       obj[column.prop] = row[colIndex];
-  //     });
-  //     return obj;
-  //   });
-  // });  
+//   // 转换各特征值数据为对象数组，以作为表格数据进行显示
+//   // datas.forEach(data => {
+//   //   transformedData.value = data.map((row, index) => {
+//   //     const obj = {};
+//   //     columns.value.forEach((column, colIndex) => {
+//   //       obj[column.prop] = row[colIndex];
+//   //     });
+//   //     return obj;
+//   //   });
+//   // });
 
-  let rawDataSeries: any = resultsObject.raw_data
-  numOfSensors.value = rawDataSeries.length
-  console.log('rawDataSeries: ', rawDataSeries)
-  // 原始信号波形图显示
-  let sensorNo = 1
-  rawDataList.value.length = 0
-  for (let series of rawDataSeries) {
-    rawDataList.value.push({
-      'sensor_no': '传感器 ' + sensorNo,
-      'data': series,
-    })
-    sensorNo += 1
-  }
-  sensorNo = 1
-  featuresSeriesList.value.length = 0
-  for (let features of Object.values(featuresToDrawLineChart)) {
-    featuresSeriesList.value.push({
-      'sensor_no': '传感器 ' + sensorNo,
-      'data': features,
-    })
-    sensorNo += 1
-  }
-  console.log('featuresSeriesList: ', featuresSeriesList.value)
-  featuresExtractionRawData.value = rawDataList.value[0].sensor_no  //默认显示第一个传感器的原始信号
+//   let rawDataSeries: any = resultsObject.raw_data
+//   numOfSensors.value = rawDataSeries.length
+//   console.log('rawDataSeries: ', rawDataSeries)
+//   // 原始信号波形图显示
+//   let sensorNo = 1
+//   rawDataList.value.length = 0
+//   for (let series of rawDataSeries) {
+//     rawDataList.value.push({
+//       'sensor_no': '传感器 ' + sensorNo,
+//       'data': series,
+//     })
+//     sensorNo += 1
+//   }
+//   sensorNo = 1
+//   featuresSeriesList.value.length = 0
+//   for (let features of Object.values(featuresToDrawLineChart)) {
+//     featuresSeriesList.value.push({
+//       'sensor_no': '传感器 ' + sensorNo,
+//       'data': features,
+//     })
+//     sensorNo += 1
+//   }
+//   console.log('featuresSeriesList: ', featuresSeriesList.value)
+//   featuresExtractionRawData.value = rawDataList.value[0].sensor_no  //默认显示第一个传感器的原始信号
 
-  displayFeatureExtraction.value = true  // 显示特征提取结果
+//   displayFeatureExtraction.value = true  // 显示特征提取结果
 
-  // console.log('length: ', num_sensors.value)
-  nextTick(() => {
-    // 使用echarts绘制特征提取的原始信号波形图
-    rawDataList.value.forEach(object => {
-      let chart = echarts.init(document.getElementById(object.sensor_no))
+//   // console.log('length: ', num_sensors.value)
+//   nextTick(() => {
+//     // 使用echarts绘制特征提取的原始信号波形图
+//     rawDataList.value.forEach(object => {
+//       let chart = echarts.init(document.getElementById(object.sensor_no))
+//       let dataSeries = object.data
+//       let option = {
+//         title: {
+//           text: '原始信号'
+//         },
+//         xAxis: {
+//           type: 'value',
+//           data: Array.from({length: dataSeries.length}),
+//           name: '采样点'
+//         },
+//         yAxis: {
+//           type: 'value',
+//           name: '采样值'
+//         },
+//         series: [
+//           {
+//             name: '信号',
+//             type: 'line',
+//             symbol: 'circle',
+//             symbolSize: 2,
+//             data: dataSeries.map((value, index) => [index, value])
+//           }
+//         ],
+//         dataZoom: [
+//           {
+//             type: 'inside', // 使用鼠标滚轮来缩放
+//             start: 0,
+//             end: 100,
+//           },/*
+//           {
+//             show: true,
+//             type: 'slider', // 在图表下方显示滑动条
+//             start: 0,
+//             end: 100,
+//           },*/
+//         ],
+//       }
+//       chart.setOption(option)
+//     })
+//     featuresSeriesList.value.forEach(object => {
+//       // 使用echarts绘制特征提取的特征折线图
+//       type EChartsOption = echarts.EChartsOption;
+//       let dataSeries = object.data
+//       var lineChartDom = document.getElementById(object.sensor_no + 'features')
+//       var lineChart = echarts.init(lineChartDom);
+//       var lineChartOption: EChartsOption;
+
+//       lineChartOption = {
+//         title: {
+//           text: '连续信号样本提取特征'
+//         },
+//         tooltip: {
+//           trigger: 'axis'
+//         },
+//         legend: {
+//           // data: ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine']
+//           left: 'center',
+//           top: '5%',
+//           bottom: '6%',
+//           data: featuresName
+//         },
+//         grid: {
+//           left: '5%',
+//           right: '5%',
+//           bottom: '3%',
+//           containLabel: true
+//         },
+//         toolbox: {
+//           feature: {
+//             saveAsImage: {}
+//           }
+//         },
+//         xAxis: {
+//           type: 'category',
+//           boundaryGap: false,
+//           // data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+//           data: x_axis
+//         },
+//         yAxis: {
+//           type: 'value'
+//         },
+//         series: [],
+//         dataZoom: [
+//           {
+//             type: 'inside',
+//             start: 0,
+//             end: 100,
+//           },
+//           /*
+//           {
+//             show: true,
+//             type: 'slider',
+//             start: 0,
+//             end: 100,
+//             orient: 'vertical', // 改为垂直方向
+//             right: 20, // 距离右侧20px
+//             top: '0%', // 距离顶部20%
+//             height: '100%', // 设置滑动条的高度
+//           },*/
+//         ],
+//       };
+//       for (let key of featuresName) {
+//         lineChartOption.series.push({
+//           name: key,
+//           type: 'line',
+//           stack: 'Total',
+//           data: dataSeries[key]
+//         })
+//       }
+//       lineChart.setOption(lineChartOption);
+//     })
+//   })
+// }
+
+const featureExtractionDisplay = async(resultsObject: any) => {
+
+
+// 获取后端传回的提取的特征
+let featuresWithName = Object.assign({}, resultsObject.features_with_name)
+let featuresName = featuresWithName.features_name
+let featuresToDrawLineChart = Object.assign({}, resultsObject.featuresToDrawLineChart)
+// let featuresGroupBySensor = Object.assign(featuresWithName.features_extracted_group_by_sensor)
+
+console.log("featuresToDrawLineChart: ", featuresToDrawLineChart)
+
+let num_frames = resultsObject.num_examples
+// 根据帧数num_frames生成x坐标的坐标轴
+let x_axis = []
+for (let i = 0; i < num_frames; i++) {
+  x_axis.push('样本' + (i + 1) + `(${i * 2048}~${(i + 1) * 2048 - 1})`)
+}
+
+let rawDataSeries: any = resultsObject.raw_data
+numOfSensors.value = rawDataSeries.length
+console.log('rawDataSeries: ', rawDataSeries)
+// 原始信号波形图显示
+let sensorNo = 1
+rawDataList.value.length = 0
+for (let series of rawDataSeries) {
+  rawDataList.value.push({
+    'sensor_no': '传感器 ' + sensorNo,
+    'data': series,
+  })
+  sensorNo += 1
+}
+sensorNo = 1
+featuresSeriesList.value.length = 0
+for (let features of Object.values(featuresToDrawLineChart)) {
+  featuresSeriesList.value.push({
+    'sensor_no': '传感器 ' + sensorNo,
+    'data': features,
+  })
+  sensorNo += 1
+}
+// console.log('featuresSeriesList: ', featuresSeriesList.value)
+featuresExtractionRawData.value = rawDataList.value[0].sensor_no  //默认显示第一个传感器的原始信号
+
+// displayFeatureExtraction.value = true  // 显示特征提取结果
+
+// console.log('length: ', num_sensors.value)
+nextTick(() => {
+  // 使用echarts绘制特征提取的原始信号波形图
+  rawDataList.value.forEach(object => {
+    let domElement = document.getElementById(object.sensor_no);
+    let existingChart = echarts.getInstanceByDom(domElement);
+    if(!existingChart){
+      let chart = echarts.init(domElement)
       let dataSeries = object.data
       let option = {
+        animation: false,
         title: {
           text: '原始信号'
         },
@@ -4556,21 +7063,28 @@ const featureExtractionDisplay = (resultsObject) => {
             type: 'line',
             symbol: 'circle',
             symbolSize: 2,
-            data: dataSeries.map((value, index) => [index, value])
+            data: dataSeries.map((value, index) => [index, value]),
+            
           }
         ]
       }
       chart.setOption(option)
-    })
-    featuresSeriesList.value.forEach(object => {
-      // 使用echarts绘制特征提取的特征折线图
-      type EChartsOption = echarts.EChartsOption;
+    }
+    
+  })
+  featuresSeriesList.value.forEach(object => {
+    // 使用echarts绘制特征提取的特征折线图
+    type EChartsOption = echarts.EChartsOption;
+    let domElement = document.getElementById(object.sensor_no + 'features');
+    let existingChart = echarts.getInstanceByDom(domElement);
+
+    if (!existingChart){
       let dataSeries = object.data
-      var lineChartDom = document.getElementById(object.sensor_no + 'features')
-      var lineChart = echarts.init(lineChartDom);
+      var lineChart = echarts.init(domElement);
       var lineChartOption: EChartsOption;
 
       lineChartOption = {
+        animation: false,
         title: {
           text: '连续信号样本提取特征'
         },
@@ -4614,10 +7128,27 @@ const featureExtractionDisplay = (resultsObject) => {
           data: dataSeries[key]
         })
       }
-      lineChart.setOption(lineChartOption);
-    })
+      lineChart.setOption(lineChartOption)
+      var imgSrc = lineChart.getDataURL({
+        type: 'jpeg',  // 可选 'jpeg'
+        backgroundColor: '#fff',
+        excludeComponents: ['toolbox']
+      });
+      // 提取 Base64 编码部分
+      var base64Image = imgSrc.split(',')[1];
+      console.log(" feature extraction base64Image: ", base64Image)
+      // 将imgsrc编码为字符串
+      resultsToGenerateConclusion['featureExtraction']['imageBase64'] = base64Image
+    }
   })
+  resultsToGenerateConclusion['featureExtraction']['text'] = '对输入信号特征提取结果如下'
+})
 }
+
+
+
+
+
 
 // 特征选择结果可视化
 const displayFeatureSelection = ref(false)
@@ -4627,8 +7158,22 @@ const selectFeatureRule = ref('')
 const correlationFigure = ref('')
 const featuresSelectionTabs = ref('first')
 
-const featuresSelectionDisplay = (resultsObject) => {
-  displayFeatureSelection.value = true
+// const featuresSelectionDisplay = (resultsObject) => {
+//   displayFeatureSelection.value = true
+
+//   let figure1 = resultsObject.figure_Base64
+//   let figure2 = resultsObject.heatmap_Base64
+//   featuresSelected.value = resultsObject.selected_features.join('、')
+
+//   selectFeatureRule.value = resultsObject.rule
+//   featureSelectionFigure.value = 'data:image/png;base64,' + figure1
+//   correlationFigure.value = 'data:image/png;base64,' + figure2
+
+// }
+
+
+const featuresSelectionDisplay = async(resultsObject: any) => {
+  // displayFeatureSelection.value = true
 
   let figure1 = resultsObject.figure_Base64
   let figure2 = resultsObject.heatmap_Base64
@@ -4638,10 +7183,18 @@ const featuresSelectionDisplay = (resultsObject) => {
   featureSelectionFigure.value = 'data:image/png;base64,' + figure1
   correlationFigure.value = 'data:image/png;base64,' + figure2
 
+  resultsToGenerateConclusion['featureSelection']['imageBase64'] = figure1
+  resultsToGenerateConclusion['featureSelection']['text'] = '对输入信号进行特征选择后，最终选择的特征为' + featuresSelected.value
+  // 将 Base64 字符串转换为二进制数组
+  // const binaryData = base64ToArrayBuffer(figure1);
+
 }
 
 
-// 用户对于故障诊断结果准确性
+
+
+
+// 用户对于故障诊断结果准确性的反馈
 const feedBackDialogVisible = ref(false)
 // const feedbackContent = ref('')
 const feedBackFormRef = ref()
@@ -4682,7 +7235,7 @@ const feedBack = () => {
         }
       }
     )
-    .catch(error => {
+    .catch((error: any) => {
       console.log("上传反馈失败", error)
       message.error("上传反馈失败")
     })
@@ -4693,15 +7246,167 @@ const feedBack = () => {
 //   })
 }
 
+
+
 // 故障诊断结果展示
 const displayFaultDiagnosis = ref(false)
 const faultDiagnosis = ref('')
 const faultDiagnosisFigure = ref('')
 const faultDiagnosisResultsText = ref('')
-const faultDiagnosisResultOption = ref('1')
+const faultDiagnosisResultOption = ref('2')
 
-const faultDiagnosisDisplay = (resultsObject: any) => {
-  displayFaultDiagnosis.value = true
+// const faultDiagnosisDisplay = (resultsObject: any) => {
+//   displayFaultDiagnosis.value = true
+
+//   let figure1 = resultsObject.figure_Base64
+//   let diagnosisResult = resultsObject.diagnosis_result
+//   let indicator = resultsObject.indicator
+//   let x_axis = resultsObject.x_axis
+//   let num_has_fault = resultsObject.num_has_fault
+//   let num_has_no_fault = resultsObject.num_has_no_fault
+
+//   console.log('indicator: ', indicator)
+//   // 获取indicator的key
+//   let indicatorKeys = Object.keys(indicator)
+
+//   nextTick(() => {
+
+//     // 绘制连续样本指标变化折线图
+//     type EChartsOption = echarts.EChartsOption;
+//     var lineChartDom = document.getElementById('indicatorVaryingFigure')!;
+//     var lineChart = echarts.init(lineChartDom);
+//     var lineChartOption: EChartsOption;
+
+//     lineChartOption = {
+//       title: {
+//         text: '连续样本指标变化曲线图'
+//       },
+//       tooltip: {
+//         trigger: 'axis'
+//       },
+//       legend: {
+//         // data: ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine']
+//         left: 'center',
+//         top: '5%',
+//         bottom: '6%',
+//         data: indicatorKeys
+//       },
+//       grid: {
+//         left: '5%',
+//         right: '5%',
+//         bottom: '3%',
+//         containLabel: true
+//       },
+//       toolbox: {
+//         feature: {
+//           saveAsImage: {}
+//         }
+//       },
+//       xAxis: {
+//         type: 'category',
+//         boundaryGap: false,
+//         // data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+//         data: x_axis
+//       },
+//       yAxis: {
+//         type: 'value'
+//       },
+//       series: [],
+//       dataZoom: [
+//         {
+//           type: 'inside', // 使用鼠标滚轮来缩放
+//           start: 0,
+//           end: 100,
+//         },/*
+//         {
+//           show: true,
+//           type: 'slider', // 在图表下方显示滑动条
+//           start: 0,
+//           end: 100,
+//         },*/
+//       ],
+//     };
+
+//     for (let key in indicator) {
+//       lineChartOption.series.push({
+//         name: key,
+//         type: 'line',
+//         stack: 'Total',
+//         data: indicator[key]
+//       })
+//     }
+//     lineChart.setOption(lineChartOption);
+
+//     // 绘制故障样本与非故障样本数量饼状图
+//     var pieChartDom = document.getElementById('faultExampleRatioFigure');
+//     var pieChart = echarts.init(pieChartDom);
+//     var pieChartOption;
+
+//     pieChartOption = {
+//       title: {
+//         text: '预测结果中不同类型样本数量比例',
+//         // subtext: 'Fake Data',
+//         left: 'center'
+//       },
+//       tooltip: {
+//         trigger: 'item'
+//       },
+//       legend: {
+//         orient: 'vertical',
+//         left: 'left'
+//       },
+//       series: [
+//         {
+//           name: '样本数量',
+//           type: 'pie',
+//           radius: '50%',
+//           data: [
+//             {value: num_has_fault, name: '预测为故障类型的样本'},
+//             {value: num_has_no_fault, name: '预测为非故障类型的样本'},
+//             // { value: 580, name: 'Email' },
+//             // { value: 484, name: 'Union Ads' },
+//             // { value: 300, name: 'Video Ads' }
+//           ],
+//           emphasis: {
+//             itemStyle: {
+//               shadowBlur: 10,
+//               shadowOffsetX: 0,
+//               shadowColor: 'rgba(0, 0, 0, 0.5)'
+//             }
+//           }
+//         }
+//       ],
+//       dataZoom: [
+//         {
+//           type: 'inside', // 使用鼠标滚轮来缩放
+//           start: 0,
+//           end: 100,
+//         },/*
+//         {
+//           show: true,
+//           type: 'slider', // 在图表下方显示滑动条
+//           start: 0,
+//           end: 100,
+//         },*/
+//       ],
+//     };
+
+//     pieChart.setOption(pieChartOption);
+//   })
+
+
+//   faultDiagnosisResultsText.value = resultsObject.resultText
+//   if (diagnosisResult == 0) {
+//     faultDiagnosis.value = '无故障'
+//   } else {
+//     faultDiagnosis.value = '存在故障'
+//   }
+//   faultDiagnosisFigure.value = 'data:image/png;base64,' + figure1
+
+// }
+
+const faultDiagnosisDisplay = async(resultsObject: any) => {
+  // displayFaultDiagnosis.value = true
 
   let figure1 = resultsObject.figure_Base64
   let diagnosisResult = resultsObject.diagnosis_result
@@ -4710,6 +7415,10 @@ const faultDiagnosisDisplay = (resultsObject: any) => {
   let num_has_fault = resultsObject.num_has_fault
   let num_has_no_fault = resultsObject.num_has_no_fault
 
+  if (indicator != 'none'){
+    canShowIndicator.value = true
+  }
+
   console.log('indicator: ', indicator)
   // 获取indicator的key
   let indicatorKeys = Object.keys(indicator)
@@ -4717,112 +7426,150 @@ const faultDiagnosisDisplay = (resultsObject: any) => {
   nextTick(() => {
 
     // 绘制连续样本指标变化折线图
-    type EChartsOption = echarts.EChartsOption;
-    var lineChartDom = document.getElementById('indicatorVaryingFigure')!;
-    var lineChart = echarts.init(lineChartDom);
-    var lineChartOption: EChartsOption;
 
-    lineChartOption = {
-      title: {
-        text: '连续样本指标变化曲线图'
-      },
-      tooltip: {
-        trigger: 'axis'
-      },
-      legend: {
-        // data: ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine']
-        left: 'center',
-        top: '5%',
-        bottom: '6%',
-        data: indicatorKeys
-      },
-      grid: {
-        left: '5%',
-        right: '5%',
-        bottom: '3%',
-        containLabel: true
-      },
-      toolbox: {
-        feature: {
-          saveAsImage: {}
+    if (indicator != 'none'){
+      
+      type EChartsOption = echarts.EChartsOption;
+
+      let lineChartDom = document.getElementById('indicatorVaryingFigure')
+      let existingLineChart = echarts.getInstanceByDom(lineChartDom);
+
+      if(!existingLineChart){
+        var lineChart = echarts.init(lineChartDom);
+        var lineChartOption: EChartsOption;
+
+        lineChartOption = {
+          title: {
+            text: '连续样本指标变化曲线图'
+          },
+          tooltip: {
+            trigger: 'axis'
+          },
+          legend: {
+            // data: ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine']
+            left: 'center',
+            top: '5%',
+            bottom: '6%',
+            data: indicatorKeys
+          },
+          grid: {
+            left: '5%',
+            right: '5%',
+            bottom: '3%',
+            containLabel: true
+          },
+          toolbox: {
+            feature: {
+              saveAsImage: {}
+            }
+          },
+          xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            // data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+            data: x_axis
+          },
+          yAxis: {
+            type: 'value'
+          },
+          series: []
+        };
+
+        for (let key in indicator) {
+          lineChartOption.series.push({
+            name: key,
+            type: 'line',
+            stack: 'Total',
+            data: indicator[key]
+          })
         }
-      },
-      xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        // data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-        data: x_axis
-      },
-      yAxis: {
-        type: 'value'
-      },
-      series: []
-    };
+        lineChart.setOption(lineChartOption);
 
-    for (let key in indicator) {
-      lineChartOption.series.push({
-        name: key,
-        type: 'line',
-        stack: 'Total',
-        data: indicator[key]
-      })
+      }
+
     }
-    lineChart.setOption(lineChartOption);
+    
+    // var lineChartDom = document.getElementById('indicatorVaryingFigure')!;
+    
 
     // 绘制故障样本与非故障样本数量饼状图
     var pieChartDom = document.getElementById('faultExampleRatioFigure');
-    var pieChart = echarts.init(pieChartDom);
-    var pieChartOption;
+    if(!pieChartDom){
+      console.log("faultDiagnosis pieChartDom is null")
+      return 
+    }
+    let existingPieChart = echarts.getInstanceByDom(pieChartDom);
 
-    pieChartOption = {
-      title: {
-        text: '预测结果中不同类型样本数量比例',
-        // subtext: 'Fake Data',
-        left: 'center'
-      },
-      tooltip: {
-        trigger: 'item'
-      },
-      legend: {
-        orient: 'vertical',
-        left: 'left'
-      },
-      series: [
-        {
-          name: '样本数量',
-          type: 'pie',
-          radius: '50%',
-          data: [
-            {value: num_has_fault, name: '预测为故障类型的样本'},
-            {value: num_has_no_fault, name: '预测为非故障类型的样本'},
-            // { value: 580, name: 'Email' },
-            // { value: 484, name: 'Union Ads' },
-            // { value: 300, name: 'Video Ads' }
-          ],
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)'
-            }
+    if (!existingPieChart) {
+      var pieChart = echarts.init(pieChartDom);
+      var pieChartOption;
+
+      pieChartOption = {
+        title: {
+          text: '预测结果中不同类型样本数量比例',
+          // subtext: 'Fake Data',
+          left: 'center'
+        },
+        tooltip: {
+          trigger: 'item'
+        },
+        legend: {
+          orient: 'vertical',
+          left: 'left'
+        },
+        series: [
+          {
+            name: '样本数量',
+            type: 'pie',
+            radius: '50%',
+            data: [
+              {value: num_has_fault, name: '预测为故障类型的样本'},
+              {value: num_has_no_fault, name: '预测为非故障类型的样本'},
+              // { value: 580, name: 'Email' },
+              // { value: 484, name: 'Union Ads' },
+              // { value: 300, name: 'Video Ads' }
+            ],
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
+            },
           }
-        }
-      ]
-    };
-
-    pieChart.setOption(pieChartOption);
+        ],
+        animation: false
+      };
+      pieChart.setOption(pieChartOption);
+      var imgSrc = pieChart.getDataURL({
+        type: 'png',  // 可选 'jpeg'
+        backgroundColor: '#fff',
+        excludeComponents: ['toolbox']
+      })
+      var img = imgSrc.split(',')[1]
+      resultsToGenerateConclusion['faultDiagnosis']['imageBase64'] = img
+    }
+    
   })
 
 
   faultDiagnosisResultsText.value = resultsObject.resultText
+  // 向报告中添加故障诊断结果
   if (diagnosisResult == 0) {
     faultDiagnosis.value = '无故障'
+    resultsToGenerateConclusion['faultDiagnosis']['text'] = '由输入的振动信号，共截取到'+(num_has_fault+num_has_no_fault)+
+    '个样本，根据故障诊断模型预测，其中'+num_has_fault+'个样本存在故障，未达到样本总数的70%，由此判断该部件无故障'
   } else {
     faultDiagnosis.value = '存在故障'
+    resultsToGenerateConclusion['faultDiagnosis']['text'] = '由输入的振动信号，共截取到'+(num_has_fault+num_has_no_fault)+
+    '个样本，根据故障诊断模型预测，其中'+num_has_fault+'个样本存在故障，已达到样本总数的70%，由此判断该部件存在故障'
   }
   faultDiagnosisFigure.value = 'data:image/png;base64,' + figure1
 
 }
+
+
+
 
 
 // 故障预测结果展示
@@ -4832,9 +7579,28 @@ const faultRegression = ref('')
 const timeToFault = ref('')
 const faultRegressionFigure = ref('')
 
-const faultRegressionDisplay = (resultsObject) => {
-  displayFaultRegression.value = true
+// const faultRegressionDisplay = (resultsObject) => {
+//   displayFaultRegression.value = true
 
+//   let figure1 = resultsObject.figure_Base64
+//   faultRegressionFigure.value = 'data:image/png;base64,' + figure1
+//   // let fault_time = results_object.time_to_fault
+
+//   if (resultsObject.time_to_fault == 0) {
+//     haveFault.value = 1
+//     faultRegression.value = '已经出现故障'
+//   } else {
+//     haveFault.value = 0
+//     faultRegression.value = '还未出现故障'
+//     timeToFault.value = resultsObject.time_to_fault_str
+//   }
+
+// }
+
+const faultRegressionDisplay = async(resultsObject: any) => {
+  // displayFaultRegression.value = true
+
+  let predictionConclusion: string
   let figure1 = resultsObject.figure_Base64
   faultRegressionFigure.value = 'data:image/png;base64,' + figure1
   // let fault_time = results_object.time_to_fault
@@ -4842,13 +7608,22 @@ const faultRegressionDisplay = (resultsObject) => {
   if (resultsObject.time_to_fault == 0) {
     haveFault.value = 1
     faultRegression.value = '已经出现故障'
+    predictionConclusion = '预测结果：' + resultsObject.prediction_conclusion
   } else {
     haveFault.value = 0
     faultRegression.value = '还未出现故障'
     timeToFault.value = resultsObject.time_to_fault_str
+    predictionConclusion = '预测结果：' + resultsObject.prediction_conclusion
+    predictionConclusion += ', ' + '预计故障时间：' + resultsObject.time_to_fault_str
   }
 
+  resultsToGenerateConclusion['faultPrediction']['text'] = predictionConclusion
 }
+
+
+
+
+
 
 // 插值处理可视化
 const activeName3 = ref('1')
@@ -4856,8 +7631,24 @@ const displayInterpolation = ref(false)
 const interpolationFigures = ref([]) // 插值处理结果图像
 const interpolationResultsOfSensors = ref([])   // 插值处理结果中有几个传感器
 
-const interpolationDisplay = (resultsObject: any) => {
-  displayInterpolation.value = true
+// const interpolationDisplay = (resultsObject: any) => {
+//   displayInterpolation.value = true
+
+//   let sensorId = 0
+//   interpolationFigures.value.length = 0
+//   interpolationResultsOfSensors.value.length = 0
+//   for (const [key, value] of Object.entries(resultsObject)) {
+//     sensorId += 1
+//     interpolationFigures.value.push('data:image/png;base64,' + value)
+//     interpolationResultsOfSensors.value.push({label: key.split('_')[0], name: sensorId.toString()})
+//   }
+//   // console.log('interpolationResultsOfSensors: ', interpolationResultsOfSensors)
+//   // console.log('interpolationFigures: ', interpolationFigures)
+//   // displayDenoise.value = true
+// }
+
+const interpolationDisplay = async(resultsObject: any) => {
+  // displayInterpolation.value = true
 
   let sensorId = 0
   interpolationFigures.value.length = 0
@@ -4872,6 +7663,9 @@ const interpolationDisplay = (resultsObject: any) => {
   // displayDenoise.value = true
 }
 
+
+
+
 // 无量纲化可视化
 const activeName4 = ref('1')
 const displayNormalization = ref(false)
@@ -4880,6 +7674,64 @@ const normalizationFormdataScaled = ref([])  // 无量纲的结果表格
 const normalizationColumns = ref([])
 const normalizationResultFigures = ref([])   // 无量纲结果图像
 const normalizationResultsSensors = ref([])
+
+// const transformDataToFormdata = (features_with_name: any, columns: any, formdata: any) => {
+//   // 从后端返回的结果中提取出特征名称和特征值，并转化为表格数据
+//   let featuresName = features_with_name.features_name.slice()
+//   let featuresGroupBySensor = Object.assign(features_with_name.features_extracted_group_by_sensor)
+//   let datas = []        // 表格中每一行的数据
+//   featuresName.unshift('传感器')  // 表格的列名
+//   for (const sensor in featuresGroupBySensor) {
+//     let features_of_sensor = featuresGroupBySensor[sensor].slice()
+//     features_of_sensor.unshift(sensor)
+//     datas.push(features_of_sensor)
+//   }
+
+//   columns.value.length = 0
+//   featuresName.forEach(element => {
+//     columns.value.push({prop: element, label: element, width: 180})
+//   });
+
+//   // 转换数据为对象数组
+//   formdata.value = datas.map((row, index) => {
+//     const obj = {};
+//     columns.value.forEach((column, colIndex) => {
+//       obj[column.prop] = row[colIndex];
+//     });
+//     return obj;
+//   });
+// }
+
+// const normalizationResultType = ref('table')   // 无量纲化的结果类型，table表示表格，figure表示图像
+
+// const normalizationDisplay = (resultsObject: any) => {
+//   displayNormalization.value = true
+
+//   let rawData = Object.assign({}, resultsObject.raw_data)
+//   let scaledData = Object.assign({}, resultsObject.scaled_data)
+
+//   // 无量纲化结果为表格数据
+//   if (resultsObject.datatype == 'table') {
+//     normalizationResultType.value = 'table'
+//     transformDataToFormdata(rawData, normalizationColumns, normalizationFormdataRaw)
+//     transformDataToFormdata(scaledData, normalizationColumns, normalizationFormdataScaled)
+//   }
+//   // 无量纲化的对象为信号序列，结果为信号序列的波形图
+//   else {
+//     normalizationResultType.value = 'figure'
+//     let sensorId = 0
+//     normalizationResultFigures.value.length = 0
+//     normalizationResultsSensors.value.length = 0
+//     for (const [key, value] of Object.entries(resultsObject)) {
+//       if (key == 'datatype') {
+//         continue
+//       }
+//       sensorId += 1
+//       normalizationResultFigures.value.push('data:image/png;base64,' + value)
+//       normalizationResultsSensors.value.push({label: key.split('_')[0], name: sensorId.toString()})
+//     }
+//   }
+// }
 
 const transformDataToFormdata = (features_with_name: any, columns: any, formdata: any) => {
   // 从后端返回的结果中提取出特征名称和特征值，并转化为表格数据
@@ -4910,8 +7762,8 @@ const transformDataToFormdata = (features_with_name: any, columns: any, formdata
 
 const normalizationResultType = ref('table')   // 无量纲化的结果类型，table表示表格，figure表示图像
 
-const normalizationDisplay = (resultsObject: any) => {
-  displayNormalization.value = true
+const normalizationDisplay = async(resultsObject: any) => {
+  // displayNormalization.value = true
 
   let rawData = Object.assign({}, resultsObject.raw_data)
   let scaledData = Object.assign({}, resultsObject.scaled_data)
@@ -4939,13 +7791,38 @@ const normalizationDisplay = (resultsObject: any) => {
   }
 }
 
+
+
+
+
+
 // 小波降噪可视化
 const activeName2 = ref('1')
 const displayDenoise = ref(false)
 const denoiseFigures = ref([])  // 存放小波降噪结果图片
-const waveletResultsOfSensors = ref([])  // 存放不同传感器的小波降噪结果
 
-const denoiseDisplay = (resultsObject) => {
+interface waveletResults {
+  label: string;
+  name: string;
+}
+const waveletResultsOfSensors = ref<waveletResults[]>([])  // 存放不同传感器的小波降噪结果
+
+// const denoiseDisplay = (resultsObject) => {
+//   console.log('results_object: ', resultsObject)
+//   let sensorId = 0
+//   denoiseFigures.value.length = 0
+//   waveletResultsOfSensors.value.length = 0
+//   for (const [key, value] of Object.entries(resultsObject)) {
+//     sensorId += 1
+//     denoiseFigures.value.push('data:image/png;base64,' + value)
+//     waveletResultsOfSensors.value.push({label: key.split('_')[0], name: sensorId.toString()})
+//   }
+//   console.log('results_of_sensors: ', waveletResultsOfSensors)
+//   console.log('denoiseFigures: ', denoiseFigures)
+//   displayDenoise.value = true
+// }
+
+const denoiseDisplay = async(resultsObject: any) => {
   console.log('results_object: ', resultsObject)
   let sensorId = 0
   denoiseFigures.value.length = 0
@@ -4957,10 +7834,305 @@ const denoiseDisplay = (resultsObject) => {
   }
   console.log('results_of_sensors: ', waveletResultsOfSensors)
   console.log('denoiseFigures: ', denoiseFigures)
-  displayDenoise.value = true
+  // displayDenoise.value = true
 }
 
+
 // 清除可视化区域
+// const resultsViewClear = () => {
+//   showPlainIntroduction.value = false  // 清除算法介绍
+//   showStatusMessage.value = false      // 清除程序运行状态
+//   canShowResults.value = false         // 清除可视化区域元素
+//   contrastVisible.value = false    // 清除
+//   show1.value = true
+//   loading.value = true
+//   isShow.value = false
+//   // 清除所有结果可视化
+//   displayHealthEvaluation.value = false
+//   displayFeatureExtraction.value = false
+//   displayFeatureSelection.value = false
+//   displayFaultDiagnosis.value = false
+//   displayFaultRegression.value = false
+//   displayInterpolation.value = false
+//   displayNormalization.value = false
+//   displayDenoise.value = false
+//   displayRawDataWaveform.value = false
+
+//   if (!done.value) {
+//     currentDisplayedItem = ''
+//   }
+// }
+
+
+const displayRawDataWaveform = ref(false)
+const rawDataWaveform = ref('')
+const currentDataBrowsing = ref('')
+// 用户浏览原始数据
+// const browseDataset = (row: { dataset_name: any; }) => {
+
+//   // 清除可视化区域内容
+//   resultsViewClear()
+//   canShowResults.value = true
+//   // 发送请求获取原始数据的波形图
+//   let filename = row.dataset_name
+
+//   api.get('user/browse_datafile/?filename=' + filename).then((response: any) => {
+//     if (response.status === 200) {
+//       displayRawDataWaveform.value = true
+//       let data = response.data
+//       let figure = data.figure_Base64
+
+//       rawDataWaveform.value = 'data:image/png;base64,' + figure
+//       currentDataBrowsing.value = filename
+
+//       console.log('访问成功：')
+//     } else {
+//       ElMessage.error('访问文件失败')
+//     }
+//   })
+//       .catch((error: any) => {
+//         console.log('访问文件失败：', error)
+//       })
+// }
+
+// 当前显示的算法模块结果
+
+// 点击可视化建模区中的算法模块显示对应的结果
+// const showResult = (item) => {
+
+
+//   if (missionComplete.value) {
+//     if (item.label == '数据源') {
+//       ElMessage.info('数据源模块没有结果可显示')
+//       return
+//     }
+//     if (item.label != '层次逻辑回归评估' && item.label != '层次分析模糊综合评估' && item.label != '层次朴素贝叶斯评估' && item.label != '特征提取' && item.label != '特征选择' && item.label != '故障诊断'
+//         && item.label != '故障预测' && item.label != '特征提取' && item.label != '插值处理' && item.label != '无量纲化' && item.label != '小波变换' && item.label != '健康评估'
+//     ) {
+//       showPlainIntroduction.value = false
+//       showStatusMessage.value = false
+//       show1.value = true
+//       loading.value = true
+//       canShowResults.value = false
+//       isShow.value = false
+//       setTimeout(function () {
+//         isShow.value = true
+//         show1.value = false
+//         loading.value = false
+//       }, 2500);
+//       let moduleName = item.label
+//       let url = 'http://127.0.0.1:8000/homepage?display=' + moduleName
+//       axios.request({
+//         method: 'GET',
+//         url: url,
+//       });
+//       setTimeout(function () {
+//         // 为 iframe 的 src 属性添加一个查询参数，比如当前的时间戳，以强制刷新
+//         var iframe = document.getElementById('my_gradio_app');
+//         var currentSrc = iframe.src;
+//         var newSrc = currentSrc.split('?')[0]; // 移除旧的查询参数
+//         iframe.src = newSrc + '?updated=' + new Date().getTime();
+//       }, 2400);
+//     } else {
+//       resultsViewClear()
+//       canShowResults.value = true
+//       if (item.label == '层次分析模糊综合评估') {
+//         let results_to_show = responseResults.层次分析模糊综合评估
+//         healthEvaluationDisplay(results_to_show)
+//       } else if (item.label == '特征提取') {
+//         if (currentDisplayedItem != '特征提取') {
+//           currentDisplayedItem = '特征提取'
+//         } else {
+//           displayFeatureExtraction.value = true  // 显示特征提取结果
+//           return
+//         }
+//         let results_to_show = responseResults.特征提取
+//         featureExtractionDisplay(results_to_show)
+//       } else if (item.label == '特征选择') {
+//         if (currentDisplayedItem != '特征选择') {
+//           currentDisplayedItem = '特征选择'
+//         } else {
+//           displayFeatureSelection.value = true  // 显示特征选择结果
+//           return
+//         }
+//         let results_to_show = responseResults.特征选择
+//         featuresSelectionDisplay(results_to_show)
+//       } else if (item.label == '故障诊断') {
+//         if (currentDisplayedItem != '故障诊断') {
+//           currentDisplayedItem = '故障诊断'
+//         } else {
+//           displayFaultDiagnosis.value = true
+//           return
+//         }
+//         let results_to_show = responseResults.故障诊断
+//         faultDiagnosisDisplay(results_to_show)
+//       } else if (item.label == '故障预测') {
+//         let results_to_show = responseResults.故障预测
+//         faultRegressionDisplay(results_to_show)
+//       } else if (item.label == '插值处理') {
+//         let results_to_show = responseResults.插值处理
+//         interpolationDisplay(results_to_show)
+//       } else if (item.label == '无量纲化') {
+//         let results_to_show = responseResults.无量纲化
+//         normalizationDisplay(results_to_show)
+//       } else if (item.label == '小波变换') {
+//         let results_to_show = responseResults.小波变换
+//         denoiseDisplay(results_to_show)
+//       } else if (item.label == '层次朴素贝叶斯评估') {
+//         let results_to_show = responseResults.层次朴素贝叶斯评估
+//         healthEvaluationDisplay(results_to_show)
+//       } else if (item.label == '层次逻辑回归评估') {
+//         let results_to_show = responseResults.层次逻辑回归评估
+//         healthEvaluationDisplay(results_to_show)
+//       } else if (item.label == '健康评估') {
+//         let results_to_show = responseResults.健康评估
+//         healthEvaluationDisplay(results_to_show)
+//       } else {
+//         ElMessage({
+//           message: '无效的算法模块',
+//           type: 'error'
+//         })
+//       }
+//     }
+//   }
+// }
+
+// 用于生成最终报告的模型中各个模块运行结果
+let resultsToGenerateConclusion = {
+  'includedModules': [] as string[],
+  'outline': "",
+  'healthEvaluation': {'imageBase64': "", 'text': ""},
+  'featureExtraction': {'imageBase64': "", 'text': ""},
+  'featureSelection': {'imageBase64': "", 'text': ""},
+  'faultDiagnosis': {'imageBase64': "", 'text': ""},
+  'faultPrediction': {'imageBase64': "", 'text': ""},
+  'interpolation': {'imageBase64': "", 'text': ""},
+  'normalization': {'imageBase64': "", 'text': ""},
+  'wavelet': "",
+}
+
+const selectAllModuleToGenerateResult = ref(false)
+
+// 处理全选输出结果的逻辑
+const toggleSelectAll = () => {
+  if (selectAllModuleToGenerateResult.value) {
+    moduleResultToGenerateList.value = [...contentJson.schedule];
+  } else {
+    // 取消全选时至少保留第一项
+    if (moduleResultToGenerateList.value.length > 0) {
+      moduleResultToGenerateList.value = [contentJson.schedule[0]];
+    } else {
+      moduleResultToGenerateList.value = [];
+    }
+  }
+  // 去除“数据源”这一项
+  moduleResultToGenerateList.value = moduleResultToGenerateList.value.filter(item => item !== '数据源');
+};
+
+const moduleResultToGenerateList = ref<string[]>([])
+const outputConfigVisible = ref(false)
+
+// 打开结果输出配置面板
+const outputConfig = () => {
+  if(!missionComplete.value){
+    ElMessage({
+      message: "无运行结果",
+      type: 'error'
+    })
+    return;
+  }
+  outputConfigVisible.value = true
+}
+
+
+let mapping = {
+  '层次分析模糊综合评估': 'healthEvaluation',
+  '层次朴素贝叶斯评估': 'healthEvaluation',
+  '层次逻辑回归评估': 'healthEvaluation',
+  '特征提取': 'featureExtraction',
+  '特征选择': 'featureSelection',
+  '故障诊断': 'faultDiagnosis',
+  '故障预测': 'faultPrediction',
+  '插值处理': 'interpolation',
+  '无量纲化': 'normalization',
+  '小波变换': 'wavelet'
+}
+
+
+// 生成总结报告pdf
+const generateConclusion = async() => {
+  // 生成所选模块的报告
+  if(moduleResultToGenerateList.value.length === 0){
+    ElMessage({
+      message: '请选择生成报告中所包含的结果',
+      type: 'warning'
+    })
+    return
+  }
+  // 将中文的模块名转换为英文
+  resultsToGenerateConclusion.includedModules = moduleResultToGenerateList.value.map(item => mapping[item]);
+  moduleResultToGenerateList.value.forEach(moduleName => {
+    if (missionComplete.value){
+      // console.log("moduleName: ", moduleName)
+      
+    generateResultsToDisplay(moduleName, false);
+       // 输出结果总体描述
+    var outline = "时间："+ new Date().toLocaleString() + "<br/>" + "数据集："+ usingDatafile.value + "<br/>" + "模型名称："+ modelLoaded.value + "<br/>" + "包含模块："+ contentJson.schedule.join(', ')
+    // console.log('resultsToGenerateOutput: ', resultsToGenerateConclusion)
+    resultsToGenerateConclusion.outline = outline
+    let formData = new FormData()
+    formData.append('resultsToGenerateOutput', JSON.stringify(resultsToGenerateConclusion))
+
+    api.post('user/generate_conclusion/', formData, { responseType: 'blob' }).then((response: any) => {
+      if (response.status === 200) {
+        ElMessage({
+          message: '生成总结报告成功',
+          type: 'success',
+        });
+        downloadFile(response.data, 'report.pdf');
+        // let conclusion = response.data.data
+      }else {
+        ElMessage({
+          message: '生成总结报告失败, '+response.data.message,
+          type: 'error',
+        });
+      }
+    })
+    .catch((error: any) => {
+      console.log('生成总结报告失败：', error)
+    })
+      // console.log('moduleResultToGenerateList: ', moduleResultToGenerateList.value)
+    }else{
+      ElMessage({
+        message: '无运行结果',
+        type: 'warning'
+      })
+      return
+    }
+  });
+  
+}
+
+// const downloadFile = (data: BlobPart, filename: string) => {
+//   const blob = new Blob([data], { type: 'application/pdf' });
+//   const url = window.URL.createObjectURL(blob);
+//   const link = document.createElement('a');
+//   link.href = url;
+//   link.download = filename;
+//   link.click();
+//   window.URL.revokeObjectURL(url);
+// } 
+// 生成报告后自动下载报告
+const downloadFile = (blobData: Blob, fileName: string)=> {
+  const url = window.URL.createObjectURL(new Blob([blobData]));
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', fileName); // 设置下载的文件名
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 const resultsViewClear = () => {
   showPlainIntroduction.value = false  // 清除算法介绍
   showStatusMessage.value = false      // 清除程序运行状态
@@ -4985,171 +8157,114 @@ const resultsViewClear = () => {
   }
 }
 
-
-const displayRawDataWaveform = ref(false)
-const rawDataWaveform = ref('')
-const currentDataBrowsing = ref('')
-// 用户浏览原始数据
-const browseDataset = (row: { dataset_name: any; }) => {
-
-  // 清除可视化区域内容
-  resultsViewClear()
-  canShowResults.value = true
-  // 发送请求获取原始数据的波形图
-  let filename = row.dataset_name
-
-  api.get('user/browse_datafile/?filename=' + filename).then((response: any) => {
-    if (response.status === 200) {
-      displayRawDataWaveform.value = true
-      let data = response.data
-      let figure = data.figure_Base64
-
-      rawDataWaveform.value = 'data:image/png;base64,' + figure
-      currentDataBrowsing.value = filename
-
-      console.log('访问成功：')
-    } else {
-      ElMessage.error('访问文件失败')
-    }
-  })
-      .catch((error: any) => {
-        console.log('访问文件失败：', error)
-      })
-}
-
 // 当前显示的算法模块结果
 let currentDisplayedItem = ''
 
-// 点击可视化建模区中的算法模块显示对应的结果
-const showResult = (item) => {
-
-  if (done.value) {
-
-    if (missionComplete.value) {
-      if (item.label == '数据源') {
-        ElMessage.info('数据源模块没有结果可显示')
+const generateResultsToDisplay = async(moduleName: string, display: boolean) => {
+  if (moduleName == '层次分析模糊综合评估') {
+      let results_to_show = responseResults.层次分析模糊综合评估
+      if (currentDisplayedItem != '层次分析模糊综合评估') {
+        currentDisplayedItem = '层次分析模糊综合评估'
+      } else {
+        displayHealthEvaluation.value = display  // 显示健康评估结果
         return
       }
-      if (item.label != '层次逻辑回归评估' && item.label != '层次分析模糊综合评估' && item.label != '层次朴素贝叶斯评估' && item.label != '特征提取' && item.label != '特征选择' && item.label != '故障诊断'
-          && item.label != '故障预测' && item.label != '特征提取' && item.label != '插值处理' && item.label != '无量纲化' && item.label != '小波变换' && item.label != '健康评估'
-      ) {
-        showPlainIntroduction.value = false
-        showStatusMessage.value = false
-        show1.value = true
-        loading.value = true
-        canShowResults.value = false
-        isShow.value = false
-        setTimeout(function () {
-          isShow.value = true
-          show1.value = false
-          loading.value = false
-        }, 2500);
-        let moduleName = item.label
-        let url = 'http://127.0.0.1:8000/homepage?display=' + moduleName
-        axios.request({
-          method: 'GET',
-          url: url,
-        });
-        setTimeout(function () {
-          // 为 iframe 的 src 属性添加一个查询参数，比如当前的时间戳，以强制刷新
-          var iframe = document.getElementById('my_gradio_app');
-          var currentSrc = iframe.src;
-          var newSrc = currentSrc.split('?')[0]; // 移除旧的查询参数
-          iframe.src = newSrc + '?updated=' + new Date().getTime();
-        }, 2400);
+      displayHealthEvaluation.value = display  // 显示健康评估结果
+      await healthEvaluationDisplay(results_to_show)
+    } else if (moduleName == '特征提取') {
+      if (currentDisplayedItem != '特征提取') {
+        currentDisplayedItem = '特征提取'
       } else {
-        resultsViewClear()
-        canShowResults.value = true
-        if (item.label == '层次分析模糊综合评估') {
-          let results_to_show = responseResults.层次分析模糊综合评估
-          if (currentDisplayedItem != '层次分析模糊综合评估') {
-            currentDisplayedItem = '层次分析模糊综合评估'
-          } else {
-            displayHealthEvaluation.value = true  // 显示健康评估结果
-            return
-          }
-          healthEvaluationDisplay(results_to_show)
-        } else if (item.label == '特征提取') {
-          if (currentDisplayedItem != '特征提取') {
-            currentDisplayedItem = '特征提取'
-          } else {
-            displayFeatureExtraction.value = true  // 显示特征提取结果
-            return
-          }
-          let results_to_show = responseResults.特征提取
-          featureExtractionDisplay(results_to_show)
-        } else if (item.label == '特征选择') {
-          if (currentDisplayedItem != '特征选择') {
-            currentDisplayedItem = '特征选择'
-          } else {
-            displayFeatureSelection.value = true  // 显示特征选择结果
-            return
-          }
-          let results_to_show = responseResults.特征选择
-          featuresSelectionDisplay(results_to_show)
-        } else if (item.label == '故障诊断') {
-          if (currentDisplayedItem != '故障诊断') {
-            currentDisplayedItem = '故障诊断'
-          } else {
-            displayFaultDiagnosis.value = true
-            return
-          }
-          let results_to_show = responseResults.故障诊断
-          faultDiagnosisDisplay(results_to_show)
-        } else if (item.label == '故障预测') {
-          let results_to_show = responseResults.故障预测
-          faultRegressionDisplay(results_to_show)
-        } else if (item.label == '插值处理') {
-          let results_to_show = responseResults.插值处理
-          interpolationDisplay(results_to_show)
-        } else if (item.label == '无量纲化') {
-          let results_to_show = responseResults.无量纲化
-          normalizationDisplay(results_to_show)
-        } else if (item.label == '小波变换') {
-          let results_to_show = responseResults.小波变换
-          denoiseDisplay(results_to_show)
-        } else if (item.label == '层次朴素贝叶斯评估') {
-          let results_to_show = responseResults.层次朴素贝叶斯评估
-          if (currentDisplayedItem != '层次朴素贝叶斯评估') {
-            currentDisplayedItem = '层次朴素贝叶斯评估'
-          } else {
-            displayHealthEvaluation.value = true
-            return
-          }
-          healthEvaluationDisplay(results_to_show)
-        } else if (item.label == '层次逻辑回归评估') {
-          let results_to_show = responseResults.层次逻辑回归评估
-          if (currentDisplayedItem != '层次逻辑回归评估') {
-            currentDisplayedItem = '层次逻辑回归评估'
-          } else {
-            displayHealthEvaluation.value = true
-            return
-          }
-          healthEvaluationDisplay(results_to_show)
-        } else if (item.label == '健康评估') {
-          let results_to_show = responseResults.健康评估
-          if (currentDisplayedItem != '健康评估') {
-            currentDisplayedItem = '健康评估'
-          } else {
-            displayHealthEvaluation.value = true
-            return
-          }
-          healthEvaluationDisplay(results_to_show)
-        } else {
-          ElMessage({
-            message: '无效的算法模块',
-            type: 'error'
-          })
-        }
+        displayFeatureExtraction.value = display  // 显示特征提取结果
+        return
       }
+      let results_to_show = responseResults.特征提取
+      displayFeatureExtraction.value = display
+      await featureExtractionDisplay(results_to_show)
+    } else if (moduleName == '特征选择') {
+      if (currentDisplayedItem != '特征选择') {
+        currentDisplayedItem = '特征选择'
+      } else {
+        displayFeatureSelection.value = display  // 显示特征选择结果
+        return
+      }
+      let results_to_show = responseResults.特征选择
+      displayFeatureSelection.value = display
+      await featuresSelectionDisplay(results_to_show)
+    } else if (moduleName == '故障诊断') {
+      if (currentDisplayedItem != '故障诊断') {
+        currentDisplayedItem = '故障诊断'
+      } else {
+        displayFaultDiagnosis.value = display
+        return
+      }
+      let results_to_show = responseResults.故障诊断
+      displayFaultDiagnosis.value = display
+      await faultDiagnosisDisplay(results_to_show)
+    } else if (moduleName == '故障预测') {
+      let results_to_show = responseResults.故障预测
+      displayFaultRegression.value = display
+      await faultRegressionDisplay(results_to_show)
+    } else if (moduleName == '插值处理') {
+      let results_to_show = responseResults.插值处理
+      displayInterpolation.value = display
+      await interpolationDisplay(results_to_show)
+    } else if (moduleName == '无量纲化') {
+      let results_to_show = responseResults.无量纲化
+      displayNormalization.value = display
+      await normalizationDisplay(results_to_show)
+    } else if (moduleName == '小波变换') {
+      let results_to_show = responseResults.小波变换
+      displayDenoise.value = display
+      await denoiseDisplay(results_to_show)
+    } else if (moduleName == '层次朴素贝叶斯评估') {
+      let results_to_show = responseResults.层次朴素贝叶斯评估
+      if (currentDisplayedItem != '层次朴素贝叶斯评估') {
+        currentDisplayedItem = '层次朴素贝叶斯评估'
+      } else {
+        displayHealthEvaluation.value = display
+        return
+      }
+      displayHealthEvaluation.value = display
+      await healthEvaluationDisplay(results_to_show)
+    } else if (moduleName == '层次逻辑回归评估') {
+      let results_to_show = responseResults.层次逻辑回归评估
+      if (currentDisplayedItem != '层次逻辑回归评估') {
+        currentDisplayedItem = '层次逻辑回归评估'
+      } else {
+        displayHealthEvaluation.value = display
+        return
+      }
+      displayHealthEvaluation.value = display
+      await healthEvaluationDisplay(results_to_show)
+    } else if (moduleName == '健康评估') {
+      let results_to_show = responseResults.健康评估
+      if (currentDisplayedItem != '健康评估') {
+        currentDisplayedItem = '健康评估'
+      } else {
+        displayHealthEvaluation.value = display
+        return
+      }
+      displayHealthEvaluation.value = display
+      await healthEvaluationDisplay(results_to_show)
+    } else {
+      ElMessage({
+        message: '无效的算法模块',
+        type: 'error'
+      })
     }
-  } else {
-    // ElMessage({
-    //   message: '当前无运行结果',
-    //   type: 'error'
-    // })
-  }
 }
+
+const showResult = (moduleName: string) => {
+
+  if (missionComplete.value) {
+    resultsViewClear()
+    canShowResults.value = true
+    generateResultsToDisplay(moduleName, true)
+  }
+  
+}
+
 
 
 // 从后端获取到的历史模型的信息
@@ -5189,13 +8304,16 @@ const fetchModels = () => {
       })
 }
 
+const isFullScreen = ref(false);
 
 //全屏
 const toggleFullscreen = () => {
   if (document.fullscreenElement) {
     document.exitFullscreen();
+    isFullScreen.value = false;
   } else {
     document.documentElement.requestFullscreen();
+    isFullScreen.value = true;
   }
 }
 
@@ -5203,116 +8321,45 @@ const toggleFullscreen = () => {
 // 复用历史模型，不需要进行模型检查等操作
 let modelHasBeenSaved = false
 const modelLoaded = ref('无')  // 已加载的历史模型
-let modelLoadedId: string  // 所加载的模型的唯一标识符
 
-// 点击历史模型表格中使用按钮复现用户历史模型
-const useModel = (row) => {
+//恢复画布
+function restoreCanvas(objects) {
 
-  // console.log('点击历史模型复现：', row)
-
-  if (nodeList.value.length != 0) {
-    nodeList.value.length = 0
+  if (objects.nodeList) {
+    fromObject(objects.nodeList)
   }
   handleClear()
   updateStatus('当前模型已保存')
   modelHasBeenSaved = true
   canStartProcess.value = false
-  modelLoaded.value = row.model_name
-  modelLoadedId = String(row.id)
-  let objects
-  try {
-    objects = JSON.parse(row.model_info)
-  } catch {
-    objects = row.model_info
-  }
 
+  console.log('使用的模型信息，并根据此再次构建contentjson',objects)
 
-  // if (typeof objects == 'string')
-
-  let connection = objects.connection      // 模型连线信息
-  let nodeList1 = objects.nodeList         // 模型节点信息
-
-  console.log('connection:', connection)
-  console.log('nodeList:', nodeList1)
-
-
-  // 恢复节点
-  for (let node of nodeList1) {
-
-    nodeList.value.push(node)
-
-    if (node.label == '特征提取') {
-      features.value.length = 0
-      let params = node.parameters[node.use_algorithm]
-      for (let [key, value] of Object.entries(params)) {
-        if (value) {
-          features.value.push(key)
-        }
-      }
-    }
-  }
-  // 用于将节点的id与节点的label对应起来
-  let idToLabelList = {'nodeId': [], 'nodeLabel': []}
-
-  // 初始化每个节点的可连接状态
-  for (let node of nodeList.value) {
-
-    let nodeId = node.id
-    idToLabelList.nodeId.push(nodeId)
-    idToLabelList.nodeLabel.push(node.label)
-
-    nextTick(() => {
-      // plumbIns.draggable(nodeId, { containment: "efContainer" })
-      if (node.id === '2.2') {
-        plumbIns.makeTarget(nodeId, deff.jsplumbTargetOptions)
-        return
-      }
-      plumbIns.makeSource(nodeId, deff.jsplumbSourceOptions)
-      // plumbIns.addEndpoint(nodeId, deff.jsplumbTargetOptions)
-      if (node.id === '1' || node.id === '4') {
-        return
-      }
-      plumbIns.makeTarget(nodeId, deff.jsplumbTargetOptions)
-    })
-  }
-
-  // 根据返回的模型的连接顺序，恢复模型中的连线
-  let connectionList = []
-  let connection2 = []   // 记录每个节点的id
-  let node_num = connection.length
-
-  // 初始化connection2，用于记录每个节点的id
-  for (let i = 0; i < node_num; i++) {
-    let label = connection[i]
-    for (let j = 0; j < node_num; j++) {
-      if (idToLabelList.nodeLabel[j] === label) {
-        connection2[i] = idToLabelList.nodeId[j]
-        break
-      }
-    }
-  }
-  console.log("connection2:", connection2)
-
-  saveModelSetting(false, connection)
-  contentJson.schedule = connection
+  console.log('边的信息:', modeling_nodeList.value)
+  buildContentJson()
+  // saveModelSetting(false, connection)
+  console.log('objects.connection:', objects.connection)
+  contentJson.schedule = objects.connection
   modelSetup.value = true
-  // 如果只有一个节点，则不恢复连线，否则按照模型信息中各模块的连接顺序恢复连线
-  if (node_num == 1) {
-    connectionList = []
-  } else {
-    for (let i = 0; i < node_num - 1; i++) {
-      connectionList.push({'soruce_id': connection2[i], 'target_id': connection2[i + 1]})
-    }
-    nextTick(() => {
-      for (let line of connectionList) {
-        plumbIns.connect({
-          source: document.getElementById(line.soruce_id),
-          target: document.getElementById(line.target_id)
-        })
-      }
-    })
-  }
 }
+
+// // 点击历史模型表格中使用按钮复现用户历史模型
+// const useModel = (row) => {
+//   modelLoaded.value = row.model_name
+//   //后端传来的数据恢复画布信息
+//   // let objects = JSON.parse(row.model_info)
+//   //要执行两遍才会渲染上
+//   restoreCanvas(objects)
+//   console.log('第一次渲染:', modeling_nodeList.value)
+//   // 使用setTimeout等待0.5秒
+//   setTimeout(() => {
+//     // 0.5秒后执行的操作
+
+//     restoreCanvas(objects)
+//     console.log('第二次渲染:', modeling_nodeList.value)
+//   }, 500);
+
+// }
 
 
 let index = 0
@@ -5387,7 +8434,7 @@ const modelParams = ref([])  // {'模块名': xx, '算法': xx, '参数': xx}
 
 const showModelInfo = (row) => {
   let objects = JSON.parse(row.model_info)
-  let nodesList = objects.nodeList         // 模型节点信息   
+  let nodesList = objects.nodeList         // 模型节点信息
   let connection = objects.connection     // 模型连接顺序
 
   modelName.value = row.model_name
@@ -5493,11 +8540,11 @@ const startModeling = () => {
 // 建模状态更新
 function updateStatus(status) {
   var indicator = document.getElementById('statusIndicator');
-  indicator.textContent = status; // 更新文本  
-  indicator.classList.remove('error', 'success', 'saved', 'rectify'); // 移除之前的状态类  
+  indicator.textContent = status; // 更新文本
+  indicator.classList.remove('error', 'success', 'saved', 'rectify'); // 移除之前的状态类
   switch (status) {
     case '未建立模型':
-      // 默认样式，或者设置为特定类  
+      // 默认样式，或者设置为特定类
       break;
     case '模型建立完成，请点击模型检查':
       indicator.classList.add('error');
@@ -5724,8 +8771,8 @@ ul > li {
 
 .fullscreen_container {
   height: 100vh;
-  /* display: flex; */
-  /* flex-direction: column; */
+  display: flex;
+  flex-direction: column;
 }
 
 .result_visualization_view {
@@ -5817,7 +8864,7 @@ body {
 .aside-title {
   font-size: 20px;
   font-weight: 700;
-  background-color: #ffffff;
+  background-color: #ebeef4;
   justify-content: center;
   display: flex;
   align-items: center;
@@ -5951,15 +8998,15 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: rgba(204, 208, 214);
+  background-color: #c1ced9;
   padding: 0 20px;
   height: 60px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  border-bottom: rgb(95, 117, 154) 1px solid;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1),
+  0 1px 3px rgba(0, 0, 0, 0.08);
   text-align: center;
   line-height: 60px;
   position: relative;
-  margin-bottom: 3px;
+  margin-top: 1px;
   width: 100%;
 }
 
@@ -5988,6 +9035,7 @@ body {
   flex: 4;
   justify-content: center; /* 水平居中 */
   align-items: center; /* 垂直居中 */
+  height: 60px;
 }
 
 .title h1 {
@@ -5995,7 +9043,10 @@ body {
   font-size: 24px;
   font-weight: 600;
   color: #333;
-  font-family: 'Microsoft YaHei', sans-serif; /* 修改为微软雅黑字体 */
+  font-family: 'JetBrains Mono', monospace;
+  height: 60px;
+  white-space: nowrap; /* 不换行 */
+  overflow: hidden; /* 隐藏溢出部分 */
 }
 
 .user-actions {
@@ -6007,9 +9058,12 @@ body {
 }
 
 .welcome-message {
-  font-size: 15px;
-  color: #409EFF;
+  font-size: 16px;
+  //color: #409EFF;
+  color: black;
   margin-right: 18px;
+  white-space: nowrap; /* 不换行 */
+  overflow: hidden; /* 隐藏溢出部分 */
 }
 
 .action-item {
@@ -6020,14 +9074,16 @@ body {
 }
 
 .action-item .action-icon {
-  font-size: 18px;
+  font-size: 16px;
   margin-right: 5px;
-  color: #409EFF;
+  //color: #409EFF;
+  color: black;
 }
 
 .action-item .action-text {
-  font-size: 14px;
-  color: #409EFF;
+  font-size: 16px;
+  //color: #409EFF;
+  color: black;
 }
 
 .action-item:hover .action-icon,
@@ -6039,4 +9095,290 @@ body {
   transform: scale(1.2);
   transition: transform 0.3s;
 }
+
+/*
+使用 Font Awesome 图标:
+1、安装：
+npm install @fortawesome/fontawesome-free
+2、配置：
+// 在要使用的地方 导入 Font Awesome CSS
+// 网站：https://fontawesome.com/icons
+import '@fortawesome/fontawesome-free/css/all.css';
+*/
+//@import 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';
+
+//tree css start
+.custom-tree-node {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  //padding-right: 8px;
+  //background-color: #5cb85c;
+}
+
+.node-label {
+  //background-color: red;
+}
+
+.node-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  //background-color: #3c93f8;
+  gap: 8px;
+  margin-left: 8px;
+}
+
+.el-button {
+  font-size: 12px;
+  padding: 0 5px;
+}
+
+.el-tree .el-tree-node__content {
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.el-tree .el-tree-node__content:hover {
+  background-color: #f0f0f0;
+}
+
+//tree css end
+//el-main分割 css start
+.parent-containerOfElMain {
+  position: relative;
+  width: 100%;
+  //height: 100vh;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+/* 建模部分 */
+.modeling-areaOfElMain {
+  flex: 1;
+  background-color: #ffffff;
+  padding: 0;
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* 运行结果部分 */
+.result-areaOfElMain {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #ffffff;
+  //border-top: 2px solid #409EFF;
+  z-index: 1;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* 确保内容在高度变化时不溢出 */
+}
+
+/* 运行结果头部，可拖动 */
+.result-headerOfElMain {
+  cursor: ns-resize;
+  padding: 0;
+  width: 100%;
+  height: 40px;
+  background-color: #ebeef4;
+  color: #409EFF;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+  position: relative;
+}
+
+/* 运行结果内容 */
+.result-contentOfElMain {
+  padding: 0;
+  //overflow: auto;
+  overflow-y: hidden;
+  flex-grow: 1;
+}
+
+.buttonsOfElMain {
+  width: 100%;
+  display: flex;
+  justify-content: end;
+}
+
+/* 控制按钮 */
+.control-buttonsOfElMain {
+  position: absolute;
+  bottom: 0;
+  //background-color: #66e748;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  gap: 10px;
+}
+
+/* 图标按钮样式 */
+.icon-buttonOfElMain {
+  background: none;
+  border: none;
+  margin-right: 10px;
+  //color: #000000;
+  cursor: pointer;
+  font-size: 18px; /* 调整图标大小 */
+  padding: 5px;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  //border-radius: 50%; /* 添加圆角 */
+}
+
+.icon-buttonOfElMain:hover {
+  color: #000000;
+  background-color: rgba(235, 238, 244, 0.1); /* 添加悬停背景 */
+}
+
+.icon-buttonOfElMain.primary {
+  color: #409EFF;
+}
+
+.icon-buttonOfElMain.success {
+  color: #67c23a;
+}
+
+/* 过渡动画 */
+.slide-enter-active,
+.slide-leave-active {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.slide-enter-from {
+  opacity: 0;
+  transform: translateY(100%); /* 从下往上 */
+}
+
+.slide-enter-to {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.slide-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.slide-leave-to {
+  opacity: 0;
+  transform: translateY(100%); /* 从上往下 */
+}
+
+//el-main分割 css end
+
+//自定义侧边栏样式start
+.el-aside-demo {
+
+}
+
+/* 滚动条轨道样式 */
+.el-aside-demo::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(255, 255, 255, 0);
+  background-color: #ebeef4; /* 更深的颜色，让轨道看起来更清晰 */
+  border-radius: 10px; /* 圆角轨道 */
+}
+
+/* 整体滚动条样式 */
+.el-aside-demo::-webkit-scrollbar {
+  width: 0; /* 设置滚动条的宽度 */
+  background-color: #ffffff; /* 与轨道背景色一致 */
+  border-radius: 10px; /* 圆角滚动条 */
+}
+
+/* 滚动条滑块样式 */
+.el-aside-demo::-webkit-scrollbar-thumb {
+  //background: linear-gradient(to top, rgba(125, 126, 128, 0.6), rgba(97, 98, 99, 0.6)); /* 渐变色效果 */
+  border-radius: 10px; /* 圆角滑块 */
+  border: 2px solid rgba(255, 255, 255, 0.2); /* 添加边框，以提高可视性 */
+}
+
+/* 滚动条滑块悬浮时的样式 */
+.el-aside-demo::-webkit-scrollbar-thumb:hover {
+  //background: linear-gradient(to top, rgba(125, 126, 128, 0.8), rgba(97, 98, 99, 0.8)); /* 鼠标悬浮时加深颜色 */
+}
+
+//自定义侧边栏样式end
+
+//建模区域的配置菜单start
+/* 配置区域 */
+.configPanelOfModelNode {
+  width: 300px;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  background-color: white;
+  transition: transform 0.3s ease-in-out;
+  box-shadow: -3px 0 3px rgba(0, 0, 0, 0.2);
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+/* 隐藏配置区域时的transform */
+.configPanelOfModelNode.hidden {
+  transform: translateX(100%);
+}
+
+.closeConfigPanelBtnOfModelNode {
+  width: 100%;
+  display: flex;
+  //margin-left: 10px;
+  height: 35px;
+  padding-left: 10px;
+  justify-content: start;
+  background-color: #ebeef4;
+  border-bottom: #ccd0d6 solid 1px;
+}
+
+/* 配置区域初始状态 */
+.configAreaPanelOfModelNode {
+  height: 95%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  //background-color: #66e748;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* 滚动条轨道样式 */
+.configAreaPanelOfModelNode::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(255, 255, 255, 0);
+  background-color: #ffffff;
+  border-radius: 10px;
+}
+
+/* 整体滚动条样式 */
+.configAreaPanelOfModelNode::-webkit-scrollbar {
+  width: 8px;
+  background-color: #ccd0d6;
+  border-radius: 10px;
+}
+
+/* 滚动条滑块样式 */
+.configAreaPanelOfModelNode::-webkit-scrollbar-thumb {
+  //background: linear-gradient(to top, rgba(125, 126, 128, 0.6), rgba(97, 98, 99, 0.6)); /* 渐变色效果 */
+  border-radius: 10px;
+  border: 2px solid rgba(32, 130, 249, 0.2);
+}
+
+/* 滚动条滑块悬浮时的样式 */
+.configAreaPanelOfModelNode::-webkit-scrollbar-thumb:hover {
+  //background: linear-gradient(to top, rgba(125, 126, 128, 0.8), rgba(97, 98, 99, 0.8)); /* 鼠标悬浮时加深颜色 */
+}
+
+//建模区域的配置菜单end
+
 </style>

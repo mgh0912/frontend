@@ -61,19 +61,6 @@
   width: 140px;
 }
 
-/* body > .el-container {
-  height: 91vh;
-} */
-/* 
-.el-container:nth-child(5) .el-aside,
-.el-container:nth-child(6) .el-aside {
-  height: 91vh;
-}
-
-.el-container:nth-child(7) .el-aside {
-  height: 91vh;
-} */
-
 
 .setting-button {
   width: 250px;
@@ -154,37 +141,6 @@
 }
 
 
-/* 修改下拉框的样式 */
-/* .select {
-  width: 200px;
-  background-color: white;
-  padding: 0;
-}
-
-.select .el-scrollbar__wrap {
-  height:100%;
-  width: 100%;
-  background-color: white;
-  padding: 0;
-}
-
-.select .el-select-dropdown__item {
-  
-  padding: 8px 16px;
-  font-size: 14px;
-  color: #1986a1;
-  background-color: white;
-}
-
-.select .el-select-dropdown__item:hover {
-  background-color: #0888e4;
-} */
-
-/* .select .el-select-dropdown__item.is-selected { */
-/* background-color: #42b5ea; */
-/* color: #1890ff;
-} */
-/* 算法选择区的背景色 */
 .algorithms-selection {
   background-color: #89cdfa;
   width: 100%;
@@ -229,4 +185,8 @@
   justify-content: center;
   margin-top: 20px; 
   font-size: 18px;
+}
+
+.ant-select-dropdown-menu-item-group-list {
+  width: 300px; /* 自定义宽度 */
 }

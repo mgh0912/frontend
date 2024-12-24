@@ -8,7 +8,7 @@ const api = axios.create({
 // 拦截请求并将登录时从服务器获得的token添加到Authorization头部
 api.interceptors.request.use(function (config) {
     // 从localStorage获取JWT
-    let token = window.localStorage.getItem('jwt');
+    let token = window.sessionStorage.getItem('jwt');
     // console.log('the token is: ', token)
 
     // 将JWT添加到请求的Authorization头部

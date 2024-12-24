@@ -141,13 +141,13 @@ const login = () => {
             let tokenGot = response.data.token;
 
             // 保存 token 和登录时间到 localStorage
-            window.localStorage.setItem("jwt", tokenGot);
+            window.sessionStorage.setItem("jwt", tokenGot);
 
             // 保存用户名到 localStorage
-            window.localStorage.setItem("username", formState.username);
+            window.sessionStorage.setItem("username", formState.username);
 
             // 保存用户角色到 localStorage
-            window.localStorage.setItem("role", formState.role);
+            window.sessionStorage.setItem("role", formState.role);
 
             // 根据用户登录时所选择的角色跳转到用户界面或者管理员界面
             if (formState.role == "user" || formState.role == "superuser") {

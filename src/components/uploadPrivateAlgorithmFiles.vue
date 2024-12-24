@@ -1,7 +1,8 @@
 <template>
   <a-button class="private-algorithm-button" ghost @click="uploadPrivateAlgorithmFiles()">
-    <span>上传组件</span></a-button
-  >
+    <i class="fa-solid fa-cloud-arrow-up" style="margin-right: 3px;"></i>
+    <span style="font-family: 'JetBrains Mono', monospace;">上传组件</span>
+  </a-button>
   <!-- 上传增值服务组件的操作面板 -->
   <a-modal
     v-model:open="dialogVisible"
@@ -234,7 +235,7 @@
         <!-- <div v-if="extraModuleValidationResult === true">校验通过，上传成功</div> -->
         <!-- <div v-else>校验失败</div> -->
         <div style="display: flex; flex-direction: row; width: 100%">
-          <span style="">上传组件的测试运行结果（点击放大）</span>
+          <span style="">所上传的组件运行结果（点击放大）</span>
           <span><a-button type="word" style="margin-left: 150px" @click="closeValidationResult">关闭</a-button></span></div>
        
         <!-- 插值处理组件校验的结果 -->
@@ -245,46 +246,6 @@
             :max-scale="7"
             :min-scale="0.2"
             :preview-src-list="interpolationFigures"
-            :initial-index="4"
-            fit="cover"
-          />
-        </div>
-
-        <!-- 无量纲化组件校验的结果 -->
-        <div v-if="canDisplayDimensionlessValidationResult" style="width: 100%; height: 250px;" >
-          <el-image
-            :src="dimensionlessFigures[0]"
-            :zoom-rate="1.2"
-            :max-scale="7"
-            :min-scale="0.2"
-            :preview-src-list="dimensionlessFigures"
-            :initial-index="4"
-            fit="cover"
-          />
-        </div>
-
-        <!-- 小波变换组件校验的结果 -->
-        <div v-if="canDisplayWaveletTransformValidationResult" style="width: 100%; height: 250px;" >
-          <el-image
-            :src="waveletTransformFigures[0]"
-            :zoom-rate="1.2"
-            :max-scale="7"
-            :min-scale="0.2"
-            :preview-src-list="waveletTransformFigures"
-            :initial-index="4"
-            fit="cover"
-          />
-        </div>
-
-        <!-- 故障诊断组件校验的结果 -->
-        <div v-if="canDisplayFaultDiagnosisValidationResult" style="width: 100%; height: auto;" >
-          <el-image
-            style="width: auto; height: 100px;"
-            :src="faultDiagnosisFigures[0]"
-            :zoom-rate="1.2"
-            :max-scale="7"
-            :min-scale="0.2"
-            :preview-src-list="faultDiagnosisFigures"
             :initial-index="4"
             fit="cover"
           />
@@ -334,12 +295,6 @@
     <el-scrollbar :height="600">
       <div v-if="templateName === '插值处理'">
         <div>
-          <h3>附：示例代码源文件下载链接（点击下载）</h3>
-          <a
-            href="src/assets/exampleCode/My-Interpolation.py"
-            download="example-interpolation.py"
-            >插值处理组件示例代码源文件</a
-          >
           <h1>基本结构</h1>
           <h2>1. 数据输入</h2>
           <h3>插值处理的私有算法作为脚本运行时，需要从主程序获取两个参数：</h3>
@@ -573,12 +528,6 @@
       <!-- 小波变换的专有算法模板 -->
       <div v-if="templateName === '小波变换'">
         <div>
-          <h3>附：示例代码源文件下载链接（点击下载）</h3>
-          <a
-            href="src/assets/exampleCode/My-Wavelet-1.py"
-            download="example-wavelet-trans.py"
-            >小波变换组件示例代码源文件</a
-          >
           <h1>基本结构</h1>
           <h2>1. 数据输入</h2>
           <h3>小波变换的专有算法作为脚本运行时，主要需要从主程序获取两个参数：</h3>
@@ -600,12 +549,12 @@
           </code> -->
 
           <h2>3. 私有算法代码模板示例</h2>
-          <!-- <h3>小波变换的专有算法模板代码如下：</h3>
+          <h3>小波变换的专有算法模板代码如下：</h3>
           <a
             href="src/assets/exampleCode/My-Wavelet-1.py"
             download="example-wavelet-transform.py"
             >点击下载示例代码源文件</a
-          > -->
+          >
           <a-image :width="500" src="src/assets/wavelet-transform-outline.png"></a-image>
           <h3>其中需要注意，定义的小波变换处理方法要在同一个源文件中。</h3>
         </div>
@@ -788,7 +737,7 @@ let contentJsonForFaultDiagnosisML = {
       谱峭度的均值: true,
       谱峭度的峰度: true,
     },
-    correlation_coefficient_importance: {'rule': 1, 'threshold1': 0.25, 'threshold2': 0.1},
+    correlation_coefficient_importance: {'rule': 1, 'threshold1': 0.45, 'threshold2': 0.1},
     private_fault_diagnosis_machine_learning: '',
   },
   schedule: ["数据源", "特征提取", "特征选择", "故障诊断"],
@@ -816,25 +765,7 @@ const startValidating = () => {
   const data = new FormData();
   // data.append("file_name", validateExtraAlgorithmUsingFileName.value); // 所使用的数据文件
   data.append("params", JSON.stringify(contentJson)); // 模型信息
-  let algorithmType = unknownform.algorithmType;
-
-  switch (algorithmType) {
-    case "插值处理":
-      data.append("validationExample", "example_for_interpolation_validation");
-      break;
-    case "小波变换":
-      data.append("validationExample", "single_sensor_example");
-      break;
-    case "无量纲化":
-      data.append("validationExample", "single_sensor_example");
-      break;
-    case "故障诊断":
-      data.append("validationExample", "example_for_fault_diagnosis_validation");
-      break;
-    default:
-      data.append("validationExample", "single_sensor_example");
-  }
-  // data.append('validationExample', 'single_sensor_example')
+  data.append('validationExample', 'single_sensor_example')
 
   return api
     .post("user/run_with_datafile_on_cloud/", data, {
@@ -923,37 +854,22 @@ const deleteExtraModule = () => {
     });
 };
 
-const canDisplayInterpolationValidationResult = ref(false)  // 插值处理组件校验结果
-const canDisplayWaveletTransformValidationResult = ref(false)  // 小波变换组件校验结果
-const canDisplayDimensionlessValidationResult = ref(false)  // 无量纲化组件校验结果
-const canDisplayFaultDiagnosisValidationResult = ref(false)  // 故障诊断组件校验结果
+const canDisplayInterpolationValidationResult = ref(false)
+const canDisplayWaveletTransformValidationResult = ref(false)
 
 const resetDisplay = () => {
   canDisplayInterpolationValidationResult.value = false
   canDisplayWaveletTransformValidationResult.value = false
-  canDisplayDimensionlessValidationResult.value = false
-  canDisplayFaultDiagnosisValidationResult.value = false
 }
 
-// 关闭组件校验结果
 const closeValidationResult = () => {
   canShowValidationResult.value = false
 }
 
-const interpolationFigures = ref<string[]>([])  // 插值处理组件校验结果
-const waveletTransformFigures = ref<string[]>([])  // 小波变换组件校验结果
-const dimensionlessFigures = ref<string[]>([])  // 无量纲化组件校验结果
-const faultDiagnosisFigures = ref<string[]>([])  // 故障诊断组件校验结果
+const interpolationFigures = ref([])
 // const interpolationResultsOfSensors = ref([])
-interface ResultsObject {  // 完整性校验结果
-  插值处理: Object
-  小波变换: Object
-  无量纲化: Object
-  故障诊断: Object
-}
-
 // 完整性校验通过后的结果展示
-const displayValidationResult = (algorithmType: string, resultsObject: ResultsObject) => {
+const displayValidationResult = (algorithmType: string, resultsObject: Object) => {
   interpolationFigures.value.length = 0
   // interpolationResultsOfSensors.value.length = 0
   // 清除显示结果
@@ -962,33 +878,11 @@ const displayValidationResult = (algorithmType: string, resultsObject: ResultsOb
     canDisplayInterpolationValidationResult.value = true
     for(const [key, value] of Object.entries(resultsObject.插值处理)){
       // 将插值处理的结果添加到插值图展示
-      // console.log('value: ', value)
+      console.log('value: ', value)
       interpolationFigures.value.push('data:image/png;base64,' + value)
       // interpolationResultsOfSensors.value.push({label: key.split('_')[0], name: sensorId.toString()})
     }
-  }else if(algorithmType == "无量纲化"){
-    canDisplayDimensionlessValidationResult.value = true
-    for(const [key, value] of Object.entries(resultsObject.无量纲化)){
-      // interpolationFigures.value.push('data:image/png;base64,' + value)
-      dimensionlessFigures.value.push('data:image/png;base64,' + value)
-    }
-  }else if(algorithmType == "故障诊断"){
-    canDisplayFaultDiagnosisValidationResult.value = true
-    let faultDiagnosisValidationResult: string = resultsObject.故障诊断.fd_validation_result
-    // interpolationFigures.value.push('data:image/png;base64,' + value)
-    faultDiagnosisFigures.value.push('data:image/png;base64,' + faultDiagnosisValidationResult)
-    
   }
-
-  if (algorithmType == "小波变换"){
-    canDisplayWaveletTransformValidationResult.value = true
-    // interpolationFigures.value.push('data:image/png;base64,' + resultsObject.小波变换)
-    for(const [key, value] of Object.entries(resultsObject.小波变换)){
-      waveletTransformFigures.value.push('data:image/png;base64,' + value)
-    }
-  }
-
-  
 }
 
 
@@ -1021,7 +915,6 @@ const extraModuleUploadAndValidate = async () => {
     Object.assign(contentJson, contentJsonForDimensionless);
   } else if (unknownform.algorithmType == '故障诊断') {
     if (unknownform.faultDiagnosisType == 'machineLearning'){
-      // 基于机器学习的故障诊断的组件校验
       contentJsonForFaultDiagnosisML.parameters['private_fault_diagnosis_machine_learning'] = algorithmName;
       Object.assign(contentJson, contentJsonForFaultDiagnosisML)
     }
@@ -1776,10 +1669,14 @@ const onClose = () => {
 }
 
 .private-algorithm-button {
-  background-color: #ffd541;
-  color: #566f4f;
-  font-size: 17px;
-  font-weight: 600;
-  border: 1px solid #789b6e;
+  background-color: #ffffff;
+  color: #333333;
+  font-size: 16px;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border-radius: 0;
+  /*font-weight: 600;*/
+  /*border: 1px solid #333333;*/
 }
 </style>

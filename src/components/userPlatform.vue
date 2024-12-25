@@ -1121,22 +1121,29 @@
                       <el-scrollbar height="100%">
                         <!-- 自定义建模 -->
                         <div v-if="(userRole==='superuser' || userRole === 'user') && modelSelection === 'customModel'">
-                          <v-md-preview :text="howToCustomizeModel" style="text-align: left;"></v-md-preview>
-                          <div style="text-align: left; padding-left: 40px;">
-                            <h4>1.机器学习的故障诊断流程推荐</h4>
-                            <img src="../assets/customize-model-1.png" width="900px" alt="">
-                            <div>模版用例：
-                              <a-button @click="useModel(predefinedModel['templateModel1'])">用例1</a-button>
-                              <a-button>用例2</a-button>
-                            </div>
-                            <br>
-                            <h4>1.深度学习的故障诊断流程推荐</h4>
-                            <img src="../assets/customize-model-2.png" width="600px" alt="">
-                            <div>模版用例：
-                              <a-button @click="useModel(predefinedModel['templateModel1'])">用例1</a-button>
-                              <a-button>用例2</a-button>
+                          <v-md-preview
+                              :text="howToCustomizeModel"
+                              style="text-align: left;"
+                              v-if="(userRole==='superuser')"
+                              > </v-md-preview>
+                          <div v-if="(userRole==='superuser')">
+                            <div style="text-align: left; padding-left: 40px;">
+                              <h4>1.机器学习的故障诊断流程推荐</h4>
+                              <img src="../assets/customize-model-1.png" width="900px" alt="">
+                              <div>模版用例：
+                                <a-button @click="useModel(predefinedModel['templateModel1'])">用例1</a-button>
+                                <a-button>用例2</a-button>
+                              </div>
+                              <br>
+                              <h4>1.深度学习的故障诊断流程推荐</h4>
+                              <img src="../assets/customize-model-2.png" width="600px" alt="">
+                              <div>模版用例：
+                                <a-button @click="useModel(predefinedModel['templateModel1'])">用例1</a-button>
+                                <a-button>用例2</a-button>
+                              </div>
                             </div>
                           </div>
+
                         </div>
                         <!-- 预定义模型 -->
                         <div v-if="userRole === 'superuser' && modelSelection === 'templateModel'">

@@ -1073,7 +1073,7 @@
               >
                 <!-- 运行结果头部，可拖动 -->
                 <div class="result-headerOfElMain" @mousedown="initDragOfElMain" @touchstart="initDragTouchOfElMain">
-                  <!--                  <span>运行结果部分</span>-->
+<!--                                    <span>运行结果部分</span>-->
                   <div class="buttonsOfElMain">
                     <button
                         class="icon-buttonOfElMain"
@@ -3527,7 +3527,7 @@ function runModelOfViewFlow() {
         responseResults = response.data.results
         missionComplete.value = true
         statusMessageToShow.value = statusMessage.success
-
+        showResultOfElMain()
       } else {
         processIsShutdown.value = false
       }

@@ -5,8 +5,8 @@
 </style>
 <template>
   <!--
-  更新页面 --v6.0
-  版本  2024-12-15
+  更新页面 --v6.1
+  版本  2024-12-25
   -->
   <div style="height: 100vh;overflow-x: hidden;">
     <el-container class="fullscreen_container">
@@ -8651,7 +8651,7 @@ import '@fortawesome/fontawesome-free/css/all.css';
   position: absolute;
   top: 0;
   right: 0;
-  z-index: 2;
+  z-index: 1;
   background-color: white;
   transition: transform 0.3s ease-in-out;
   box-shadow: -3px 0 3px rgba(0, 0, 0, 0.2);

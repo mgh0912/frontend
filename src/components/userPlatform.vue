@@ -449,7 +449,6 @@
                               ref="treeRef"
                               :data="filteredDataOfTree"
                               style="width: 100%;max-width: 100%;"
-                              show-checkbox
                               node-key="id"
                               :expand-on-click-node="false"
                               :default-expand-all="isExpandAllOfTree"
@@ -460,14 +459,8 @@
                       <span class="custom-tree-node" style="">
                         <span class="node-label">{{ node.label }}</span>
                         <span class="node-actions">
-                          <el-icon @click="appendOfTree(data)" :style="{color:'#67c23a'}">
-                                <Plus/>
-                          </el-icon>
-                          <el-icon @click="removeOfTree(node, data)" :style="{color:'#f56c6c'}">
-                                <Delete/>
-                          </el-icon>
-                          <el-icon @click="editOfTree(node, data)" :style="{color:'#409eff'}">
-                                <Edit/>
+                          <el-icon v-if="node.isLeaf" @click="nodeModelOfTree(node, data)" :style="{color:'#409eff'}">
+                               <i class="fa-solid fa-hexagon-nodes"></i>
                           </el-icon>
                         </span>
                       </span>
@@ -576,7 +569,6 @@
                           ref="treeRef"
                           :data="filteredDataOfTree"
                           style="width: 100%;max-width: 100%;"
-                          show-checkbox
                           node-key="id"
                           :expand-on-click-node="false"
                           :default-expand-all="isExpandAllOfTree"
@@ -587,13 +579,13 @@
                       <span class="custom-tree-node" style="">
                         <span class="node-label">{{ node.label }}</span>
                         <span class="node-actions">
-                          <el-icon @click="appendOfTree(data)" :style="{color:'#67c23a'}">
+                          <el-icon v-if="!node.isLeaf" @click="appendOfTree(data)" :style="{color:'#67c23a'}">
                                 <Plus/>
                           </el-icon>
-                          <el-icon @click="removeOfTree(node, data)" :style="{color:'#f56c6c'}">
+                          <el-icon  @click="removeOfTree(node, data)" :style="{color:'#f56c6c'}">
                                 <Delete/>
                           </el-icon>
-                          <el-icon @click="editOfTree(node, data)" :style="{color:'#409eff'}">
+                          <el-icon v-if="!node.isLeaf" @click="editOfTree(node, data)" :style="{color:'#409eff'}">
                                 <Edit/>
                           </el-icon>
                         </span>
@@ -695,7 +687,7 @@
                         :disabled="disabledStateOfControlBtn.clearModelOfViewFlowBtn"
                         :style="{color: dark ? '#ffffff' : '#000000'}"
                         title="下载报告">
-                      <i class="fa-solid fa-broom"></i>
+                              <i class="fa-solid fa-download"></i>
                       <span style="font-size: 10px;margin-top: 3px;">下载</span>
                     </ControlButton>
                     <ControlButton
@@ -931,16 +923,23 @@
                         <div style="flex: 1;padding: 10px;width: 100%;">
                           <el-text style="font-size: 15px;">选择特征<span
                               style="font-size: 12px;">(共{{
-                              Object.keys(item.parameters[item.use_algorithm]).length
+                              Object.keys(modeling_nodeList[parameter_dict[transfer['特征提取']]].nodeInfo.parameters[transfer['特征提取']]).length
                             }}个可选特征)</span></el-text>
                         </div>
                         <div style="flex: 1;width: 100%;padding-bottom: 10px;">
                           <el-select v-model="features" multiple collapse-tags collapse-tags-tooltip
                                      :max-collapse-tags="5" popper-class="select"
                                      placeholder="选择需要提取的特征" :teleported="false" style="width: 90%;">
-                            <el-option v-for="(value, key) in item.parameters[item.use_algorithm]" :label="key"
+                            <el-option v-for="(value, key) in modeling_nodeList[parameter_dict[transfer['特征提取']]].nodeInfo.parameters[transfer['特征提取']]" :label="key"
                                        :value="key" style="width: 200px; background-color: white;"/>
                           </el-select>
+<!--                          <a-select-->
+<!--                              v-model:value="value"-->
+<!--                              mode="multiple"-->
+<!--                              style="width: 100%"-->
+<!--                              placeholder="Please select"-->
+<!--                              :options="modeling_nodeList[parameter_dict[transfer['特征提取']]].nodeInfo.parameters[transfer['特征提取']]"-->
+<!--                          ></a-select>-->
                         </div>
                       </div>
                     </div>
@@ -963,30 +962,30 @@
                     </template>
                     <div class="" style="width: 100%;">
                       <div style="background-color: white; display: flex; flex-direction: column; padding: 20px">
-                        <el-radio-group v-model="item.parameters[item.use_algorithm]['rule']">
+                        <el-radio-group v-model="modeling_nodeList[parameter_dict[transfer['特征选择']]].nodeInfo.parameters[transfer['特征选择']]['rule']">
                           <el-radio :value="1" size="large">规则一</el-radio>
                           <el-radio :value="2" size="large">规则二</el-radio>
                         </el-radio-group>
                         <!-- 特征选择规则一 -->
-                        <div v-if="item.parameters[item.use_algorithm]['rule'] == 1">
+                        <div v-if="modeling_nodeList[parameter_dict[transfer['特征选择']]].nodeInfo.parameters[transfer['特征选择']]['rule'] == 1">
                           <div style="margin-top: 5px; margin-bottom: 15px;">
                             设定阈值后，将选择重要性系数大于该阈值的特征
                           </div>
                           <el-form>
                             <el-form-item label="阈值">
-                              <el-input-number v-model="item.parameters[item.use_algorithm]['threshold1']"
+                              <el-input-number v-model="modeling_nodeList[parameter_dict[transfer['特征选择']]].nodeInfo.parameters[transfer['特征选择']]['threshold1']"
                                                :precision="2" :step="0.05" :max="1" :min="0"/>
                             </el-form-item>
                           </el-form>
                         </div>
                         <!-- 特征选择规则二 -->
-                        <div v-if="item.parameters[item.use_algorithm]['rule'] == 2">
+                        <div v-if="modeling_nodeList[parameter_dict[transfer['特征选择']]].nodeInfo.parameters[transfer['特征选择']]['rule'] == 2">
                           <div style="margin-top: 5px; margin-bottom: 15px;">
                             设定阈值后，将根据特征的重要性，由高到低地选择特征，直到所选特征的重要性的总和占所有特征的重要性比例不小于该阈值，其中所有特征的重要性占比为1
                           </div>
                           <el-form>
                             <el-form-item label="阈值">
-                              <el-input-number v-model="item.parameters[item.use_algorithm]['threshold2']"
+                              <el-input-number v-model="modeling_nodeList[parameter_dict[transfer['特征选择']]].nodeInfo.parameters[transfer['特征选择']]['threshold2']"
                                                :precision="2" :step="0.05" :max="1" :min="0"/>
                             </el-form-item>
                           </el-form>
@@ -1009,7 +1008,7 @@
                     </template>
                     <div class="" style="width: 100%;background-color: white;padding-top: 10px;">
                       <div>是否使用模型训练时的标准化方法?</div>
-                      <el-radio-group v-model="item.parameters[item.use_algorithm]['useLog']">
+                      <el-radio-group v-model="modeling_nodeList[parameter_dict[transfer['无量纲化']]].nodeInfo.parameters[transfer['无量纲化']]['useLog']">
                         <el-radio :value="true" size="large">是</el-radio>
                         <el-radio :value="false" size="large">否</el-radio>
                       </el-radio-group>
@@ -1031,12 +1030,12 @@
                     <div class="" style="width: 100%;">
                       <div style="background-color: white; display: flex; flex-direction: column; padding-top: 20px;">
                         <el-row
-                            v-for="(value, key) in item.parameters[item.use_algorithm]"
+                            v-for="(value, key) in modeling_nodeList[parameter_dict[transfer['小波变换']]].nodeInfo.parameters[transfer['小波变换']]"
                             :key="key" style="margin-bottom: 20px">
                           <el-col :span="10" style="align-content: center;"><span
                               style="margin-left: 10px; font-size: 15px;">{{ labelsForParams[key] }}：</span></el-col>
                           <el-col :span="12">
-                            <el-select v-model="item.parameters[item.use_algorithm][key]" collapse-tags
+                            <el-select v-model="modeling_nodeList[parameter_dict[transfer['小波变换']]].nodeInfo.parameters[transfer['小波变换']][key]" collapse-tags
                                        collapse-tags-tooltip :teleported="false" placeholder="请选择参数">
                               <el-option
                                   v-for="item in recommendParams[key]"
@@ -1732,118 +1731,22 @@ const handleLoadModel = (row: any) => {
   modelLoaded.value = row.model_name
   //后端传来的数据恢复画布信息
   let objects = JSON.parse(row.model_info)
-  console.log('objects',objects)
   //要执行两遍才会渲染上
   restoreCanvas(objects)
-  console.log('第一次渲染:', modeling_nodeList.value)
   // 使用setTimeout等待0.5秒
   setTimeout(() => {
     // 0.5秒后执行的操作
 
     restoreCanvas(objects)
-    console.log('第二次渲染:', modeling_nodeList.value)
   }, 500);
-// console.log('点击历史模型复现：', row)
 
-// if (nodeList.value.length != 0) {
-//   nodeList.value.length = 0
-// }
 handleClear()
 updateStatus('当前模型已保存')
 modelHasBeenSaved = true
 canStartProcess.value = false
 modelLoaded.value = row.model_name
 modelLoadedId = String(row.id)
-// let objects
-// try {
-//   objects = JSON.parse(row.model_info)
-// } catch {
-//   objects = row.model_info
-// }
 
-// let connection = objects.connection      // 模型连线信息
-// let nodeList1 = objects.nodeList         // 模型节点信息
-
-// console.log('connection:', connection)
-// console.log('nodeList:', nodeList1)
-
-
-// 恢复节点
-// for (let node of nodeList1) {
-
-//   nodeList.value.push(node)
-
-//   if (node.label == '特征提取') {
-//     features.value.length = 0
-//     let params = node.parameters[node.use_algorithm]
-//     for (let [key, value] of Object.entries(params)) {
-//       if (value) {
-//         features.value.push(key)
-//       }
-//     }
-//   }
-// }
-// 用于将节点的id与节点的label对应起来
-// let idToLabelList = {'nodeId': [], 'nodeLabel': []}
-
-// 初始化每个节点的可连接状态
-// for (let node of nodeList.value) {
-
-//   let nodeId = node.id
-//   idToLabelList.nodeId.push(nodeId)
-//   idToLabelList.nodeLabel.push(node.label)
-
-//   nextTick(() => {
-//     // plumbIns.draggable(nodeId, { containment: "efContainer" })
-//     if (node.id === '2.2') {
-//       plumbIns.makeTarget(nodeId, deff.jsplumbTargetOptions)
-//       return
-//     }
-//     plumbIns.makeSource(nodeId, deff.jsplumbSourceOptions)
-//     // plumbIns.addEndpoint(nodeId, deff.jsplumbTargetOptions)
-//     if (node.id === '1' || node.id === '4') {
-//       return
-//     }
-//     plumbIns.makeTarget(nodeId, deff.jsplumbTargetOptions)
-//   })
-// }
-
-// 根据返回的模型的连接顺序，恢复模型中的连线
-// let connectionList = []
-// let connection2 = []   // 记录每个节点的id
-// let node_num = connection.length
-
-// 初始化connection2，用于记录每个节点的id
-// for (let i = 0; i < node_num; i++) {
-//   let label = connection[i]
-//   for (let j = 0; j < node_num; j++) {
-//     if (idToLabelList.nodeLabel[j] === label) {
-//       connection2[i] = idToLabelList.nodeId[j]
-//       break
-//     }
-//   }
-// }
-// console.log("connection2:", connection2)
-
-// saveModelSetting(false, connection)
-// contentJson.schedule = connection
-// modelSetup.value = true
-// // 如果只有一个节点，则不恢复连线，否则按照模型信息中各模块的连接顺序恢复连线
-// if (node_num == 1) {
-//   connectionList = []
-// } else {
-//   for (let i = 0; i < node_num - 1; i++) {
-//     connectionList.push({'soruce_id': connection2[i], 'target_id': connection2[i + 1]})
-//   }
-//   nextTick(() => {
-//     for (let line of connectionList) {
-//       plumbIns.connect({
-//         source: document.getElementById(line.soruce_id),
-//         target: document.getElementById(line.target_id)
-//       })
-//     }
-//   })
-// }
 }
 // 用户查看源文件
 const browseDataset = (row: { dataset_name: any; }) => {
@@ -1862,7 +1765,6 @@ api.get('user/browse_datafile/?filename=' + filename).then((response: any) => {
 
     rawDataWaveform.value = 'data:image/png;base64,' + figure
     currentDataBrowsing.value = filename
-
     console.log('访问成功：')
   } else {
     ElMessage.error('访问文件失败')
@@ -1911,8 +1813,7 @@ const openDatasetLoadingPanel = () => {
 const activeNamesOfMenuPanel = ref(['1'])// 当前展开项
 //点击了那个菜单项
 const onItemClickOfMycollapse = (data) => {
-  // console.log("=========================================================================")
-  // console.log(data.name)
+
 }
 //////////////////////////////////////////////////////////////////菜单面板--end
 ///////////////////////////////////////////////////////////////////////////////sidebar end
@@ -2072,7 +1973,6 @@ const filteredDataOfTree = ref<Tree[]>(dataSourceOfTree.value)
 // 添加子节点
 const appendOfTree = (data: Tree) => {
   console.log("添加节点方法执行...")
-
   const newChild = {id: idOfTree++, label: 'New Node', children: []}
   if (!data.children) {
     data.children = []
@@ -2083,8 +1983,9 @@ const appendOfTree = (data: Tree) => {
 
 // 删除节点
 const removeOfTree = (node: Node, data: Tree) => {
+  console.log('data',data)
   console.log("删除节点方法执行...")
-  console.log(node)
+  console.log('node',node.isLeaf)
 
   const parent = node.parent
   const children: Tree[] = parent.data.children || parent.data
@@ -2095,6 +1996,10 @@ const removeOfTree = (node: Node, data: Tree) => {
   }
 }
 
+//树节点应用模型
+const nodeModelOfTree = (node: Node, data: Tree) => {
+  console.log("应用模型方法执行...")
+}
 // 编辑节点
 const editOfTree = (node: Node, data: Tree) => {
   console.log("编辑节点方法执行...")
@@ -2137,14 +2042,6 @@ const filterDataOfTree = (nodes: Tree[], keyword: string): Tree[] => {
 watch(searchKeywordOfTree, (val) => {
   treeRef.value!.filter(val)
 })
-
-// const handleSearchOfTree = () => {
-//   if (searchKeywordOfTree.value != '') {
-//     filteredDataOfTree.value = filterDataOfTree(dataSourceOfTree.value, searchKeywordOfTree.value)
-//   } else {
-//     filteredDataOfTree.value = dataSourceOfTree.value  // 清空搜索时恢复原始数据
-//   }
-// }
 
 const filterNodeOfTree = (value: string, data: Tree) => {
   if (!value) return true
@@ -2416,18 +2313,13 @@ const showParameterEdit = ref('')
 const algorithm = ref('')
 let item = reactive({})
 const findIndex = ref(null)
-
+//参数字典
+const parameter_dict = ref({})
 const model_model = reactive([])
 // const dragEnd = ref(false)
 //which_init_method: 就是指的那个方法初始化的节点：handleDragend | handleDragendAdd
 function onDragStart(event, algorithms, node, which_init_method, type) {
-  // console.log("onDragStart执行了...", modeling_nodeList.value[findIndex].nodeInfo.parameters[modeling_nodeList.value[findIndex].nodeInfo.use_algorithm])
-  // console.log("onDragStart执行了...",event)
-  // let findIndex = modeling_nodeList.value.findIndex(item => item.nodeInfo.id == event.node.nodeInfo.id)
-  // console.log("algorithm:", findIndex)
   let algorithm = algorithms
-  console.log("node:", node)
-
   showParameterEdit.value = node.id
   if (which_init_method == "handleDragend") {
     const evClientX = event.clientX
@@ -2466,12 +2358,9 @@ function onDragStart(event, algorithms, node, which_init_method, type) {
     }
 
     dd_newNode = getModelingNode(algorithm, node, nodeInfo)
-    console.log("algorithm:", algorithm)
-    console.log("dd_newNode1", dd_newNode)
     item = dd_newNode.nodeInfo
   } else if (which_init_method == "handleDragendAdd") {
     // 使用find方法查找具有特定alias的对象
-    console.log("现拖拽algorithm", algorithm)
     const foundObject = fetchedExtraAlgorithmList.value.find(obj => obj.alias === algorithm)
     const parametersKey = Object.keys(foundObject.parameters)[0]
     // 如果找到了对象，复制其parameters的键
@@ -2479,7 +2368,6 @@ function onDragStart(event, algorithms, node, which_init_method, type) {
       console.log("找到的算法文件", parametersKey); // 输出: ['private_fault_diagnosis_deeplearning', 'private_fault_diagnosis_machine_learning']
     }
     node.parameters[parametersKey] = node.alias
-    console.log("node.parameters", node.parameters)
     // 拖拽进来相对于地址栏偏移量
     const evClientX = event.clientX
     const evClientY = event.clientY
@@ -2506,7 +2394,6 @@ function onDragStart(event, algorithms, node, which_init_method, type) {
     }
 
     // 针对时域或是频域特征给出不同的可选特征
-    // console.log(nodeInfo)
     dd_newNode = getModelingNode(algorithm, node, nodeInfo)
     item = dd_newNode.nodeInfo
   }
@@ -2520,7 +2407,6 @@ function onDragStart(event, algorithms, node, which_init_method, type) {
   document.addEventListener('drop', onDragEnd)
 
   //TODO item = getModelingNode(algorithm, node, nodeInfo)
-  // console.log("item:")
   
 
 }
@@ -2545,8 +2431,6 @@ function onDragLeave() {
 
 function onDragEnd(event) {
   console.log("onDragEnd执行了...")
-  
-  console.log('找到的索引',findIndex)
   isDragging.value = false
   isDragOver.value = false
   draggedType.value = null
@@ -2576,7 +2460,6 @@ function onDrop(event) {
 
   //算法模块不允许重复
   if (modeling_nodeList.value.length > 0) {
-    console.log("modeling_nodeList", modeling_nodeList.value.length)
     for (let i = 0; i < modeling_nodeList.value.length; i++) {
       if (modeling_nodeList.value[i].nodeInfo.id == dd_newNode.nodeInfo.id) {
         ElMessage({
@@ -2587,120 +2470,20 @@ function onDrop(event) {
       }
     }
   }
-  console.log(dd_newNode);
   console.log("dd_newNode.nodeInfo", dd_newNode.nodeInfo)
   modeling_nodeList.value.push(dd_newNode)
   findIndex.value = modeling_nodeList.value.findIndex(item => item.nodeInfo.id == dd_newNode.nodeInfo.id)
-  console.log("开始拖拽findIndex:", findIndex.value)
-  console.log("索引对应的节点", )
+  console.log("索引对应的节点", dd_newNode.nodeInfo.use_algorithm)
+  parameter_dict[dd_newNode.nodeInfo.use_algorithm] = findIndex.value
+  console.log("索引字典", parameter_dict)
 }
 
 //节点被点击
 function handleNodeClick(event) {
-  // findIndex.value = modeling_nodeList.value.findIndex(item => item.nodeInfo.id == event.node.nodeInfo.id)
-  // console.log("findIndex:", findIndex.value)
-  // console.log("索引对应的节点", modeling_nodeList.value[findIndex.value].nodeInfo.parameters[modeling_nodeList.value[findIndex.value].nodeInfo.use_algorithm])
   showParameterEdit.value = event.node.nodeInfo.id
   //运行完毕showResul
 
   let itemRusult = event.node.nodeInfo.label
-
-  // if (missionComplete.value) {
-  //   console.log('程序运行完成，输出结果：', event.node.nodeInfo)
-  //   let itemRusult = event.node.nodeInfo.label
-  //   if (itemRusult == '数据源') {
-  //     ElMessage.info('数据源模块没有结果可显示')
-  //     return
-  //   }
-  //   if (itemRusult != '层次逻辑回归评估' && itemRusult != '层次分析模糊综合评估' && itemRusult != '层次朴素贝叶斯评估' && itemRusult != '特征提取' && itemRusult != '特征选择' && itemRusult != '故障诊断'
-  //       && itemRusult != '故障预测' && itemRusult != '特征提取' && itemRusult != '插值处理' && itemRusult != '无量纲化' && itemRusult != '小波变换' && itemRusult != '健康评估'
-  //   ) {
-  //     showPlainIntroduction.value = false
-  //     showStatusMessage.value = false
-  //     show1.value = true
-  //     loading.value = true
-  //     canShowResults.value = false
-  //     isShow.value = false
-  //     setTimeout(function () {
-  //       isShow.value = true
-  //       show1.value = false
-  //       loading.value = false
-  //     }, 2500);
-  //     let moduleName = itemRusult
-  //     let url = 'http://127.0.0.1:8000/homepage?display=' + moduleName
-  //     axios.request({
-  //       method: 'GET',
-  //       url: url,
-  //     });
-  //     setTimeout(function () {
-  //       // 为 iframe 的 src 属性添加一个查询参数，比如当前的时间戳，以强制刷新
-  //       var iframe = document.getElementById('my_gradio_app');
-  //       var currentSrc = iframe.src;
-  //       var newSrc = currentSrc.split('?')[0]; // 移除旧的查询参数
-  //       iframe.src = newSrc + '?updated=' + new Date().getTime();
-  //     }, 2400);
-  //   } else {
-  //     resultsViewClear()
-  //     canShowResults.value = true
-  //     if (itemRusult == '层次分析模糊综合评估') {
-  //       let results_to_show = responseResults.层次分析模糊综合评估
-  //       healthEvaluationDisplay(results_to_show)
-  //     } else if (itemRusult == '特征提取') {
-  //       if (currentDisplayedItem != '特征提取') {
-  //         currentDisplayedItem = '特征提取'
-  //       } else {
-  //         displayFeatureExtraction.value = true  // 显示特征提取结果
-  //         return
-  //       }
-  //       let results_to_show = responseResults.特征提取
-  //       featureExtractionDisplay(results_to_show)
-  //     } else if (itemRusult == '特征选择') {
-  //       if (currentDisplayedItem != '特征选择') {
-  //         currentDisplayedItem = '特征选择'
-  //       } else {
-  //         displayFeatureSelection.value = true  // 显示特征选择结果
-  //         return
-  //       }
-  //       let results_to_show = responseResults.特征选择
-  //       featuresSelectionDisplay(results_to_show)
-  //     } else if (itemRusult == '故障诊断') {
-  //       if (currentDisplayedItem != '故障诊断') {
-  //         currentDisplayedItem = '故障诊断'
-  //       } else {
-  //         displayFaultDiagnosis.value = true
-  //         return
-  //       }
-  //       let results_to_show = responseResults.故障诊断
-  //       faultDiagnosisDisplay(results_to_show)
-  //     } else if (itemRusult == '故障预测') {
-  //       let results_to_show = responseResults.故障预测
-  //       faultRegressionDisplay(results_to_show)
-  //     } else if (itemRusult == '插值处理') {
-  //       let results_to_show = responseResults.插值处理
-  //       interpolationDisplay(results_to_show)
-  //     } else if (itemRusult == '无量纲化') {
-  //       let results_to_show = responseResults.无量纲化
-  //       normalizationDisplay(results_to_show)
-  //     } else if (itemRusult == '小波变换') {
-  //       let results_to_show = responseResults.小波变换
-  //       denoiseDisplay(results_to_show)
-  //     } else if (itemRusult == '层次朴素贝叶斯评估') {
-  //       let results_to_show = responseResults.层次朴素贝叶斯评估
-  //       healthEvaluationDisplay(results_to_show)
-  //     } else if (itemRusult == '层次逻辑回归评估') {
-  //       let results_to_show = responseResults.层次逻辑回归评估
-  //       healthEvaluationDisplay(results_to_show)
-  //     } else if (itemRusult == '健康评估') {
-  //       let results_to_show = responseResults.健康评估
-  //       healthEvaluationDisplay(results_to_show)
-  //     } else {
-  //       ElMessage({
-  //         message: '无效的算法模块',
-  //         type: 'error'
-  //       })
-  //     }
-  //   }
-  // }
   showResult(itemRusult);
 }
 
@@ -2741,7 +2524,6 @@ function clearModelOfViewFlow() {
   order.value = [];
   visited.value = new Set();
   done.value = false
-  // features.value = []  // 特征提取选择的特征
   features.value = ['均值', '方差', '标准差', '峰度', '偏度', '四阶累积量', '六阶累积量', '最大值', '最小值', '中位数', '峰峰值', '整流平均值', '均方根', '方根幅值',
     '波形因子', '峰值因子', '脉冲因子', '裕度因子', '重心频率', '均方频率', '均方根频率', '频率方差', '频率标准差', '谱峭度的均值', '谱峭度的标准差', '谱峭度的峰度', '谱峭度的偏度']
   jsonClear()    // 向后端发送的模型信息
@@ -2894,10 +2676,11 @@ function checkModelOrder() {
   } else{
     //针对多个模块
     // 形成表示具体算法模块连接顺序的字符串
-    for (let i = 0; i < modeling_nodeList.value.length; i++) {
-      let module = modeling_nodeList.value[i]
-      algorithmSchedule.push(module.nodeInfo.label_display)
-      moduleSchedule.push(module.nodeInfo.label)
+    for (let i = 0; i < contentJson.schedule.length; i++) {
+      let module = contentJson.schedule[i]
+      let algorithmsS =  modeling_nodeList.value.find(item => item.nodeInfo.label == module)
+      algorithmSchedule.push(algorithmsS.nodeInfo.label_display)
+      moduleSchedule.push(module)
     }
     moduleStr = Object.values(moduleSchedule).join('')   // 所有模块的名称按顺序拼接起来的字符串
     algorithmStr = Object.values(algorithmSchedule).join('')  // 所有模块中的算法名称按顺序拼接起来的字符串
@@ -3517,6 +3300,7 @@ function checkModelOrder() {
 };
 //检查模型
 function checkModelOfViewFlow() {
+
   //检查时构建contentJson
   if(modeling_nodeList.value.length>1){
     buildContentJson()
@@ -3564,10 +3348,6 @@ function buildContentJson() {
   // 初始化顺序数组和已访问节点集合
   order.value = [];
   visited.value = new Set();
-  console.log('adjacencyList:', adjacencyList)
-  console.log('inDegree:', inDegree)
-  console.log('visit:', visited)
-  console.log('order:', order)
   // 执行拓扑排序并获取节点的处理顺序
   console.log("构建处理逻辑: ")
   let isLofical_completeness = toObject().nodes.length-toObject().edges.length
@@ -3593,7 +3373,7 @@ function buildContentJson() {
     // 找到起始节点
     // 使用 filter() 方法移除在adjacencyList中作为键的键
     const filteredKeys = adjacencyList.value.filter(key => !(key in inDegree));
-    console.log('头节点：', filteredKeys[0]);
+    console.log('头节点：', filteredKeys);
 // 从第一个节点开始构建顺序
 //   const startNode = filteredKeys; // 假设第一个边的 source 是起始节点
     buildOrder(filteredKeys[0]);
@@ -3628,6 +3408,8 @@ function buildContentJson() {
         }
         features.value.forEach(element => {
           if (params[element] == false) {
+
+            console.log(' element设为真',element)
             params[element] = true
           }
         });
@@ -3838,6 +3620,12 @@ async function layoutGraph(direction) {
   }
 }
 
+const transfer = ref({
+  '特征提取': '',
+  '无量纲化': '',
+  '特征选择': '',
+  '小波变换': '',
+})
 //配置菜单模块start
 const isHiddenConfigPanelOfNode = ref(false)
 //包含那些菜单(添加的是：拖拽组件nodeInfo.id)
@@ -3847,13 +3635,42 @@ watch(modeling_nodeList, (newVal, oldVal) => {
   const addedItems = newVal.filter(item => !oldVal.includes(item));
   if (addedItems.length) {
     console.log('添加的元素:', addedItems);
+    console.log("添加元素后的modeling_nodeList: ", modeling_nodeList)
+    parameter_dict.value = {}
+    console.log("监听器添加元素后parameter_dict: ", parameter_dict.value)
+    console.log("动态修改数据: ",item.use_algorithm)
+    if(item.nodeId=='1.2'){
+      console.log("进入1.2",)
+         transfer.value['特征提取'] = item.use_algorithm
+    }
+    if(item.nodeId=='1.3'){
+      transfer.value['特征选择'] = item.use_algorithm
+    }
+    if(item.nodeId=='1.4'){
+      transfer.value['小波变换'] = item.use_algorithm
+    }
+    if(item.nodeId=='1.5'){
+      transfer.value['无量纲化'] = item.use_algorithm
+    }
+    console.log("监听器添加元素后transfer: ", transfer.value)
+    modeling_nodeList.value.forEach((items,index) => {
+        parameter_dict.value[items.nodeInfo.use_algorithm] = index
+    })
+
     addedItems.forEach(item => {
       containsMenuSettings.value.push(item.nodeInfo.id);
+
     })
   } else {
     const removedItems = oldVal.filter(item => !newVal.includes(item));
     if (removedItems.length) {
       console.log('删除的元素:', removedItems);
+      parameter_dict.value = {}
+      console.log("parameter_dict.value: ", parameter_dict.value)
+      modeling_nodeList.value.forEach((items,index) => {
+        parameter_dict.value[items.nodeInfo.use_algorithm] = index
+      })
+      console.log("监听器删除元素后parameter_dict: ", parameter_dict)
       removedItems.forEach(item => {
         let id = containsMenuSettings.value.indexOf(item.nodeInfo.id)
         if (id != -1) {
@@ -3867,6 +3684,7 @@ watch(modeling_nodeList, (newVal, oldVal) => {
 
 //打开配置菜单
 function openConfigPanelOfModelNode() {
+  console.log("是否绑定: ", modeling_nodeList.value)
   if (isHiddenConfigPanelOfNode.value) {
     isHiddenConfigPanelOfNode.value = false;
   }
@@ -5437,17 +5255,6 @@ const checkModel = () => {
                 } else {
                   current = '故障预测'
                 }
-                // if (nextModuleText.indexOf('层次分析模糊综合评估') == -1){
-                //   current = '故障预测'
-                // }
-                // if (includeHealthEvaluation(nextModuleText) == ''){
-                //   current = '故障预测'
-                // }
-                // if (nextModuleText.indexOf('故障预测') > nextModuleText.indexOf('层次分析模糊综合评估')){
-                //   current = '层次分析模糊综合评估'
-                // }else{
-                //   current = '故障预测'
-                // }
                 let preModuleText = nextModuleText.substring(0, nextModuleText.indexOf(current))
                 if (!preModuleText.match('特征提取特征选择') && !preModuleText.match('特征提取无量纲化特征选择') && !preModuleText.match('特征提取特征选择无量纲化')) {
                   ElMessage({
@@ -5463,22 +5270,7 @@ const checkModel = () => {
           } else {
             // 如果是传统机器学习的故障诊断
             let preModuleText = moduleStr.substring(0, moduleStr.indexOf('故障诊断'))
-            // if (!preModuleText.match('特征提取') && !preModuleText.match('特征选择') && !preModuleText.match('特征提取无量纲化特征选择')){
-            //   ElMessage({
-            //     message: '因模型中包含机器学习的故障诊断，建议在故障诊断之前包含特征提取及特征选择',
-            //     type: 'warning'
-            //   })
-            //   return
-            // }
-            // if (!preModuleText.match('特征提取特征选择') && !preModuleText.match('特征提取无量纲化特征选择') && !preModuleText.match('特征提取特征选择无量纲化')){
 
-            //   ElMessage({
-            //     message: '建议在特征提取之后进行特征选择',
-            //     type: 'warning',
-            //     showClose: true
-            //   })
-            //   return
-            // }
             // 如果机器学习的故障诊断之前既不包含特征提取，也不包含特征选择
             if (!preModuleText.match('特征提取') && !preModuleText.match('特征选择')) {
               ElMessage({
@@ -5562,28 +5354,7 @@ const checkModel = () => {
             }
           }
         }
-        // else {
-        //   // 如果是机器学习的故障诊断
-        //   if (moduleStr.indexOf('故障诊断') > 0) {
-        //     let preModuleText = moduleStr.substring(0, moduleStr.indexOf('故障诊断'))
-        //     if (!preModuleText.match('特征提取') && !preModuleText.match('特征选择') && !preModuleText.match('特征提取无量纲化特征选择')){
-        //       ElMessage({
-        //         message: '因模型中包含故障诊断，建议在故障诊断之前包含特征提取及特征选择',
-        //         type: 'warning'
-        //       })
-        //       return
-        //     }
-        //     if (!preModuleText.match('特征提取特征选择') && !preModuleText.match('特征提取无量纲化特征选择') && !preModuleText.match('特征提取特征选择无量纲化')){
 
-        //       ElMessage({
-        //         message: '建议在特征提取之后进行特征选择',
-        //         type: 'warning',
-        //         showClose: true
-        //       })
-        //       return
-        //     }
-        //   }
-        // }
         if (moduleStr.match('特征提取故障诊断')) {
           let sourceId = labelToId('特征提取')
           let current = linkedList.search('特征提取')
@@ -5724,35 +5495,6 @@ const checkModel = () => {
 
           }
         }
-        // if (moduleStr.match('层次分析模糊综合评估') && (moduleStr.match('LSTM的故障诊断') || moduleStr.match('GRU的故障诊断'))) {
-        //   ElMessage({
-        //     showClose: true,
-        //     message: '使用深度学习模型的故障诊断无法为健康评估提供有效的评估依据，建议使用机器学习的故障诊断配合健康评估！',
-        //     type: 'warning'
-        //   })
-        //   return
-        // }
-        // 健康评估之后无法再连接其他模块
-        // if (includeHealthEvaluation(moduleStr) && moreText(moduleStr, '层次分析模糊综合评估')) {
-        //   let sourceId = labelToId('层次分析模糊综合评估')
-        //   let current = linkedList.search('层次分析模糊综合评估')
-        //   let next = current.next.value
-        //   let targetId = labelToId(next)
-
-        //   plumbIns.select({ source: sourceId, target: targetId }).setPaintStyle({
-        //     stroke: '#E53935',
-        //     strokeWidth: 7,
-        //     outlineStroke: 'transparent',
-        //     outlineWidth: 5,
-
-        //   });
-        //   ElMessage({
-        //     showClose: true,
-        //     message: '注意健康评估之后无法连接更多的模块',
-        //     type: 'warning'
-        //   })
-        //   return
-        // }
         if (algorithmStr.match('多传感器') && algorithmStr.match('单传感器')) {
           ElMessage({
             showClose: true,
@@ -6795,199 +6537,6 @@ const rawDataList = ref<Object[]>([])
 const featuresSeriesList = ref<Object[]>([])
 const featuresExtractionRawData = ref('传感器 1')
 
-// const featureExtractionDisplay = (resultsObject) => {
-
-
-//   // 获取后端传回的提取的特征
-//   let featuresWithName = Object.assign({}, resultsObject.features_with_name)
-//   let featuresName = featuresWithName.features_name
-//   let featuresToDrawLineChart = Object.assign({}, resultsObject.featuresToDrawLineChart)
-//   // let featuresGroupBySensor = Object.assign(featuresWithName.features_extracted_group_by_sensor)
-
-//   console.log("featuresToDrawLineChart: ", featuresToDrawLineChart)
-
-//   let num_frames = resultsObject.num_examples
-//   // 根据帧数num_frames生成x坐标的坐标轴
-//   let x_axis = []
-//   for (let i = 0; i < num_frames; i++) {
-//     x_axis.push('样本' + (i + 1) + `(${i * 2048}~${(i + 1) * 2048 - 1})`)
-//   }
-
-//   // let datas = []        // 表格中每一行的数据
-//   // featuresName.unshift('传感器')  // 表格的列名
-//   // for (const sensor in featuresGroupBySensor) {
-//   //   let featuresOfSensor = featuresGroupBySensor[sensor].slice()
-//   //   featuresOfSensor.unshift(sensor)
-//   //   datas.push(featuresOfSensor)
-//   // }
-//   // console.log("........datas: ", datas)
-
-//   // datas是每个传感器的每一帧样本所提取到的特征
-
-//   // 特征表格
-//   // columns.value.length = 0
-//   // 将特征名作为列名
-//   // featuresName.forEach(element => {
-//   //   columns.value.push({ prop: element, label: element, width: 180 })
-//   // });
-
-//   // 转换各特征值数据为对象数组，以作为表格数据进行显示
-//   // datas.forEach(data => {
-//   //   transformedData.value = data.map((row, index) => {
-//   //     const obj = {};
-//   //     columns.value.forEach((column, colIndex) => {
-//   //       obj[column.prop] = row[colIndex];
-//   //     });
-//   //     return obj;
-//   //   });
-//   // });
-
-//   let rawDataSeries: any = resultsObject.raw_data
-//   numOfSensors.value = rawDataSeries.length
-//   console.log('rawDataSeries: ', rawDataSeries)
-//   // 原始信号波形图显示
-//   let sensorNo = 1
-//   rawDataList.value.length = 0
-//   for (let series of rawDataSeries) {
-//     rawDataList.value.push({
-//       'sensor_no': '传感器 ' + sensorNo,
-//       'data': series,
-//     })
-//     sensorNo += 1
-//   }
-//   sensorNo = 1
-//   featuresSeriesList.value.length = 0
-//   for (let features of Object.values(featuresToDrawLineChart)) {
-//     featuresSeriesList.value.push({
-//       'sensor_no': '传感器 ' + sensorNo,
-//       'data': features,
-//     })
-//     sensorNo += 1
-//   }
-//   console.log('featuresSeriesList: ', featuresSeriesList.value)
-//   featuresExtractionRawData.value = rawDataList.value[0].sensor_no  //默认显示第一个传感器的原始信号
-
-//   displayFeatureExtraction.value = true  // 显示特征提取结果
-
-//   // console.log('length: ', num_sensors.value)
-//   nextTick(() => {
-//     // 使用echarts绘制特征提取的原始信号波形图
-//     rawDataList.value.forEach(object => {
-//       let chart = echarts.init(document.getElementById(object.sensor_no))
-//       let dataSeries = object.data
-//       let option = {
-//         title: {
-//           text: '原始信号'
-//         },
-//         xAxis: {
-//           type: 'value',
-//           data: Array.from({length: dataSeries.length}),
-//           name: '采样点'
-//         },
-//         yAxis: {
-//           type: 'value',
-//           name: '采样值'
-//         },
-//         series: [
-//           {
-//             name: '信号',
-//             type: 'line',
-//             symbol: 'circle',
-//             symbolSize: 2,
-//             data: dataSeries.map((value, index) => [index, value])
-//           }
-//         ],
-//         dataZoom: [
-//           {
-//             type: 'inside', // 使用鼠标滚轮来缩放
-//             start: 0,
-//             end: 100,
-//           },/*
-//           {
-//             show: true,
-//             type: 'slider', // 在图表下方显示滑动条
-//             start: 0,
-//             end: 100,
-//           },*/
-//         ],
-//       }
-//       chart.setOption(option)
-//     })
-//     featuresSeriesList.value.forEach(object => {
-//       // 使用echarts绘制特征提取的特征折线图
-//       type EChartsOption = echarts.EChartsOption;
-//       let dataSeries = object.data
-//       var lineChartDom = document.getElementById(object.sensor_no + 'features')
-//       var lineChart = echarts.init(lineChartDom);
-//       var lineChartOption: EChartsOption;
-
-//       lineChartOption = {
-//         title: {
-//           text: '连续信号样本提取特征'
-//         },
-//         tooltip: {
-//           trigger: 'axis'
-//         },
-//         legend: {
-//           // data: ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine']
-//           left: 'center',
-//           top: '5%',
-//           bottom: '6%',
-//           data: featuresName
-//         },
-//         grid: {
-//           left: '5%',
-//           right: '5%',
-//           bottom: '3%',
-//           containLabel: true
-//         },
-//         toolbox: {
-//           feature: {
-//             saveAsImage: {}
-//           }
-//         },
-//         xAxis: {
-//           type: 'category',
-//           boundaryGap: false,
-//           // data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-//           data: x_axis
-//         },
-//         yAxis: {
-//           type: 'value'
-//         },
-//         series: [],
-//         dataZoom: [
-//           {
-//             type: 'inside',
-//             start: 0,
-//             end: 100,
-//           },
-//           /*
-//           {
-//             show: true,
-//             type: 'slider',
-//             start: 0,
-//             end: 100,
-//             orient: 'vertical', // 改为垂直方向
-//             right: 20, // 距离右侧20px
-//             top: '0%', // 距离顶部20%
-//             height: '100%', // 设置滑动条的高度
-//           },*/
-//         ],
-//       };
-//       for (let key of featuresName) {
-//         lineChartOption.series.push({
-//           name: key,
-//           type: 'line',
-//           stack: 'Total',
-//           data: dataSeries[key]
-//         })
-//       }
-//       lineChart.setOption(lineChartOption);
-//     })
-//   })
-// }
-
 const featureExtractionDisplay = async(resultsObject: any) => {
 
 
@@ -7673,65 +7222,6 @@ const normalizationFormdataScaled = ref([])  // 无量纲的结果表格
 const normalizationColumns = ref([])
 const normalizationResultFigures = ref([])   // 无量纲结果图像
 const normalizationResultsSensors = ref([])
-
-// const transformDataToFormdata = (features_with_name: any, columns: any, formdata: any) => {
-//   // 从后端返回的结果中提取出特征名称和特征值，并转化为表格数据
-//   let featuresName = features_with_name.features_name.slice()
-//   let featuresGroupBySensor = Object.assign(features_with_name.features_extracted_group_by_sensor)
-//   let datas = []        // 表格中每一行的数据
-//   featuresName.unshift('传感器')  // 表格的列名
-//   for (const sensor in featuresGroupBySensor) {
-//     let features_of_sensor = featuresGroupBySensor[sensor].slice()
-//     features_of_sensor.unshift(sensor)
-//     datas.push(features_of_sensor)
-//   }
-
-//   columns.value.length = 0
-//   featuresName.forEach(element => {
-//     columns.value.push({prop: element, label: element, width: 180})
-//   });
-
-//   // 转换数据为对象数组
-//   formdata.value = datas.map((row, index) => {
-//     const obj = {};
-//     columns.value.forEach((column, colIndex) => {
-//       obj[column.prop] = row[colIndex];
-//     });
-//     return obj;
-//   });
-// }
-
-// const normalizationResultType = ref('table')   // 无量纲化的结果类型，table表示表格，figure表示图像
-
-// const normalizationDisplay = (resultsObject: any) => {
-//   displayNormalization.value = true
-
-//   let rawData = Object.assign({}, resultsObject.raw_data)
-//   let scaledData = Object.assign({}, resultsObject.scaled_data)
-
-//   // 无量纲化结果为表格数据
-//   if (resultsObject.datatype == 'table') {
-//     normalizationResultType.value = 'table'
-//     transformDataToFormdata(rawData, normalizationColumns, normalizationFormdataRaw)
-//     transformDataToFormdata(scaledData, normalizationColumns, normalizationFormdataScaled)
-//   }
-//   // 无量纲化的对象为信号序列，结果为信号序列的波形图
-//   else {
-//     normalizationResultType.value = 'figure'
-//     let sensorId = 0
-//     normalizationResultFigures.value.length = 0
-//     normalizationResultsSensors.value.length = 0
-//     for (const [key, value] of Object.entries(resultsObject)) {
-//       if (key == 'datatype') {
-//         continue
-//       }
-//       sensorId += 1
-//       normalizationResultFigures.value.push('data:image/png;base64,' + value)
-//       normalizationResultsSensors.value.push({label: key.split('_')[0], name: sensorId.toString()})
-//     }
-//   }
-// }
-
 const transformDataToFormdata = (features_with_name: any, columns: any, formdata: any) => {
   // 从后端返回的结果中提取出特征名称和特征值，并转化为表格数据
   let featuresName = features_with_name.features_name.slice()
@@ -7836,165 +7326,9 @@ const denoiseDisplay = async(resultsObject: any) => {
   // displayDenoise.value = true
 }
 
-
-// 清除可视化区域
-// const resultsViewClear = () => {
-//   showPlainIntroduction.value = false  // 清除算法介绍
-//   showStatusMessage.value = false      // 清除程序运行状态
-//   canShowResults.value = false         // 清除可视化区域元素
-//   contrastVisible.value = false    // 清除
-//   show1.value = true
-//   loading.value = true
-//   isShow.value = false
-//   // 清除所有结果可视化
-//   displayHealthEvaluation.value = false
-//   displayFeatureExtraction.value = false
-//   displayFeatureSelection.value = false
-//   displayFaultDiagnosis.value = false
-//   displayFaultRegression.value = false
-//   displayInterpolation.value = false
-//   displayNormalization.value = false
-//   displayDenoise.value = false
-//   displayRawDataWaveform.value = false
-
-//   if (!done.value) {
-//     currentDisplayedItem = ''
-//   }
-// }
-
-
 const displayRawDataWaveform = ref(false)
 const rawDataWaveform = ref('')
 const currentDataBrowsing = ref('')
-// 用户浏览原始数据
-// const browseDataset = (row: { dataset_name: any; }) => {
-
-//   // 清除可视化区域内容
-//   resultsViewClear()
-//   canShowResults.value = true
-//   // 发送请求获取原始数据的波形图
-//   let filename = row.dataset_name
-
-//   api.get('user/browse_datafile/?filename=' + filename).then((response: any) => {
-//     if (response.status === 200) {
-//       displayRawDataWaveform.value = true
-//       let data = response.data
-//       let figure = data.figure_Base64
-
-//       rawDataWaveform.value = 'data:image/png;base64,' + figure
-//       currentDataBrowsing.value = filename
-
-//       console.log('访问成功：')
-//     } else {
-//       ElMessage.error('访问文件失败')
-//     }
-//   })
-//       .catch((error: any) => {
-//         console.log('访问文件失败：', error)
-//       })
-// }
-
-// 当前显示的算法模块结果
-
-// 点击可视化建模区中的算法模块显示对应的结果
-// const showResult = (item) => {
-
-
-//   if (missionComplete.value) {
-//     if (item.label == '数据源') {
-//       ElMessage.info('数据源模块没有结果可显示')
-//       return
-//     }
-//     if (item.label != '层次逻辑回归评估' && item.label != '层次分析模糊综合评估' && item.label != '层次朴素贝叶斯评估' && item.label != '特征提取' && item.label != '特征选择' && item.label != '故障诊断'
-//         && item.label != '故障预测' && item.label != '特征提取' && item.label != '插值处理' && item.label != '无量纲化' && item.label != '小波变换' && item.label != '健康评估'
-//     ) {
-//       showPlainIntroduction.value = false
-//       showStatusMessage.value = false
-//       show1.value = true
-//       loading.value = true
-//       canShowResults.value = false
-//       isShow.value = false
-//       setTimeout(function () {
-//         isShow.value = true
-//         show1.value = false
-//         loading.value = false
-//       }, 2500);
-//       let moduleName = item.label
-//       let url = 'http://127.0.0.1:8000/homepage?display=' + moduleName
-//       axios.request({
-//         method: 'GET',
-//         url: url,
-//       });
-//       setTimeout(function () {
-//         // 为 iframe 的 src 属性添加一个查询参数，比如当前的时间戳，以强制刷新
-//         var iframe = document.getElementById('my_gradio_app');
-//         var currentSrc = iframe.src;
-//         var newSrc = currentSrc.split('?')[0]; // 移除旧的查询参数
-//         iframe.src = newSrc + '?updated=' + new Date().getTime();
-//       }, 2400);
-//     } else {
-//       resultsViewClear()
-//       canShowResults.value = true
-//       if (item.label == '层次分析模糊综合评估') {
-//         let results_to_show = responseResults.层次分析模糊综合评估
-//         healthEvaluationDisplay(results_to_show)
-//       } else if (item.label == '特征提取') {
-//         if (currentDisplayedItem != '特征提取') {
-//           currentDisplayedItem = '特征提取'
-//         } else {
-//           displayFeatureExtraction.value = true  // 显示特征提取结果
-//           return
-//         }
-//         let results_to_show = responseResults.特征提取
-//         featureExtractionDisplay(results_to_show)
-//       } else if (item.label == '特征选择') {
-//         if (currentDisplayedItem != '特征选择') {
-//           currentDisplayedItem = '特征选择'
-//         } else {
-//           displayFeatureSelection.value = true  // 显示特征选择结果
-//           return
-//         }
-//         let results_to_show = responseResults.特征选择
-//         featuresSelectionDisplay(results_to_show)
-//       } else if (item.label == '故障诊断') {
-//         if (currentDisplayedItem != '故障诊断') {
-//           currentDisplayedItem = '故障诊断'
-//         } else {
-//           displayFaultDiagnosis.value = true
-//           return
-//         }
-//         let results_to_show = responseResults.故障诊断
-//         faultDiagnosisDisplay(results_to_show)
-//       } else if (item.label == '故障预测') {
-//         let results_to_show = responseResults.故障预测
-//         faultRegressionDisplay(results_to_show)
-//       } else if (item.label == '插值处理') {
-//         let results_to_show = responseResults.插值处理
-//         interpolationDisplay(results_to_show)
-//       } else if (item.label == '无量纲化') {
-//         let results_to_show = responseResults.无量纲化
-//         normalizationDisplay(results_to_show)
-//       } else if (item.label == '小波变换') {
-//         let results_to_show = responseResults.小波变换
-//         denoiseDisplay(results_to_show)
-//       } else if (item.label == '层次朴素贝叶斯评估') {
-//         let results_to_show = responseResults.层次朴素贝叶斯评估
-//         healthEvaluationDisplay(results_to_show)
-//       } else if (item.label == '层次逻辑回归评估') {
-//         let results_to_show = responseResults.层次逻辑回归评估
-//         healthEvaluationDisplay(results_to_show)
-//       } else if (item.label == '健康评估') {
-//         let results_to_show = responseResults.健康评估
-//         healthEvaluationDisplay(results_to_show)
-//       } else {
-//         ElMessage({
-//           message: '无效的算法模块',
-//           type: 'error'
-//         })
-//       }
-//     }
-//   }
-// }
 
 // 用于生成最终报告的模型中各个模块运行结果
 let resultsToGenerateConclusion = {

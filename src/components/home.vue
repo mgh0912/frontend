@@ -11,7 +11,8 @@
           <!-- <div>用户登录</div> -->
 
           <a-form :model="formState" :rules="rules" ref="formRef" style="width: 70%; height: 80%">
-            <a-form-item label="账号" name="username">
+            <div style="text-align: left; font-size: 18px; color: #808080">账号</div>
+            <a-form-item  name="username">
               <a-input
                 placeholder="请输入账号"
                 v-model:value="formState.username"
@@ -23,7 +24,8 @@
                 </template>
               </a-input>
             </a-form-item>
-            <a-form-item label="密码" name="password">
+            <div style="text-align: left; font-size: 18px;color: #808080">密码</div>
+            <a-form-item  name="password">
               <a-input
                 placeholder="请输入密码"
                 v-model:value="formState.password"
@@ -36,7 +38,7 @@
                 </template>
               </a-input>
             </a-form-item>
-            <a-form-item label="角色" name="role">
+            <!-- <a-form-item label="角色" name="role">
               <a-select
                 v-model:value="formState.role"
                 size="large"
@@ -46,12 +48,12 @@
                 <a-select-option value="admin">系统管理员</a-select-option>
                 <a-select-option value="superuser">开发者用户</a-select-option>
               </a-select>
-            </a-form-item>
+            </a-form-item> -->
             <a-form-item label="">
               <a-button
                 type="primary"
                 html-type="submit"
-                style="width: 100%"
+                style="width: 100%; margin-top: 20px; height: 40px; background-color: #8C8C8C; font-size: 18px"
                 @click="login()"
                 size="large"
                 >登录</a-button
@@ -59,7 +61,7 @@
             </a-form-item>
           </a-form>
           <div style="position: absolute; right: 5px; bottom: 0px">
-            <el-button @click="goToResetPassword" class="button"> 忘记密码? </el-button>
+            <el-button @click="goToResetPassword" class="button" style=""> 忘记密码? </el-button>
           </div>
         </div>
       </div>
@@ -85,10 +87,15 @@ import { UserOutlined, LockOutlined } from "@ant-design/icons-vue";
 import api from "../utils/api.js";
 
 const formRef = ref();
+// const formState = reactive({
+//   username: "",
+//   password: "",
+//   role: "",
+// });
+
 const formState = reactive({
   username: "",
   password: "",
-  role: "",
 });
 
 const goToResetPassword = () => {
@@ -138,6 +145,8 @@ const login = () => {
               message: "登录成功",
               type: "success",
             });
+
+            let role = response.data.role;
             let tokenGot = response.data.token;
 
             // 保存 token 和登录时间到 localStorage
@@ -147,10 +156,10 @@ const login = () => {
             window.sessionStorage.setItem("username", formState.username);
 
             // 保存用户角色到 localStorage
-            window.sessionStorage.setItem("role", formState.role);
+            window.sessionStorage.setItem("role", role);
 
             // 根据用户登录时所选择的角色跳转到用户界面或者管理员界面
-            if (formState.role == "user" || formState.role == "superuser") {
+            if (role == "user" || role == "superuser") {
               router.push("/UserPlatform");
             } else {
               router.push("/admin");
@@ -158,7 +167,7 @@ const login = () => {
           }
         }
       })
-      .catch((error) => {
+      .catch((error: any) => {
         // 处理错误
         console.error("请求错误：", error);
         // 显示错误消息
@@ -181,6 +190,7 @@ const login = () => {
   justify-content: center;
   left: 0;
   top: 0;
+  font-family: 'Microsoft YaHei';
 
   .login-panel {
     position: absolute;
@@ -191,11 +201,11 @@ const login = () => {
     margin: auto;
 
     padding: 25px;
-    width: 26%;
+    width: 20%;
     min-width: 260px;
     height: 30%;
     min-height: 300px;
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.75);
     border-radius: 5%;
     box-shadow: 2px 2px 10px #ddd;
 
@@ -206,7 +216,7 @@ const login = () => {
 
     .login-title {
       display: inline-block;
-      font-size: 22px;
+      font-size: 25px;
       // height: 30%;
       
       text-align: center;
@@ -352,5 +362,18 @@ const login = () => {
     color: rgb(213, 215, 230);
     background-color: #326aff;
   }
+}
+
+a-button {
+  width: 100%;
+  margin-top: 20px;
+  height: 40px;
+  background-color: #8C8C8C;
+  font-size: 18px;
+  transition: background-color 0.3s ease; /* 添加过渡效果 */
+}
+
+a-button:hover {
+  background-color: #D3D3D3; /* 淡灰色 */
 }
 </style>

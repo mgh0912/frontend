@@ -419,7 +419,7 @@ const fetchModels = () => {
     });
 };
 
-// 发布模型
+// 申请发布模型
 const publishModelConfirm = (index: number, row: modelInfo) => {
     let modelId = row.id
     let formData = new FormData()

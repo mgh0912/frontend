@@ -42,6 +42,16 @@ const routes = [
                 name: 'feedBackManagement',
                 component: () =>import("../components/feedBack.vue")
             },
+            {
+                path: '/admin/feedBackManagement',
+                name: 'feedBackManagement',
+                component: () =>import("../components/feedBack.vue")
+            },
+            {
+                path: '/admin/publishModelApplicationsAudit',
+                name: 'publishModelApplicationsAudit',
+                component: () =>import("../components/modelPublishRequestAudit.vue")
+            }
         ]
 
     },
@@ -55,16 +65,7 @@ const routes = [
         name: 'resetPassword',
         component: () =>import("../components/resetPassword.vue")
     },
-    {
-    path: '/admin/feedBackManagement',
-    name: 'feedBackManagement',
-    component: () =>import("../components/feedBack.vue")
-     },
-     {
-     path: '/admin/publishModelApplicationsAudit',
-     name: 'publishModelApplicationsAudit',
-     component: () =>import("../components/modelPublishRequestAudit.vue")
-     }
+    
 
 ];
 

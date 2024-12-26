@@ -289,6 +289,7 @@ const handleSelectFeedback = (row: any) => {
   transition: all 0.3s ease;
   margin-left: 30px;
   margin-top: 20px;
+  text-align: left;
 }
 
 /* 按钮悬停效果 */

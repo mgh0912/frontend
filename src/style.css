@@ -112,11 +112,11 @@
 
   color: green;
   text-align: center;
-  white-space: nowrap;
+  /* white-space: nowrap; */
   /* 不换行 */
-  overflow: hidden;
+  /* overflow: hidden; */
   /* 隐藏超出部分 */
-  text-overflow: ellipsis;
+  /* text-overflow: ellipsis; */
   /* 显示为省略号 */
 }
 

@@ -3057,7 +3057,7 @@ function checkModelOfViewFlow() {
   console.log("检查模型时构建contentJson: ", contentJson)
   // 进行模型参数设置和逻辑的检查
   var check_order_right = checkModelOrder()
-  console.log("check_order_right: ", check_order_right)
+  console.log("check_order_right: ", buildContentJson())
 }
 
 //构建处理顺序
@@ -3213,7 +3213,6 @@ const getComponentTrees = async() => {
 async function saveModelOfViewFlow() {
   //显示保存模型表单
   await getComponentTrees();
-
   console.log("saveModelOfViewFlow trees: ", dataSourceOfTree)
   dialogModle.value = true
 }
@@ -6023,7 +6022,6 @@ const saveModelSetting = (saveModel, schedule) => {
 //检查保存模型的表单
 const checkForm = () => {
   if ((modelInfoForm.value.name === '')  |  (modelInfoForm.value.class.length==0)  | (modelInfoForm.value.description=='')) {
-    alert('请补充完整信息')
     return false
   }else{
     return true
@@ -6048,76 +6046,86 @@ const filterTreeData = (data) => {
 
 // 完成模型名称等信息的填写后，确定保存模型
 const saveModelConfirm = async (formEl: FormInstance | undefined) => {
-  if(!checkForm()){
-    console.log("执行保存表单失败")
+  if(contentJson.schedule.length==0){
+    ElMessage({
+      message: '请先建立并检查模型',
+      type: 'warning'
+    })
     return
   }else{
-
-    console.log('saveModelConfirm modelInfoForm: ', modelInfoForm.value)
-    // 将模型信息保存到数据库
-    let data = new FormData()
-    data.append('model_name', modelInfoForm.value.name)
-    let nodelistInfo = toObject()
-    let modelInfo = {"nodeList": nodelistInfo, "connection": contentJson.schedule}
-    data.append('model_info', JSON.stringify(modelInfo))
-    data.append('description', modelInfoForm.value.description)
-
-    let treeName = modelInfoForm.value.class.split('.')[0]  // 根节点（树名）
-    let parentNodeValue = modelInfoForm.value.class  // 所属于类型的节点值
-
-    console.log('saveModelConfirm treeName: ', treeName)
-    console.log('saveModelConfirm parentNodeValue: ', parentNodeValue)
-    data.append('treeName', treeName)
-    data.append('parentNode', parentNodeValue)
-
-    // 获取树名和节点值
-
-    api.post('/user/save_model/', data,
-        {
-          headers: {"Content-Type": 'multipart/form-data'}
-        }
-    ).then((response: any) => {
-      if (response.data.code == 401) {
-        ElMessageBox.alert('登录状态已失效，请重新登陆', '提示', {
-          confirmButtonText: '确定',
-          callback: (action: Action) => {
-            router.push('/')
-          },
-        })
-      }
-      if (response.data.code == 200) {
-        ElMessage({
-          message: '保存模型成功',
-          type: 'success'
-        })
-
-        fetchModels()
-        modelsDrawer.value = false       // 关闭历史模型抽屉
-        dialogFormVisible.value = false    // 关闭提示窗口
-        dialogModle.value = false
-        canStartProcess.value = false     // 保存模型成功可以运行
-        modelSetup.value = true                 // 模型保存完成
-        modelLoaded.value = modelInfoForm.value.name  // 保存模型后，显示当前模型名称
-        updateStatus('当前模型已保存')
-      } else if (response.data.code == 400) {
-        ElMessage({
-          message: '已有同名模型，保存模型失败',
-          type: 'error'
-        })
-      } else {
-        ElMessage({
-          message: '保存模型失败，'+ response.data.message,
-          type: 'error'
-        })
-      }
-    }).catch(error => {
+    if(!checkForm()){
       ElMessage({
-        message: '保存模型请求失败',
-        type: 'error'
+        message: '请填写完整信息',
+        type: 'warning'
       })
-      console.log('save model error: ', error)
-    })
+      return
+    }else{
+
+      console.log('saveModelConfirm modelInfoForm: ', modelInfoForm.value)
+      // 将模型信息保存到数据库
+      let data = new FormData()
+      data.append('model_name', modelInfoForm.value.name)
+      let nodelistInfo = toObject()
+      let modelInfo = {"nodeList": nodelistInfo, "connection": contentJson.schedule}
+      data.append('model_info', JSON.stringify(modelInfo))
+      data.append('description', modelInfoForm.value.description)
+
+      let treeName = modelInfoForm.value.class.split('.')[0]  // 根节点（树名）
+      let parentNodeValue = modelInfoForm.value.class  // 所属于类型的节点值
+
+      console.log('saveModelConfirm treeName: ', treeName)
+      console.log('saveModelConfirm parentNodeValue: ', parentNodeValue)
+      data.append('treeName', treeName)
+      data.append('parentNode', parentNodeValue)
+
+      // 获取树名和节点值
+
+      api.post('/user/save_model/', data,
+          {
+            headers: {"Content-Type": 'multipart/form-data'}
+          }
+      ).then((response: any) => {
+        if (response.data.code == 401) {
+          ElMessageBox.alert('登录状态已失效，请重新登陆', '提示', {
+            confirmButtonText: '确定',
+            callback: (action: Action) => {
+              router.push('/')
+            },
+          })
+        }
+        if (response.data.code == 200) {
+          ElMessage({
+            message: '保存模型成功',
+            type: 'success'
+          })
+          modelsDrawer.value = true       // 关闭历史模型抽屉
+          dialogFormVisible.value = false    // 关闭提示窗口
+          dialogModle.value = false
+          canStartProcess.value = false     // 保存模型成功可以运行
+          modelSetup.value = true                 // 模型保存完成
+          modelLoaded.value = modelInfoForm.value.name  // 保存模型后，显示当前模型名称
+          updateStatus('当前模型已保存')
+        } else if (response.data.code == 400) {
+          ElMessage({
+            message: '已有同名模型，保存模型失败',
+            type: 'error'
+          })
+        } else {
+          ElMessage({
+            message: '保存模型失败，'+ response.data.message,
+            type: 'error'
+          })
+        }
+      }).catch(error => {
+        ElMessage({
+          message: '保存模型请求失败',
+          type: 'error'
+        })
+        console.log('save model error: ', error)
+      })
+    }
   }
+
 }
 
 const show1 = ref(false)
@@ -7413,39 +7421,6 @@ const showResult = (moduleName: string) => {
 // 从后端获取到的历史模型的信息
 const fetchedModelsInfo = ref([])
 
-// 打开抽屉，同时从后端获取历史模型
-const fetchModels = () => {
-  dataDrawer.value = false  // 打开历史模型抽屉
-
-  // 向后端发送请求获取用户的历史模型
-  api.get('/user/fetch_models/').then((response: any) => {
-    if (response.data.code == 200) {
-      modelsDrawer.value = true
-      let modelsInfo = response.data.message
-      fetchedModelsInfo.value.length = 0
-      for (let item of modelsInfo) {
-        fetchedModelsInfo.value.push(item)
-      }
-    }
-    if (response.data.code == 401) {
-      ElMessageBox.alert('登录状态已失效，请重新登陆', '提示',
-          {
-            confirmButtonText: '确定',
-            callback: (action: Action) => {
-              router.push('/')
-            }
-          }
-      )
-    }
-
-  })
-      .catch(error => {
-        ElMessage({
-          message: '获取历史模型失败,' + error,
-          type: 'error'
-        })
-      })
-}
 
 const isFullScreen = ref(false);
 

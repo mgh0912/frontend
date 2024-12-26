@@ -56,6 +56,13 @@ export const labelsForAlgorithms = {
     extra_health_evaluation: '增值服务组件（健康评估）',  // 私有健康评估算法
     extra_wavelet_transform: '增值服务组件（小波变换）',
     private_feature_extraction: '增值服务组件（特征提取）',
+    additional_model_one_multiple: '多传感器信号级加权融合的故障诊断',
+    additional_model_two_multiple: '多传感器信号时频表征自适应加权融合的故障诊断',
+    additional_model_three_multiple: '多传感器特征级融合的深度学习故障诊断',
+    additional_model_four_multiple: '多传感器决策级融合的深度学习故障诊断',
+    additional_model_five: '基于单传感器的知识型 1D 时域深度学习故障诊断',
+    additional_model_six: '基于单传感器的时域和频域协同注意学习故障诊断',
+    additional_model_seven: '基于单传器的多域深度特征融合故障诊断'
 };
 
 // 算法介绍

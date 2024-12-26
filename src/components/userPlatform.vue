@@ -512,10 +512,10 @@
                 </template>
               </my-collapse-item>
 
-              <my-collapse-item v-if="userRole === 'superuser'" name="6" :data="{name:'6'}" item-background="#ebeef4">
+              <my-collapse-item v-if="userRole === 'superuser'" @click="openCodeEditPanel" name="6" :data="{name:'6'}" item-background="#ebeef4">
                 <template #title>
                   <div style="padding: 10px;">
-                    <span style="font-size: 20px;" @click="openCodeEditPanel">组件代码</span>
+                    <span style="font-size: 20px; width: 100%" >组件代码</span>
                   </div>
                   <!-- 修改源码 -->
                  <div>
@@ -2408,7 +2408,20 @@ function checkModelOrder() {
     return false;
   }
 
-
+  const canRunSoloModule = (moduleStr: string) => {
+    const modulesCanRunSolo = ['插值处理', '特征提取', '小波变换', '无量纲化', 'GRU的故障诊断', 'LSTM的故障诊断', '一维卷积深度学习模型的故障诊断', 
+      '基于时频图的深度学习模型的故障诊断', '深度学习故障诊断', '多传感器信号级加权融合的故障检测', '多传感器信号时频表征自适应加权融合的故障检测',
+      '多传感器特征级融合的深度学习故障检测', '多传感器决策级融合的深度学习故障检测', '基于单传感器的知识型 1D 时域深度学习故障诊断',
+      '基于单传感器的时域和频域协同注意学习故障诊断', '基于单传器的多域深度特征融合故障诊断'
+    ]
+    // 检查传入的字符串中是否包含数组中任意一项，是的话返回true，否则返回false
+    modulesCanRunSolo.forEach(item => {
+      if (moduleStr.match(item)) {
+        return true
+      }
+    })
+    return false
+  }
 
 
   if (contentJson.schedule.length == 1) {
@@ -2426,10 +2439,13 @@ function checkModelOrder() {
     // 形成表示具体算法模块连接顺序的字符串
     for (let i = 0; i < contentJson.schedule.length; i++) {
       let module = contentJson.schedule[i]
+      console.log("module: ", module)
       let algorithmsS =  modeling_nodeList.value.find(item => item.nodeInfo.label == module)
       algorithmSchedule.push(algorithmsS.nodeInfo.label_display)
+      console.log("algorithmsS: ", algorithmsS)
       moduleSchedule.push(module)
     }
+    
     moduleStr = Object.values(moduleSchedule).join('')   // 所有模块的名称按顺序拼接起来的字符串
     algorithmStr = Object.values(algorithmSchedule).join('')  // 所有模块中的算法名称按顺序拼接起来的字符串
     console.log('moduleStr', moduleStr)
@@ -2456,8 +2472,7 @@ function checkModelOrder() {
     console.log('algorithmStr: ', algorithmStr)
     // 首先判断模型中是否存在除了数据源之外的1个以上的模块，如果模型中只有一个模块，判断其是否可以独立地运行而不需要其他模块的支持
     if (modeling_nodeList.value.length == 2) {
-      if (!moduleStr.match('插值处理') && !moduleStr.match('特征提取') && !algorithmStr.match('GRU的故障诊断') && !algorithmStr.match('LSTM的故障诊断') && !algorithmStr.match('小波变换')
-          && !algorithmStr.match('一维卷积深度学习模型的故障诊断') && !algorithmStr.match('基于时频图的深度学习模型的故障诊断') && !moduleStr.match('无量纲化') && !algorithmStr.match('深度学习故障诊断')) {
+      if (canRunSoloModule(moduleStr)) {
         let tip
         if (moduleStr.match('故障诊断')) {
           tip = '模型中包含故障诊断，建议在此之前进行特征提取和特征选择等操作'
@@ -4223,6 +4238,13 @@ const menuList2 = ref([
           'ulcnn_multiple': {},
           'spectrumModel': {},
           'spectrumModel_multiple': {},
+          'additional_model_one_multiple': {},
+          'additional_model_two_multiple': {},
+          'additional_model_three_multiple': {},
+          'additional_model_four_multiple': {},
+          'additional_model_five': {},
+          'additional_model_six': {},
+          'additional_model_seven': {},
           // 'private_fault_diagnosis_deeplearning': '',
         }, tip_show: false, tip: '根据提取特征对输入信号作故障诊断', optional: false
       },
@@ -4257,18 +4279,6 @@ const menuList2 = ref([
   },
 ]);
 
-// 该方法用于判断是否显示可视化建模区的背景图片
-const background_IMG = () => {
-  if (nodeList.value.length == 0) {
-    document.querySelector('.el-main')?.classList.add('has-background');
-
-  }
-  if (nodeList.value.length >= 1) {
-    document.querySelector('.el-main')?.classList.remove('has-background');
-    document.querySelector('.el-main').style.backgroundImage = ''
-
-  }
-}
 
 // 算法参数的推荐值，目前包括小波变换的变换类型和变换层数、特征选择的依据规则及相应阈值
 const recommendParams = {
@@ -6545,6 +6555,7 @@ const featuresSelectionDisplay = async(resultsObject: any) => {
   resultsToGenerateConclusion['featureSelection']['text'] = '对输入信号进行特征选择后，最终选择的特征为' + featuresSelected.value
   // 将 Base64 字符串转换为二进制数组
   // const binaryData = base64ToArrayBuffer(figure1);
+  
 
 }
 
@@ -6772,6 +6783,9 @@ const faultDiagnosisDisplay = async(resultsObject: any) => {
   let x_axis = resultsObject.x_axis
   let num_has_fault = resultsObject.num_has_fault
   let num_has_no_fault = resultsObject.num_has_no_fault
+
+  console.log('num_has_fault: ', num_has_fault)
+  console.log('num_has_no_fault: ', num_has_no_fault)
 
   if (indicator != 'none'){
     canShowIndicator.value = true
@@ -7014,8 +7028,13 @@ const interpolationDisplay = async(resultsObject: any) => {
   for (const [key, value] of Object.entries(resultsObject)) {
     sensorId += 1
     interpolationFigures.value.push('data:image/png;base64,' + value)
+    if (!resultsToGenerateConclusion['featureSelection']['imageBase64']){
+      resultsToGenerateConclusion['featureSelection']['imageBase64'] = value
+      resultsToGenerateConclusion['featureSelection']['text'] = '插值处理结果'
+    }
     interpolationResultsOfSensors.value.push({label: key.split('_')[0], name: sensorId.toString()})
   }
+  resultsToGenerateConclusion['featureSelection']['imageBase64']
   // console.log('interpolationResultsOfSensors: ', interpolationResultsOfSensors)
   // console.log('interpolationFigures: ', interpolationFigures)
   // displayDenoise.value = true
@@ -7085,6 +7104,10 @@ const normalizationDisplay = async(resultsObject: any) => {
       }
       sensorId += 1
       normalizationResultFigures.value.push('data:image/png;base64,' + value)
+      if (resultsToGenerateConclusion['normalization']['imageBase64']){
+        resultsToGenerateCxonclusion['normalization']['imageBase64'] = value
+        resultsToGenerateConclusion['normalization']['text'] = '无量纲化结果'
+      }
       normalizationResultsSensors.value.push({label: key.split('_')[0], name: sensorId.toString()})
     }
   }
@@ -7122,17 +7145,21 @@ const waveletResultsOfSensors = ref<waveletResults[]>([])  // 存放不同传感
 // }
 
 const denoiseDisplay = async(resultsObject: any) => {
-  console.log('results_object: ', resultsObject)
+  // console.log('results_object: ', resultsObject)
   let sensorId = 0
   denoiseFigures.value.length = 0
   waveletResultsOfSensors.value.length = 0
   for (const [key, value] of Object.entries(resultsObject)) {
     sensorId += 1
     denoiseFigures.value.push('data:image/png;base64,' + value)
+    if (!resultsToGenerateConclusion['wavelet']['imageBase64']){
+      resultsToGenerateConclusion['wavelet']['imageBase64'] = value
+      resultsToGenerateConclusion['wavelet']['text'] = '信号经小波变换后所得结果'
+    }
     waveletResultsOfSensors.value.push({label: key.split('_')[0], name: sensorId.toString()})
   }
-  console.log('results_of_sensors: ', waveletResultsOfSensors)
-  console.log('denoiseFigures: ', denoiseFigures)
+  // console.log('results_of_sensors: ', waveletResultsOfSensors)
+  // console.log('denoiseFigures: ', denoiseFigures)
   // displayDenoise.value = true
 }
 
@@ -7151,7 +7178,7 @@ let resultsToGenerateConclusion = {
   'faultPrediction': {'imageBase64': "", 'text': ""},
   'interpolation': {'imageBase64': "", 'text': ""},
   'normalization': {'imageBase64': "", 'text': ""},
-  'wavelet': "",
+  'wavelet': {'imageBase64': "", 'text': ""},
 }
 
 const selectAllModuleToGenerateResult = ref(false)
@@ -7220,30 +7247,7 @@ const generateConclusion = async() => {
       
     generateResultsToDisplay(moduleName, false);
        // 输出结果总体描述
-    var outline = "时间："+ new Date().toLocaleString() + "<br/>" + "数据集："+ usingDatafile.value + "<br/>" + "模型名称："+ modelLoaded.value + "<br/>" + "包含模块："+ contentJson.schedule.join(', ')
-    // console.log('resultsToGenerateOutput: ', resultsToGenerateConclusion)
-    resultsToGenerateConclusion.outline = outline
-    let formData = new FormData()
-    formData.append('resultsToGenerateOutput', JSON.stringify(resultsToGenerateConclusion))
-
-    api.post('user/generate_conclusion/', formData, { responseType: 'blob' }).then((response: any) => {
-      if (response.status === 200) {
-        ElMessage({
-          message: '生成总结报告成功',
-          type: 'success',
-        });
-        downloadFile(response.data, 'report.pdf');
-        // let conclusion = response.data.data
-      }else {
-        ElMessage({
-          message: '生成总结报告失败, '+response.data.message,
-          type: 'error',
-        });
-      }
-    })
-    .catch((error: any) => {
-      console.log('生成总结报告失败：', error)
-    })
+    
       // console.log('moduleResultToGenerateList: ', moduleResultToGenerateList.value)
     }else{
       ElMessage({
@@ -7252,8 +7256,31 @@ const generateConclusion = async() => {
       })
       return
     }
-  });
-  
+  })
+  var outline = "时间："+ new Date().toLocaleString() + "<br/>" + "数据集："+ usingDatafile.value + "<br/>" + "模型名称："+ modelLoaded.value + "<br/>" + "包含模块："+ contentJson.schedule.join(', ')
+  // console.log('resultsToGenerateOutput: ', resultsToGenerateConclusion)
+  resultsToGenerateConclusion.outline = outline
+  let formData = new FormData()
+  formData.append('resultsToGenerateOutput', JSON.stringify(resultsToGenerateConclusion))
+
+  api.post('user/generate_conclusion/', formData, { responseType: 'blob' }).then((response: any) => {
+    if (response.status === 200) {
+      ElMessage({
+        message: '生成总结报告成功',
+        type: 'success',
+      });
+      downloadFile(response.data, 'report.pdf');
+      // let conclusion = response.data.data
+    }else {
+      ElMessage({
+        message: '生成总结报告失败, '+response.data.message,
+        type: 'error',
+      });
+    }
+  })
+  .catch((error: any) => {
+    console.log('生成总结报告失败：', error)
+  })
 }
 
 // const downloadFile = (data: BlobPart, filename: string) => {

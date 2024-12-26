@@ -69,17 +69,31 @@ export default {
         {
             label: 'GRU-故障诊断',
             value: 'faultDiagnosis-GRU'
-        }
+        },
+        {
+            label: 'ulcnn-故障诊断',
+            value: 'faultDiagnosis-ULCNN'
+        },
+        {
+            label: 'simmodel-故障诊断',
+            value: 'faultDiagnosis-SIMmodel'
+        },
+        {
+            label: 'fdmssw-故障诊断',
+            value: 'faultDiagnosis-fdmssw'
+        },
         
     ]
 
     const pythonFilePaths = {
         'faultDiagnosis-RandomForest': 'src/assets/exampleCode/My-FD-Algorithm-1.py',
         'faultDiagnosis-SVM': 'src/assets/exampleCode/My-FD-Algorithm-1.py',
-        'faultDiagnosis-LSTM': 'src/assets/exampleCode/My-FD-Algorithm-1.py',
-        'faultDiagnosis-GRU': 'src/assets/exampleCode/My-FD-Algorithm-1.py',
-        'faultDiagnosis-ULCNN': 'src/assets/exampleCode/My-FD-Algorithm-1.py',
-        'faultDiagnosis-SIMmodel': 'src/assets/exampleCode/My-FD-Algorithm-1.py',
+        'faultDiagnosis-LSTM': 'src/assets/exampleCode/train_lstm.py',
+        'faultDiagnosis-GRU': 'src/assets/exampleCode/train_gru.py',
+        'faultDiagnosis-ULCNN': 'src/assets/exampleCode/train_ulcnn.py',
+        'faultDiagnosis-SIMmodel': 'src/assets/exampleCode/train_simmodel.py',
+        'faultDiagnosis-fdmssw': 'src/assets/exampleCode/train_fdmssw.py',
+
         'healthEvaluation': 'src/assets/exampleCode/My-HE-Algorithm-1.py'
     }
 
@@ -155,7 +169,7 @@ export default {
 .panel-container {
  
   width: 100%;
-  height: 800px;
+  max-height: 75vh;
 }
 
 .controls {
@@ -164,6 +178,6 @@ export default {
 
 .editor {
   width: 95%;
-  height: 90%;
+  height: 600px;
 }
 </style>

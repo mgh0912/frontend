@@ -489,7 +489,7 @@
 
                   <template #title>
                     <div style="padding: 10px;">
-                      <span style="font-size: 20px;">开发者用户模型结构树</span>
+                      <span style="font-size: 20px;">模型结构树</span>
                     </div>
                   </template>
                   <template #arrow="{ isActive }">
@@ -498,7 +498,7 @@
                     </div>
                   </template>
                   <div class="custom-tree-container" style="width: 100%;">
-                    <ComponentTree :userRole="userRole"/>
+                    <ComponentTree :userRole="userRole" @loadModel="handleLoadModel"/>
                   </div>
               </my-collapse-item>
               <my-collapse-item name="5" :data="{name:'5'}" item-background="#ebeef4">
@@ -570,7 +570,7 @@
                   </div>
                 </template>
                 <div class="custom-tree-container" style="width: 100%;">
-                  <ComponentTree :userRole="userRole"/>
+                  <ComponentTree :userRole="userRole"  @resetModel="handleResetModel" @loadModel="handleLoadModel"/>
                 </div>
               </my-collapse-item>
             </my-collapse>
@@ -1701,17 +1701,17 @@ const handleResetModel = (modelName: string) => {
   }
 }
 // 点击子组件publishModel的历史模型表格中使用按钮复现用户历史模型
-const handleLoadModel = (row: any) => {
-  console.log('接受子组件数据',row)
-  modelLoaded.value = row.model_name
+const handleLoadModel = (store: any) => {
+  console.log('接受子组件数据',store)
+  // modelLoaded.value = store.valmodelName
   //后端传来的数据恢复画布信息
-  let objects = JSON.parse(row.model_info)
+  console.log('store.modelInfo.model_info: ', store.value.modelInfo[0].model_info)
+  let objects = JSON.parse(store.value.modelInfo[0].model_info)
   //要执行两遍才会渲染上
   restoreCanvas(objects)
   // 使用setTimeout等待0.5秒
   setTimeout(() => {
     // 0.5秒后执行的操作
-
     restoreCanvas(objects)
   }, 500);
 

@@ -25,17 +25,18 @@
           :data="filteredDataOfTree"
           style="width: 100%; max-width: 100%"
           node-key="id"
+          :highlight-current="true"
           :expand-on-click-node="false"
           :default-expand-all="isExpandAllOfTree"
           :filter-node-method="filterNodeOfTree"
           :accordion="false"
         >
           <template #default="{ data }">
-            <span class="custom-tree-node" style="">
-              <el-icon v-if="data.isModel" class="model-icon">
-                <img src="@/assets/model-icon.svg" style="width: 20px; height: 20px;" alt="model">
-              </el-icon>
-              <span class="node-label">{{ getNodeLable(data) }}</span>
+              <span class="custom-tree-node" style="">
+                  <el-icon v-if="data.isModel" class="model-icon">
+                    <img src="@/assets/model-icon.svg" style="width: 20px; height: 20px;" alt="model">
+                 </el-icon>
+              <span class="node-label" >{{ getNodeLable(data) }}</span>
               <span class="node-actions" v-if="props.userRole === 'superuser' && !data.isModel">
                 <el-icon @click="appendNodeOfTree(data)" :style="{ color: '#67c23a' }" v-if="data.disabled === true">
                   <Plus />
@@ -47,6 +48,14 @@
                   <Edit />
                 </el-icon>
               </span>
+               <div v-if="data.isModel">
+                  <el-icon  class="model-icon" @click="modelClick(data)">
+                    <i class="fa-solid fa-square-binary"></i>
+                 </el-icon>
+                 <el-icon v-if="props.userRole=='superuser'" @click="deleteModelConfirm(data)" :style="{ color: '#f56c6c' }">
+                  <Delete />
+                </el-icon>
+              </div>
             </span>
           </template>
         </el-tree>
@@ -95,11 +104,135 @@
 </template>
 
 <script setup lang="ts">
-import { ElMessage, ElTree } from "element-plus";
+import {ElMessage, ElMessageBox, ElTree} from "element-plus";
 import { ref, watch, reactive, onMounted } from "vue";
 import api from "../utils/api.js";
 import { isNode } from "@vue-flow/core";
+import { useRouter } from "vue-router";
+//向父组件传递信息
+const emit = defineEmits(["resetModel", "loadModel"]);
+interface modelInfo {
+  id: number;
+  model_name: string;
+  description: string;
+  author: string;
+  model_info: any;
+  isPublish: string;
+}
+// 从后端获取到的历史模型的信息
+const fetchedModelsInfo = ref<modelInfo[]>([]);
+// 删除模型确认
+const deleteModelConfirmVisible = ref(false);
+const store = ref(
+    {
+      modelId:null,
+      modelName:'',
+      modelInfo:{}
+    }
+)
+const router = useRouter();
+const modelLoaded = ref("无");
+const modelClick =(data) => {
+  console.log('当前点击的节点信息',data);
+  console.log('获取的模型信息',fetchedModelsInfo)
+  store.value.modelId = data.modelId;
+  store.value.modelName = data.label;
+  store.value.modelInfo = fetchedModelsInfo.value.filter(item => item.id === store.value.modelId);
+  emit("loadModel", store);
 
+}
+// 点击子组件的加载模型，加载模型并到父组件userPlatForm.vue显示出来
+const loadModel = (row: modelInfo) => {
+  modelLoaded.value = row.model_name;
+  emit("loadModel", row);
+};
+// 从数据库获取模型信息
+const fetchModelInfoFromDatabase = () => {
+  //   dataDrawer.value = false; // 打开历史模型抽屉
+  // 向后端发送请求获取用户的历史模型
+  api
+      .get(props.userRole=='superuser' ? "user/fetch_models/" : "user/fetch_models_published/")
+      .then((response: any) => {
+        if (response.data.code === 200) {
+          // modelsDrawer.value = true;
+          let modelsInfo = response.data.models;
+          fetchedModelsInfo.value = [];
+          for (let item of modelsInfo) {
+
+            if(props.userRole=='user'){
+              console.log('进入用户角色获取树结构',item)
+              if(item.isPublish=='已发布'){
+                console.log('进入已发布判断',item);
+                fetchedModelsInfo.value.push(item);
+              }else{
+                continue
+              }
+            }else{
+              fetchedModelsInfo.value.push(item);
+            }
+
+          }
+          console.log('huoqudeshujiegou',fetchedModelsInfo.value)
+        }
+        if (response.data.code == 401) {
+          ElMessageBox.alert("登录状态已失效，请重新登陆", "提示", {
+            confirmButtonText: "确定",
+            callback: () => {
+              router.push("/");
+            },
+          });
+        }
+      })
+      .catch((error: any) => {
+        ElMessage({
+          message: "获取历史模型失败," + error,
+          type: "error",
+        });
+      });
+};
+//删除模型
+const deleteModelConfirm = (data) => {
+  // 发送删除请求到后端，row 是要删除的数据行
+  api
+      .get("/user/delete_model/?row_id=" + data.modelId)
+      .then((response: any) => {
+        if (response.data.code == 401) {
+          ElMessageBox.alert("登录状态失效，请重新登陆", "提示", {
+            confirmButtonText: "确定",
+            callback: () => {
+              router.push("/");
+            },
+          });
+        }
+        if (response.data.code == 200) {
+          // 如果被删除的模型已经被加载，则需要取消加载
+          emit("resetModel", data.label);
+          console.log('删除成功');
+          // 刷新数据
+          getComponentTrees();
+        } else {
+          if (response.data.code == 404) {
+            ElMessage({
+              message: "没有权限删除该模型",
+              type: "error",
+            });
+          } else {
+            ElMessage({
+              message: "删除模型失败，请稍后重试",
+              type: "error",
+            });
+          }
+        }
+      })
+      .catch((error: any) => {
+        // 处理错误
+        console.error(error);
+        ElMessage({
+          message: "删除模型失败," + error,
+          type: "error",
+        });
+      });
+};
 interface Tree {
   label: string; // 节点名称
   value: string; // 节点id
@@ -126,131 +259,6 @@ const editingNodeOfTree = ref<Tree | null>(null);
 // 编辑框中的节点名称
 const editNodeLabelOfTree = ref("");
 
-// const dataSourceOfTree = reactive<Tree[]>([
-//   {
-//     value: 1,
-//     label: "某型号轨道列车",
-//     disabled: true, // 禁用该节点
-//     children: [
-//       {
-//         value: 1.1,
-//         label: "转向架",
-//         disabled: true, // 禁用该节点
-//         children: [
-//           {
-//             value: 1.1.1,
-//             label: "构架系统",
-//             disabled: true, // 禁用该节点
-//             children: [
-//               {
-//                 value: 1.1.1.1,
-//                 label: "构架组成",
-//                 disabled: true, // 禁用该节点
-//                 children: [
-//                   { value: 1.1.1.1.1, label: "侧梁组成" },
-//                   { value: 1.1.1.1.2, label: "空气弹簧座板" },
-//                   { value: 1.1.1.1.3, label: "高度阀调整杆安装销" },
-//                   { value: 11114, label: "扣板组成" },
-//                   { value: 11115, label: "端梁座" },
-//                   { value: 11116, label: "弹簧座" },
-//                   { value: 11117, label: "弹簧座板" },
-//                   { value: 11118, label: "闸线架支座" },
-//                   { value: 11119, label: "线夹座" },
-//                   { value: 11120, label: "止挡座组成" },
-//                   { value: 11121, label: "安全吊链座" },
-//                   { value: 11122, label: "侧梁工艺块" },
-//                   { value: 11123, label: "长筋板" },
-//                   { value: 11124, label: "托板组成" },
-//                   { value: 11125, label: "短扣板" },
-//                   { value: 11126, label: "压差阀座" },
-//                   { value: 11127, label: "转向架铭牌" },
-//                   { value: 11128, label: "构架序列号标志牌" },
-//                   { value: 11129, label: "短筋板" },
-//                 ],
-//               },
-//               {
-//                 value: 1112,
-//                 label: "构架衡量组成",
-//                 disabled: true, // 禁用该节点
-//                 children: [
-//                   { value: 1113, label: "横梁钢管组成" },
-//                   { value: 1114, label: "牵引电机吊座组成" },
-//                   { value: 1115, label: "齿轮箱吊座组成" },
-//                   { value: 1116, label: "构架牵引拉杆座" },
-//                   { value: 1117, label: "纵向连接梁" },
-//                   { value: 1118, label: "横向止挡组成" },
-//                   { value: 1119, label: "横梁组成垂直挡" },
-//                   { value: 1120, label: "构架外牵引拉杆座" },
-//                 ],
-//               },
-//               {
-//                 value: 1121,
-//                 label: "构架端梁组成",
-//                 disabled: true, // 禁用该节点
-//                 children: [
-//                   { value: 1122, label: "端梁安装梁" },
-//                   { value: 1123, label: "端梁安装座组成" },
-//                 ],
-//               },
-//             ],
-//           },
-//           {
-//             value: 112,
-//             label: "转向架附件",
-//             disabled: true, // 禁用该节点
-//             children: [
-//               { value: 113, label: "转向架排障装置" },
-//               { value: 114, label: "轮缘润滑装置" },
-//             ],
-//           },
-//           {
-//             value: 115,
-//             label: "牵引装置系统",
-//             disabled: true, // 禁用该节点
-//             children: [
-//               { value: 116, label: "中心销" },
-//               { value: 117, label: "牵引梁组成" },
-//               { value: 118, label: "牵引拉杆组成" },
-//               { value: 119, label: "下盖" },
-//             ],
-//           },
-//           // ... 其他子项
-//         ],
-//       },
-//       {
-//         value: 12,
-//         label: "车体",
-//         disabled: true, // 禁用该节点
-//         children: [
-//           { value: 121, label: "车顶" },
-//           { value: 122, label: "车身侧面" },
-//           { value: 123, label: "车身底部" },
-//         ],
-//       },
-//       {
-//         value: 13,
-//         label: "电气系统",
-//         disabled: true, // 禁用该节点
-//         children: [
-//           { value: 131, label: "牵引供电系统" },
-//           { value: 132, label: "辅助供电系统" },
-//           { value: 133, label: "列车控制系统" },
-//         ],
-//       },
-//       {
-//         value: 14,
-//         label: "车内设施",
-//         disabled: true, // 禁用该节点
-//         children: [
-//           { value: 141, label: "座椅和客舱布局" },
-//           { value: 142, label: "餐饮和服务设施" },
-//           { value: 143, label: "信息显示和广播系统" },
-//         ],
-//       },
-//     ],
-//   },
-// ]);
-
 // 定义从父组件接收到的userrole
 const props = defineProps({
   userRole: String,
@@ -261,17 +269,55 @@ const dataSourceOfTree = reactive<Tree[]>([]);
 onMounted(() => {
   // 获取树形结构
   getComponentTrees();
+  //获取模型信息
+  fetchModelInfoFromDatabase();
+
 });
 
+//递归过滤未发布节点
+function filterTree(data) {
+  return data
+      .map(node => {
+        // 如果有子节点，递归处理子节点
+        if (node.children && node.children.length > 0) {
+          const filteredChildren = filterTree(node.children);
+          // 如果子节点过滤后不为空，保留当前节点
+          if (filteredChildren.length > 0) {
+            return {
+              ...node,
+              children: filteredChildren
+            };
+          }
+          // 如果子节点过滤后为空，不保留当前节点
+          return null;
+        }
+        // 处理叶子节点，根据条件过滤
+        if (node.isModel && node.isPublished === '未发布') {
+          return null; // 不保留isModel为true且isPublished为未发布的叶子节点
+        }
+        return node; // 保留其他叶子节点
+      })
+      .filter(node => node !== null); // 移除所有null节点
+}
 // 从后端获取树形结构
 const getComponentTrees = () => {
   api.get("user/get_component_trees").then((response: any) => {
     // 请求成功，后端返回数据
     if (response.data.code === 200) {
       dataSourceOfTree.length = 0;
-      response.data.trees.map((tree: Tree) => dataSourceOfTree.push(tree));
 
-      console.log("获取到树形结构: ", dataSourceOfTree);
+      if(props.userRole=='user'){
+        let filteredDataOfTreeS
+        response.data.trees.map((tree: Tree) => dataSourceOfTree.push(tree));
+        // 过滤后的数据
+        filteredDataOfTreeS = filterTree(dataSourceOfTree);
+        dataSourceOfTree.length = 0;
+        filteredDataOfTreeS.map((tree: Tree) => dataSourceOfTree.push(tree));
+        console.log("获取到树形结构: ", dataSourceOfTree);
+      }else{
+        response.data.trees.map((tree: Tree) => dataSourceOfTree.push(tree));
+      }
+
     } else {
       ElMessage.error("获取树形结构失败，" + response.data.message);
     }
@@ -313,14 +359,7 @@ const addNewComponentTree = () => {
     });
 };
 
-// 根据子节点的value 获取根节点的value（树型结构的名称）
-// const getParentValue = (value: string) => {
-//     let parentValue = "";
-//     const parentValue = dataSourceOfTree.find((tree: Tree) => {
 
-//     });
-//     return parentValue ? parentValue.value : "";
-// };
 
 // 搜索过滤后的数据
 const filteredDataOfTree = ref<Tree[]>(dataSourceOfTree);
@@ -383,14 +422,6 @@ const removeNodeOfTree = (data: Tree) => {
     .catch((error: any) => {
       ElMessage.error("节点删除失败, " + error);
     });
-  //   console.log(node);
-
-  //   const parent = node.parent;
-  //   const children: Tree[] = parent.data.children || parent.data;
-  //   const index = children.findIndex((d) => d.id === data.id);
-  //   if (index !== -1) {
-  //     children.splice(index, 1);
-  //   }
 };
 
 
@@ -398,18 +429,16 @@ const getNodeLable = (data: Tree) => {
   if (!data.isModel){
     return data.label
   }else{
+    // // 如果用户是普通用户，并且节点未发布，则不显示
+    // if (props.userRole=== 'user' && data.isPublished !== '已发布') {
+    //   return false; // 或者返回null，或者不返回任何内容
+    // }
     return data.isPublished == '已发布' ? data.label + " (已发布)" : data.label + " (未发布)";
   }
 };
 
 // 编辑节点
 const editOfTree = (data: Tree) => {
-  //   console.log("编辑节点方法执行...");
-  //   console.log("editOfTree: ", data);
-
-  //   let formData = new FormData();
-  //   formData.append("treeName", data.nodeValue.split('.')[0]);
-  //   formData.append("newNodeName", )
 
   editingNodeOfTree.value = data; // 正在修改的节点
   isEditDialogVisibleOfTree.value = true;
@@ -417,19 +446,12 @@ const editOfTree = (data: Tree) => {
   editNodeLabelOfTree.value = data.label
   isNodeEditable.value = data.disabled
 };
+
 // 修改节点的可修改性
 const isNodeEditable = ref(true);
 
 // 保存编辑
 const saveEditOfTree = () => {
-  //   if (editingNodeOfTree.value) {
-  //     editingNodeOfTree.value.label = editNodeLabelOfTree.value;
-  //     let formData
-
-  //     isEditDialogVisibleOfTree.value = false;
-  //   }
-  // 检查editNodeLabelOfTree的值不能为空，且只能包含为中英文、数字和下划线的组合
-  //   console.log("saveEditOfTree data: ", data)
 
   if (
     !editNodeLabelOfTree.value ||
@@ -504,22 +526,22 @@ watch(searchKeywordOfTree, (val) => {
   treeRef.value!.filter(val);
 });
 
-// const handleSearchOfTree = () => {
-//   if (searchKeywordOfTree.value != '') {
-//     filteredDataOfTree.value = filterDataOfTree(dataSourceOfTree.value, searchKeywordOfTree.value)
-//   } else {
-//     filteredDataOfTree.value = dataSourceOfTree.value  // 清空搜索时恢复原始数据
-//   }
-// }
-
-// const filterNodeOfTree = (value: string, data: Tree) => {
-//   if (!value) return true;
-//   return data.label.includes(value);
-// };
-// 修改 filterNodeOfTree 方法的参数类型为 TreeNodeData
 const filterNodeOfTree = (value: string, data: any) => {
-  if (!value) return true;
-  return data.label ? data.label.includes(value) : false;
+  // if(props.userRole === 'superuser'){
+    if (!value) return true;
+    return data.label ? data.label.includes(value) : false;
+  // }else{
+  //   return false
+  // }
+  // if(props.userRole === 'user'){
+  //   if (!value) {
+  //     if (data.isModel && data.isPublished !== '已发布') {
+  //       return false; // 未发布的叶子节点模型不显示
+  //     }else {
+  //       return true
+  //     }
+  //   }
+  // }
 };
 </script>
 

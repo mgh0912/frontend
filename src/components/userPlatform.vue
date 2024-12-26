@@ -489,7 +489,7 @@
 
                   <template #title>
                     <div style="padding: 10px;">
-                      <span style="font-size: 20px;">开发者用户模型结构树</span>
+                      <span style="font-size: 20px;">模型结构树</span>
                     </div>
                   </template>
                   <template #arrow="{ isActive }">
@@ -498,7 +498,7 @@
                     </div>
                   </template>
                   <div class="custom-tree-container" style="width: 100%;">
-                    <ComponentTree :userRole="userRole"/>
+                    <ComponentTree :userRole="userRole" @loadModel="handleLoadModel"/>
                   </div>
               </my-collapse-item>
               <my-collapse-item name="5" :data="{name:'5'}" item-background="#ebeef4">
@@ -570,7 +570,7 @@
                   </div>
                 </template>
                 <div class="custom-tree-container" style="width: 100%;">
-                  <ComponentTree :userRole="userRole"/>
+                  <ComponentTree :userRole="userRole"  @resetModel="handleResetModel" @loadModel="handleLoadModel"/>
                 </div>
               </my-collapse-item>
             </my-collapse>
@@ -659,18 +659,6 @@
                       <i class="fa-solid fa-broom"></i>
                       <span style="font-size: 10px;margin-top: 3px;">清空</span>
                     </ControlButton>
-
-                    <ControlButton
-                        v-if="userRole === 'superuser'"
-                        @click="finishModelOfViewFlow"
-                        class="control-operator-btn-default-css"
-                        :disabled="disabledStateOfControlBtn.finishModelOfViewFlowBtn"
-                        :style="{color: dark ? '#ffffff' : '#000000'}"
-                        title="完成模型">
-                      <i class="fa-solid fa-check"></i>
-                      <span style="font-size: 10px;margin-top: 3px;">完成</span>
-                    </ControlButton>
-
                     <ControlButton
                         v-if="userRole === 'superuser'"
                         @click="checkModelOfViewFlow"
@@ -681,7 +669,6 @@
                       <i class="fa-solid fa-magnifying-glass"></i>
                       <span style="font-size: 10px;margin-top: 3px;">检查</span>
                     </ControlButton>
-
                     <ControlButton
                         v-if="userRole === 'superuser'"
                         @click="saveModelOfViewFlow"
@@ -700,16 +687,6 @@
                         title="运行模型">
                       <i class="fa-solid fa-power-off"></i>
                       <span style="font-size: 10px;margin-top: 3px;">运行</span>
-                    </ControlButton>
-                    <ControlButton
-                        v-if="userRole === 'superuser'"
-                        @click="stopRunningModelOfViewFlow"
-                        class="control-operator-btn-default-css"
-                        :disabled="disabledStateOfControlBtn.stopRunningModelOfViewFlowBtn"
-                        :style="{color: dark ? '#ffffff' : '#000000'}"
-                        title="终止运行">
-                      <i class="fa-solid fa-stop"></i>
-                      <span style="font-size: 10px;margin-top: 3px;">终止</span>
                     </ControlButton>
                     <ControlButton
                         @click="openConfigPanelOfModelNode"
@@ -1028,6 +1005,7 @@
             <transition name="slide">
               <div
                   v-show="isResultVisibleOfElMain"
+                  v-if="isResultVisibleOfElMain"
                   class="result-areaOfElMain"
                   :style="{ height: resultHeightOfElMain + 'px' }"
               >
@@ -1128,11 +1106,11 @@
                     </div>
 
                     <!-- 显示结果 -->
-                    <el-scrollbar height="600px" v-show="canShowResults && !processing" style="background-color: white;">
+                    <el-scrollbar height="600px" v-show="canShowResults && !processing" v-if="canShowResults && !processing" style="background-color: white;">
                       <!-- 健康评估可视化 -->
                       <!-- 不同样本的评估结果 -->
                       <el-tabs type="border-card" tab-position="top" v-model="healthEvaluationOfExample"
-                               v-show="displayHealthEvaluation">
+                               v-show="displayHealthEvaluation" v-if="displayHealthEvaluation">
                         <el-tab-pane label="总结论" name="总结论">
                           <div style="display:flex; flex-direction: row; align-items: center;">
                             <div id="healthEvaluationPieChart" style="width: 600px; height: 500px"></div>
@@ -1209,7 +1187,7 @@
 
                       </el-tabs>
                       <!-- 特征提取可视化 -->
-                      <div v-show="displayFeatureExtraction" style="justify-content: center;">
+                      <div v-if="displayFeatureExtraction" v-show="displayFeatureExtraction" style="justify-content: center;">
                         <el-tabs tab-position="left" type="border-card" v-model="featuresExtractionRawData">
                           <el-tab-pane v-for="item in rawDataList" :key="item.snesor_no" :label="item.sensor_no"
                                        :name="item.sensor_no">
@@ -1221,7 +1199,7 @@
                         </el-tabs>
                       </div>
                       <!-- 特征选择可视化 -->
-                      <div v-show="displayFeatureSelection">
+                      <div v-show="displayFeatureSelection" v-if="displayFeatureSelection">
                         <el-tabs v-model="featuresSelectionTabs">
                           <el-tab-pane label="特征选择结果" name="first">
                             <el-scrollbar height="480px">
@@ -1265,7 +1243,7 @@
 
                       </div>
                       <!-- 故障诊断可视化 -->
-                      <div v-show="displayFaultDiagnosis" class="result-visualization-container">
+                      <div v-show="displayFaultDiagnosis" v-if="displayFaultDiagnosis" class="result-visualization-container">
                         <v-md-preview style="padding: 0px; margin: 0px"
                                       :text="faultDiagnosisResultsText"></v-md-preview>
                         <span><a-button circle :icon="h(EditOutlined)"
@@ -1323,7 +1301,7 @@
 
                       </div>
                       <!-- 故障故障预测可视化 -->
-                      <div v-show="displayFaultRegression" style="margin-top: 20px; font-size: 18px;">
+                      <div v-show="displayFaultRegression"  v-if="displayFaultRegression" style="margin-top: 20px; font-size: 18px;">
                         <div style="width: 1000px; margin-left: 250px;  font-weight: bold">
                           经故障诊断算法，目前该部件<span :v-model="faultRegression"
                                                          style="font-weight: bold; color: red;">{{
@@ -1347,7 +1325,7 @@
                         />
                       </div>
 
-                      <el-tabs v-model="activeName3" v-show="displayInterpolation" type="border-card">
+                      <el-tabs v-model="activeName3" v-show="displayInterpolation" v-if="displayInterpolation" type="border-card">
                         <el-tab-pane v-for="item in interpolationResultsOfSensors" :key="item.name" :label="item.label"
                                      :name="item.name">
                           <el-image
@@ -1363,7 +1341,7 @@
                         </el-tab-pane>
                       </el-tabs>
                       <!-- 无量纲化可视化 -->
-                      <div v-show="displayNormalization" style="font-size: 18px;">
+                      <div v-show="displayNormalization" v-if="displayNormalization" style="font-size: 18px;">
                         <!-- 针对提取到的特征进行的无量纲化得到的结果 -->
                         <div v-if="normalizationResultType == 'table'">
                           <div style="font-size: large;">原数据</div>
@@ -1407,7 +1385,7 @@
                       <!-- 小波降噪可视化 -->
                       <!-- <img :src="denoiseFigure" alt="denoise_figure" class="result_image"
                         style="width: 900px; height: 450px;" /> -->
-                      <el-tabs v-model="activeName2" v-show="displayDenoise" type="border-card">
+                      <el-tabs v-model="activeName2" v-show="displayDenoise" v-if="displayDenoise"  type="border-card">
                         <el-tab-pane v-for="item in waveletResultsOfSensors" :key="item.name" :label="item.label"
                                      :name="item.name">
                           <el-image
@@ -1701,17 +1679,17 @@ const handleResetModel = (modelName: string) => {
   }
 }
 // 点击子组件publishModel的历史模型表格中使用按钮复现用户历史模型
-const handleLoadModel = (row: any) => {
-  console.log('接受子组件数据',row)
-  modelLoaded.value = row.model_name
+const handleLoadModel = (store: any) => {
+  console.log('接受子组件数据',store)
+  // modelLoaded.value = store.valmodelName
   //后端传来的数据恢复画布信息
-  let objects = JSON.parse(row.model_info)
+  console.log('store.modelInfo.model_info: ', store.value.modelInfo[0].model_info)
+  let objects = JSON.parse(store.value.modelInfo[0].model_info)
   //要执行两遍才会渲染上
   restoreCanvas(objects)
   // 使用setTimeout等待0.5秒
   setTimeout(() => {
     // 0.5秒后执行的操作
-
     restoreCanvas(objects)
   }, 500);
 
@@ -1901,24 +1879,6 @@ const updateMaxHeightOfElMain = () => {
 // 创建一个节流版本的handleResize函数，每100毫秒最多执行一次，优化
 const throttledHandleResize = throttle(updateMaxHeightOfElMain, 100);
 
-// 持久化状态到 localStorage
-// const saveStateOfElMain = () => {
-//   localStorage.setItem('runResultHeightOfElMain', resultHeightOfElMain.value)
-//   localStorage.setItem('runResultVisibleOfElMain', isResultVisibleOfElMain.value)
-// }
-
-// 读取状态从 localStorage
-// const loadStateOfElMain = () => {
-//   const savedHeight = localStorage.getItem('runresultHeightOfElMain')
-//   const savedVisibility = localStorage.getItem('runResultVisibleOfElMain')
-//   if (savedHeight) {
-//     resultHeightOfElMain.value = parseInt(savedHeight, 10)
-//     previousHeightOfElMain.value = parseInt(savedHeight, 10)
-//   }
-//   if (savedVisibility !== null) {
-//     isResultVisibleOfElMain.value = savedVisibility === 'true'
-//   }
-// }
 
 onBeforeUnmount(() => {
   window.removeEventListener('mousemove', onDragOfElMain)
@@ -2272,12 +2232,12 @@ function clearModelOfViewFlow() {
   order.value = [];
   visited.value = new Set();
   done.value = false
-  features.value = ['均值', '方差', '标准差', '峰度', '偏度', '四阶累积量', '六阶累积量', '最大值', '最小值', '中位数', '峰峰值', '整流平均值', '均方根', '方根幅值',
-    '波形因子', '峰值因子', '脉冲因子', '裕度因子', '重心频率', '均方频率', '均方根频率', '频率方差', '频率标准差', '谱峭度的均值', '谱峭度的标准差', '谱峭度的峰度', '谱峭度的偏度']
+  // features.value = ['均值', '方差', '标准差', '峰度', '偏度', '四阶累积量', '六阶累积量', '最大值', '最小值', '中位数', '峰峰值', '整流平均值', '均方根', '方根幅值',
+  //   '波形因子', '峰值因子', '脉冲因子', '裕度因子', '重心频率', '均方频率', '均方根频率', '频率方差', '频率标准差', '谱峭度的均值', '谱峭度的标准差', '谱峭度的峰度', '谱峭度的偏度']
   jsonClear()    // 向后端发送的模型信息
   isShow.value = false
-  plumbIns.deleteEveryConnection()
-  plumbIns.deleteEveryEndpoint()
+  // plumbIns.deleteEveryConnection()
+  // plumbIns.deleteEveryEndpoint()
   linkedList.head = null
   linkedList.tail = null
   missionComplete.value = false // 程序处理完成
@@ -3072,7 +3032,7 @@ function checkModelOfViewFlow() {
   console.log("检查模型时构建contentJson: ", contentJson)
   // 进行模型参数设置和逻辑的检查
   var check_order_right = checkModelOrder()
-  console.log("check_order_right: ", check_order_right)
+  console.log("check_order_right: ", buildContentJson())
 }
 
 //构建处理顺序
@@ -3169,9 +3129,9 @@ function buildContentJson() {
           })
           return
         }
+        console.log('features: ', features.value)
         features.value.forEach(element => {
           if (params[element] == false) {
-
             console.log(' element设为真',element)
             params[element] = true
           }
@@ -3228,7 +3188,6 @@ const getComponentTrees = async() => {
 async function saveModelOfViewFlow() {
   //显示保存模型表单
   await getComponentTrees();
-
   console.log("saveModelOfViewFlow trees: ", dataSourceOfTree)
   dialogModle.value = true
 }
@@ -6033,7 +5992,6 @@ const saveModelSetting = (saveModel, schedule) => {
 //检查保存模型的表单
 const checkForm = () => {
   if ((modelInfoForm.value.name === '')  |  (modelInfoForm.value.class.length==0)  | (modelInfoForm.value.description=='')) {
-    alert('请补充完整信息')
     return false
   }else{
     return true
@@ -6058,76 +6016,86 @@ const filterTreeData = (data) => {
 
 // 完成模型名称等信息的填写后，确定保存模型
 const saveModelConfirm = async (formEl: FormInstance | undefined) => {
-  if(!checkForm()){
-    console.log("执行保存表单失败")
+  if(contentJson.schedule.length==0){
+    ElMessage({
+      message: '请先建立并检查模型',
+      type: 'warning'
+    })
     return
   }else{
-
-    console.log('saveModelConfirm modelInfoForm: ', modelInfoForm.value)
-    // 将模型信息保存到数据库
-    let data = new FormData()
-    data.append('model_name', modelInfoForm.value.name)
-    let nodelistInfo = toObject()
-    let modelInfo = {"nodeList": nodelistInfo, "connection": contentJson.schedule}
-    data.append('model_info', JSON.stringify(modelInfo))
-    data.append('description', modelInfoForm.value.description)
-
-    let treeName = modelInfoForm.value.class.split('.')[0]  // 根节点（树名）
-    let parentNodeValue = modelInfoForm.value.class  // 所属于类型的节点值
-
-    console.log('saveModelConfirm treeName: ', treeName)
-    console.log('saveModelConfirm parentNodeValue: ', parentNodeValue)
-    data.append('treeName', treeName)
-    data.append('parentNode', parentNodeValue)
-
-    // 获取树名和节点值
-
-    api.post('/user/save_model/', data,
-        {
-          headers: {"Content-Type": 'multipart/form-data'}
-        }
-    ).then((response: any) => {
-      if (response.data.code == 401) {
-        ElMessageBox.alert('登录状态已失效，请重新登陆', '提示', {
-          confirmButtonText: '确定',
-          callback: (action: Action) => {
-            router.push('/')
-          },
-        })
-      }
-      if (response.data.code == 200) {
-        ElMessage({
-          message: '保存模型成功',
-          type: 'success'
-        })
-
-        fetchModels()
-        modelsDrawer.value = false       // 关闭历史模型抽屉
-        dialogFormVisible.value = false    // 关闭提示窗口
-        dialogModle.value = false
-        canStartProcess.value = false     // 保存模型成功可以运行
-        modelSetup.value = true                 // 模型保存完成
-        modelLoaded.value = modelInfoForm.value.name  // 保存模型后，显示当前模型名称
-        updateStatus('当前模型已保存')
-      } else if (response.data.code == 400) {
-        ElMessage({
-          message: '已有同名模型，保存模型失败',
-          type: 'error'
-        })
-      } else {
-        ElMessage({
-          message: '保存模型失败，'+ response.data.message,
-          type: 'error'
-        })
-      }
-    }).catch(error => {
+    if(!checkForm()){
       ElMessage({
-        message: '保存模型请求失败',
-        type: 'error'
+        message: '请填写完整信息',
+        type: 'warning'
       })
-      console.log('save model error: ', error)
-    })
+      return
+    }else{
+
+      console.log('saveModelConfirm modelInfoForm: ', modelInfoForm.value)
+      // 将模型信息保存到数据库
+      let data = new FormData()
+      data.append('model_name', modelInfoForm.value.name)
+      let nodelistInfo = toObject()
+      let modelInfo = {"nodeList": nodelistInfo, "connection": contentJson.schedule}
+      data.append('model_info', JSON.stringify(modelInfo))
+      data.append('description', modelInfoForm.value.description)
+
+      let treeName = modelInfoForm.value.class.split('.')[0]  // 根节点（树名）
+      let parentNodeValue = modelInfoForm.value.class  // 所属于类型的节点值
+
+      console.log('saveModelConfirm treeName: ', treeName)
+      console.log('saveModelConfirm parentNodeValue: ', parentNodeValue)
+      data.append('treeName', treeName)
+      data.append('parentNode', parentNodeValue)
+
+      // 获取树名和节点值
+
+      api.post('/user/save_model/', data,
+          {
+            headers: {"Content-Type": 'multipart/form-data'}
+          }
+      ).then((response: any) => {
+        if (response.data.code == 401) {
+          ElMessageBox.alert('登录状态已失效，请重新登陆', '提示', {
+            confirmButtonText: '确定',
+            callback: (action: Action) => {
+              router.push('/')
+            },
+          })
+        }
+        if (response.data.code == 200) {
+          ElMessage({
+            message: '保存模型成功',
+            type: 'success'
+          })
+          modelsDrawer.value = true       // 关闭历史模型抽屉
+          dialogFormVisible.value = false    // 关闭提示窗口
+          dialogModle.value = false
+          canStartProcess.value = false     // 保存模型成功可以运行
+          modelSetup.value = true                 // 模型保存完成
+          modelLoaded.value = modelInfoForm.value.name  // 保存模型后，显示当前模型名称
+          updateStatus('当前模型已保存')
+        } else if (response.data.code == 400) {
+          ElMessage({
+            message: '已有同名模型，保存模型失败',
+            type: 'error'
+          })
+        } else {
+          ElMessage({
+            message: '保存模型失败，'+ response.data.message,
+            type: 'error'
+          })
+        }
+      }).catch(error => {
+        ElMessage({
+          message: '保存模型请求失败',
+          type: 'error'
+        })
+        console.log('save model error: ', error)
+      })
+    }
   }
+
 }
 
 const show1 = ref(false)
@@ -7440,39 +7408,6 @@ const showResult = (moduleName: string) => {
 // 从后端获取到的历史模型的信息
 const fetchedModelsInfo = ref([])
 
-// 打开抽屉，同时从后端获取历史模型
-const fetchModels = () => {
-  dataDrawer.value = false  // 打开历史模型抽屉
-
-  // 向后端发送请求获取用户的历史模型
-  api.get('/user/fetch_models/').then((response: any) => {
-    if (response.data.code == 200) {
-      modelsDrawer.value = true
-      let modelsInfo = response.data.message
-      fetchedModelsInfo.value.length = 0
-      for (let item of modelsInfo) {
-        fetchedModelsInfo.value.push(item)
-      }
-    }
-    if (response.data.code == 401) {
-      ElMessageBox.alert('登录状态已失效，请重新登陆', '提示',
-          {
-            confirmButtonText: '确定',
-            callback: (action: Action) => {
-              router.push('/')
-            }
-          }
-      )
-    }
-
-  })
-      .catch(error => {
-        ElMessage({
-          message: '获取历史模型失败,' + error,
-          type: 'error'
-        })
-      })
-}
 
 const isFullScreen = ref(false);
 
@@ -7963,9 +7898,10 @@ ul > li {
   left: 35%;
   padding: 5px 10px;
   border-radius: 5px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   border: solid 1px rgba(0, 0, 0, 0.2);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  background-color: #f0ad4e;
+  background-color: #cccccc;
   font-size: 22px;
   /* 初始颜色，如黄色 */
   color: white;

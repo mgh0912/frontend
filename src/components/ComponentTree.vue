@@ -107,7 +107,7 @@ interface Tree {
   children?: Tree[]; // 子节点
   isModel: boolean;  // 是否为模型
   modelId: string;  // 模型id
-  isPublished: boolean; // 是否发布
+  isPublished: string; // 是否发布
 }
 
 const treeRef = ref<InstanceType<typeof ElTree>>();
@@ -398,7 +398,7 @@ const getNodeLable = (data: Tree) => {
   if (!data.isModel){
     return data.label
   }else{
-    return data.isPublished ? data.label + " (已发布)" : data.label + " (未发布)";
+    return data.isPublished == '已发布' ? data.label + " (已发布)" : data.label + " (未发布)";
   }
 };
 

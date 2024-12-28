@@ -547,7 +547,7 @@
                         flex-direction: column;align-items: center;justify-content: center;
                         margin-right: 1px;"
                     >
-                    <PublishModel :userRole="userRole" @resetModel="handleResetModel" @loadModel="handleLoadModel"/>
+                      <PublishModel style="width: 100%;height: 100%;" :userRole="userRole" @resetModel="handleResetModel" @loadModel="handleLoadModel"/>
                     </div>
               
                   </div>
@@ -570,7 +570,7 @@
                   </div>
                 </template>
                 <div class="custom-tree-container" style="width: 100%;">
-                  <ComponentTree :userRole="userRole"  @resetModel="handleResetModel" @loadModel="handleLoadModel"/>
+                  <ComponentTree :userRole="userRole" ref="superComponentTree" @resetModel="handleResetModel" @loadModel="handleLoadModel"/>
                 </div>
               </my-collapse-item>
             </my-collapse>
@@ -648,7 +648,7 @@
                         :style="{color: dark ? '#ffffff' : '#000000'}"
                         title="下载报告">
                               <i class="fa-solid fa-download"></i>
-                      <span style="font-size: 10px;margin-top: 3px;">下载</span>
+                      <span style="font-size: 10px;margin-top: 3px;">报告</span>
                     </ControlButton>
                     <ControlButton
                         @click="clearModelOfViewFlow"
@@ -769,7 +769,7 @@
                       <div class="highlight"
                           :style="{ color: getColor(usingDatafile), position: 'relative', 'margin-top': '30px', 'max-width': '300px', 'word-wrap': 'break-word' }"
                           :title="usingDatafile">
-                        已加载数据：{{ usingDatafile }}
+                        {{usingDatafile!='无' ? '已加载数据：' + usingDatafile : '当前未加载数据'  }}
                       </div>
                       
                     </div>
@@ -847,7 +847,7 @@
                                     item-background="#ebeef4">
                     <template #title>
                       <div style="padding: 6px;">
-                        <span style="font-size: 16px;">特征提取参数配置</span>
+                        <span style="font-size: 16px; font-family: 'Microsoft YaHei';">特征提取参数配置</span>
                       </div>
                     </template>
                     <template #arrow="{ isActive }">
@@ -856,20 +856,33 @@
                       </div>
                     </template>
                     <div class="" style="width: 100%;background-color: white;">
-                      <div style="width: 100%;display: flex;flex-direction: column;">
+                      <div style="width: 100%;display: flex;flex-direction: column; font-family: 'Microsoft YaHei';">
                         <div style="flex: 1;padding: 10px;width: 100%;">
-                          <el-text style="font-size: 15px;">选择特征<span
+                          <el-text style="font-size: 15px; ">选择特征<span
                               style="font-size: 12px;">(共{{
                               Object.keys(modeling_nodeList[parameter_dict[transfer['特征提取']]].nodeInfo.parameters[transfer['特征提取']]).length
                             }}个可选特征)</span></el-text>
                         </div>
                         <div style="flex: 1;width: 100%;padding-bottom: 10px;">
-                          <el-select v-model="features" multiple collapse-tags collapse-tags-tooltip
+                          <!-- <el-select v-model="features" multiple collapse-tags collapse-tags-tooltip
                                      :max-collapse-tags="5" popper-class="select"
                                      placeholder="选择需要提取的特征" :teleported="false" style="width: 90%;">
                             <el-option v-for="(value, key) in modeling_nodeList[parameter_dict[transfer['特征提取']]].nodeInfo.parameters[transfer['特征提取']]" :label="key"
                                        :value="key" style="width: 200px; background-color: white;"/>
                           </el-select>
+                          <a-select>
+                            <a-select-option></a-select-option>
+                          </a-select> -->
+                          <a-select v-model:value="features" mode="multiple" :max-tag-count="5" placeholder="选择需要提取的特征" style="width: 90%;">
+                            <a-select-option
+                              v-for="(value, key) in modeling_nodeList[parameter_dict[transfer['特征提取']]].nodeInfo.parameters[transfer['特征提取']]"
+                              :key="key"
+                              :value="key"
+                              style="width: 200px; background-color: white;"
+                            >
+                              {{ key }}
+                            </a-select-option>
+                          </a-select>
 <!--                          <a-select-->
 <!--                              v-model:value="value"-->
 <!--                              mode="multiple"-->
@@ -889,7 +902,7 @@
                       item-background="#ebeef4">
                     <template #title>
                       <div style="padding: 6px;">
-                        <span style="font-size: 16px;">特征选择参数配置</span>
+                        <span style="font-size: 16px; font-family: 'Microsoft YaHei';">特征选择参数配置</span>
                       </div>
                     </template>
                     <template #arrow="{ isActive }">
@@ -935,7 +948,7 @@
                                     item-background="#ebeef4">
                     <template #title>
                       <div style="padding: 6px;">
-                        <span style="font-size: 16px;">无量纲化参数设置</span>
+                        <span style="font-size: 16px;font-family: 'Microsoft YaHei';">无量纲化参数设置</span>
                       </div>
                     </template>
                     <template #arrow="{ isActive }">
@@ -956,7 +969,7 @@
                                     item-background="#ebeef4">
                     <template #title>
                       <div style="padding: 6px;">
-                        <span style="font-size: 16px;">小波变换参数配置</span>
+                        <span style="font-size: 16px;font-family: 'Microsoft YaHei';">小波变换参数配置</span>
                       </div>
                     </template>
                     <template #arrow="{ isActive }">
@@ -972,7 +985,7 @@
                           <el-col :span="10" style="align-content: center;"><span
                               style="margin-left: 10px; font-size: 15px;">{{ labelsForParams[key] }}：</span></el-col>
                           <el-col :span="12">
-                            <el-select v-model="modeling_nodeList[parameter_dict[transfer['小波变换']]].nodeInfo.parameters[transfer['小波变换']][key]" collapse-tags
+                            <!-- <el-select v-model="modeling_nodeList[parameter_dict[transfer['小波变换']]].nodeInfo.parameters[transfer['小波变换']][key]" collapse-tags
                                        collapse-tags-tooltip :teleported="false" placeholder="请选择参数">
                               <el-option
                                   v-for="item in recommendParams[key]"
@@ -981,7 +994,17 @@
                                   :value="item.value"
                                   style="width: 200px; height: auto; background-color: white;"
                               />
-                            </el-select>
+                            </el-select> -->
+                            <a-select v-model:value="modeling_nodeList[parameter_dict[transfer['小波变换']]].nodeInfo.parameters[transfer['小波变换']][key]" placeholder="请选择参数" style="width: 90%;">
+                              <a-select-option
+                                v-for="item in recommendParams[key]"
+                                :key="item.value"
+                                :value="item.value"
+                                style="background-color: white;"
+                              >
+                                {{ item.label }}
+                              </a-select-option>
+                            </a-select>
                           </el-col>
                         </el-row>
                       </div>
@@ -994,7 +1017,7 @@
                       && !containsMenuSettings.includes('1.3')
                       && !containsMenuSettings.includes('1.4')
                       && !containsMenuSettings.includes('1.5')"
-                      style="background-color: white; display: flex; flex-direction: column; padding-top: 30px;height: 100%;">
+                      style="background-color: white; font-family: 'Microsoft YaHei'; display: flex; flex-direction: column; padding-top: 30px;height: 100%;">
                     暂无可调参数
                   </div>
                 </my-collapse>
@@ -1055,7 +1078,7 @@
                     <!-- 结果可视化区默认为自定义建模或是预定义模型的使用介绍 -->
                     <div
                         v-if="!showPlainIntroduction && !showStatusMessage && !canShowResults && !contrastVisible && !processing"
-                        style="background-color: white; height: 100%; width: auto">
+                        style="background-color: white; height: 100%; width: auto; font-family: 'Microsoft YaHei';">
                       <el-scrollbar height="100%">
                         <!-- 自定义建模 -->
                         <div v-if="(userRole==='superuser' || userRole === 'user') && modelSelection === 'customModel'">
@@ -1106,11 +1129,11 @@
                     </div>
 
                     <!-- 显示结果 -->
-                    <el-scrollbar height="600px" v-show="canShowResults && !processing" v-if="canShowResults && !processing" style="background-color: white;">
+                    <el-scrollbar height="100%" v-show="canShowResults && !processing" v-if="canShowResults && !processing" style="background-color: white;">
                       <!-- 健康评估可视化 -->
                       <!-- 不同样本的评估结果 -->
                       <el-tabs type="border-card" tab-position="top" v-model="healthEvaluationOfExample"
-                               v-show="displayHealthEvaluation" v-if="displayHealthEvaluation">
+                               v-show="displayHealthEvaluation" v-if="displayHealthEvaluation || generateHealthEvaluationFigure">
                         <el-tab-pane label="总结论" name="总结论">
                           <div style="display:flex; flex-direction: row; align-items: center;">
                             <div id="healthEvaluationPieChart" style="width: 600px; height: 500px"></div>
@@ -1186,8 +1209,9 @@
                         </el-tab-pane>
 
                       </el-tabs>
+
                       <!-- 特征提取可视化 -->
-                      <div v-if="displayFeatureExtraction" v-show="displayFeatureExtraction" style="justify-content: center;">
+                      <div v-if="displayFeatureExtraction || generateFeatureExtractionFigure" v-show="displayFeatureExtraction && missionComplete" style="justify-content: center;">
                         <el-tabs tab-position="left" type="border-card" v-model="featuresExtractionRawData">
                           <el-tab-pane v-for="item in rawDataList" :key="item.snesor_no" :label="item.sensor_no"
                                        :name="item.sensor_no">
@@ -1198,8 +1222,9 @@
                           </el-tab-pane>
                         </el-tabs>
                       </div>
+
                       <!-- 特征选择可视化 -->
-                      <div v-show="displayFeatureSelection" v-if="displayFeatureSelection">
+                      <div v-show="displayFeatureSelection && missionComplete" v-if="displayFeatureSelection || generateFeatureSelectionFigure">
                         <el-tabs v-model="featuresSelectionTabs">
                           <el-tab-pane label="特征选择结果" name="first">
                             <el-scrollbar height="480px">
@@ -1242,21 +1267,21 @@
                         </el-tabs>
 
                       </div>
+
                       <!-- 故障诊断可视化 -->
-                      <div v-show="displayFaultDiagnosis" v-if="displayFaultDiagnosis" class="result-visualization-container">
+                      <div v-if="displayFaultDiagnosis || generateFaultDiagnosisFigure" v-show="displayFaultDiagnosis && missionComplete" class="result-visualization-container">
                         <v-md-preview style="padding: 0px; margin: 0px"
                                       :text="faultDiagnosisResultsText"></v-md-preview>
                         <span><a-button circle :icon="h(EditOutlined)"
                                         @click="feedBackDialogVisible = true"></a-button> 反馈</span>
                         <!-- 用户填写反馈的对话框 -->
-                        <a-modal v-model:open="feedBackDialogVisible" title="用户反馈" cancelText="取消" okText="确定">
+                        <!-- <a-modal v-model:open="feedBackDialogVisible" title="用户反馈" cancelText="取消" okText="确定">
                           <div style="font-weight: 600; font-size: 14px">
                             <p>当前使用的模型：{{ modelLoaded }}</p>
                             <p>当前使用的数据：{{ usingDatafile }}</p>
                           </div>
                           <a-form>
                             <a-form-item label="当前模型中存在疑问的模块">
-
                               <a-select>
                                 <a-select-option v-for="item in contentJson.modules" :value="item">
                                   {{ item }}
@@ -1269,7 +1294,36 @@
                               </a-input>
                             </a-form-item>
                           </a-form>
-                        </a-modal>
+                        </a-modal> -->
+                        <!-- 用户反馈对话框 -->
+                        <div style="width: 100%; position: relative; z-index: 999;">
+                          <span style="position: absolute; right: 30px; top: 55px;">
+                            <a-button circle :icon="h(EditOutlined)"
+                            @click="feedBackDialogVisible = true" ></a-button> 反馈
+                          </span>
+                          <a-modal v-model:open="feedBackDialogVisible" title="用户反馈" cancelText="取消" okText="提交" @ok="feedBack">
+                            <div style="font-weight: 600; font-size: 14px; margin-bottom: 20px">
+                              <p>当前使用的模型：{{ modelLoadedName }}</p>
+                              <p>当前使用的数据：{{ usingDatafile }}</p>
+                            </div>
+                            <a-form :model="feedBackFormRefState" :rules="feedBackRules" ref="feedBackFormRef">
+                              <a-form-item label="当前模型中存在疑问的模块" name="module">
+                                <a-select style="width: 70%" placeholder="请选择组件" v-model:value="feedBackFormRefState.module">
+                                  <a-select-option v-for="item in contentJson.modules" :value="item">
+                                    {{ item }}
+                                  </a-select-option>
+                                </a-select>
+                              </a-form-item>
+                              <a-form-item name="feedbackContent">
+                                <div>问题描述</div>
+                                <a-input style="width: 80%" v-model:value="feedBackFormRefState.feedbackContent"/>
+                              </a-form-item>
+                              <!-- <a-form-item>
+                                <a-button @click="feedBack"></a-button>
+                              </a-form-item> -->
+                            </a-form>
+                          </a-modal>
+                        </div>
                         <el-tabs v-model="faultDiagnosisResultOption" tab-position="top">
                           <el-tab-pane key="1" label="连续样本指标变化">
                             <!-- 连续样本指标变化的折线图 -->
@@ -1300,8 +1354,9 @@
                           style="width: auto; height: 450px;" /> -->
 
                       </div>
+
                       <!-- 故障故障预测可视化 -->
-                      <div v-show="displayFaultRegression"  v-if="displayFaultRegression" style="margin-top: 20px; font-size: 18px;">
+                      <div v-show="displayFaultRegression && missionComplete"  v-if="displayFaultRegression || generateFaultRegressionFigure" style="margin-top: 20px; font-size: 18px;">
                         <div style="width: 1000px; margin-left: 250px;  font-weight: bold">
                           经故障诊断算法，目前该部件<span :v-model="faultRegression"
                                                          style="font-weight: bold; color: red;">{{
@@ -1325,7 +1380,8 @@
                         />
                       </div>
 
-                      <el-tabs v-model="activeName3" v-show="displayInterpolation" v-if="displayInterpolation" type="border-card">
+                      <!-- 插补可视化 -->
+                      <el-tabs v-model="activeName3" v-show="displayInterpolation && missionComplete" v-if="displayInterpolation || generateInterpolationFigure" type="border-card">
                         <el-tab-pane v-for="item in interpolationResultsOfSensors" :key="item.name" :label="item.label"
                                      :name="item.name">
                           <el-image
@@ -1340,8 +1396,9 @@
                           />
                         </el-tab-pane>
                       </el-tabs>
+
                       <!-- 无量纲化可视化 -->
-                      <div v-show="displayNormalization" v-if="displayNormalization" style="font-size: 18px;">
+                      <div v-show="displayNormalization && missionComplete" v-if="displayNormalization || generateNormalizationFigure" style="font-size: 18px;">
                         <!-- 针对提取到的特征进行的无量纲化得到的结果 -->
                         <div v-if="normalizationResultType == 'table'">
                           <div style="font-size: large;">原数据</div>
@@ -1382,10 +1439,11 @@
                         </el-tabs>
 
                       </div>
+
                       <!-- 小波降噪可视化 -->
                       <!-- <img :src="denoiseFigure" alt="denoise_figure" class="result_image"
                         style="width: 900px; height: 450px;" /> -->
-                      <el-tabs v-model="activeName2" v-show="displayDenoise" v-if="displayDenoise"  type="border-card">
+                      <el-tabs v-model="activeName2" v-show="displayDenoise && missionComplete" v-if="displayDenoise || generateDenoiseFigure"  type="border-card">
                         <el-tab-pane v-for="item in waveletResultsOfSensors" :key="item.name" :label="item.label"
                                      :name="item.name">
                           <el-image
@@ -1455,37 +1513,39 @@
                     padding: 30px;
                     display: flex;
                     flex-direction: row;
-                    align-items: flex-start;
+                    align-items: center;
+                    font-family: 'Microsoft YaHei';
+                    font-size: 17px
                   "
                 >
-                  <div style="font-size: 16px; margin-right: 30px; display: flex; flex-direction: row; align-items: center;">
-                    <p>选择需要输出的结果（至少选择一项）：</p>
-                  </div>
-                  <el-checkbox
-                    v-model="selectAllModuleToGenerateResult"
-                    @change="toggleSelectAll"
-                    style="margin-right: 50px"
-                    >全选</el-checkbox
-                  >
-                  <div style="max-width: 70%">
+                  <span>
+                    <p>选择需要输出的结果：<br/>（至少选择一项）</p>
+                  </span>
+                  
+                  
+                  <div style="max-width: 50%; margin-left: 30px">
+                    <el-checkbox
+                      v-model="selectAllModuleToGenerateResult"
+                      @change="toggleSelectAll"
+                      style=""
+                      >全选</el-checkbox
+                    >
+                  
                     <el-checkbox-group v-model="moduleResultToGenerateList" :min="1">
                     <!--  -->
-                      <el-checkbox v-for="module in contentJson.modules" :key="module" :label="module" :value="module"/>
+                      <el-checkbox size="large" v-for="module in contentJson.modules" :key="module" :label="module" :value="module"/>
                     </el-checkbox-group>
                   </div>
                 </div>
-                <div style="">
-                  <el-button style="width: 180px" @click="generateConclusion">生成输出报告</el-button>
+                <div style="margin-top: 50px">
+                  <el-button style="width: 180px; font-size: 17px" type="primary" @click="generateConclusion">生成输出报告</el-button>
                  
                 </div>
               </div>
             </el-dialog>
           </div>
         </el-main>
-
-        <!-- 以抽屉的形式打开用户历史模型 -->
-        
-
+    
         <!-- 以抽屉的形式打开用户历史数据 -->
         <el-drawer v-model="dataDrawer" direction="ltr" size="45%">
           <div style="display: flex; flex-direction: column">
@@ -1678,6 +1738,8 @@ const handleResetModel = (modelName: string) => {
     handleClear()
   }
 }
+
+let modelLoadedName = ref(''); // 已加载模型的名称
 // 点击子组件publishModel的历史模型表格中使用按钮复现用户历史模型
 const handleLoadModel = (store: any) => {
   console.log('接受子组件数据',store)
@@ -1693,12 +1755,16 @@ const handleLoadModel = (store: any) => {
     restoreCanvas(objects)
   }, 500);
 
-handleClear()
-updateStatus('当前模型已保存')
-modelHasBeenSaved = true
-canStartProcess.value = false
-modelLoaded.value = row.model_name
-modelLoadedId = String(row.id)
+  handleClear()
+  updateStatus('当前模型已保存')
+  modelHasBeenSaved = true
+  modelHasBeenChecked.value = true
+  canStartProcess.value = false
+  modelLoaded.value = store.value.modelName
+  modelLoadedName.value = store.value.modelName
+  modelLoadedId = String(store.value.modelId)
+  console.log("modelLoaded: ", modelLoaded.value)
+  console.log("modelLoadedId: ", modelLoadedId)
 
 }
 // 用户查看源文件
@@ -2289,27 +2355,32 @@ function checkModelParam() {
         }
       } else if (dict.nodeInfo.id == '1.2') {
         // 检查特征提取参数设置
+
         if (!features.value.length) {
           return false
         }
-      } else {
-        // 检查一般算法模块的参数设置，参数设置不能为空
-        dict.nodeInfo.parameters[dict.nodeInfo.use_algorithm] = dict.nodeInfo.use_algorithm
-        let parameters = dict.nodeInfo.parameters[dict.nodeInfo.use_algorithm]
-        console.log('parameters: ', parameters)
-        if (!parameters) {
-          console.log('parameters is null')
-          return false
-        } else {
-          for (let key in parameters) {
-            console.log("parameters", parameters[key])
-            console.log("key....", key)
-            if (parameters[key] === '' || parameters[key] === null) {
-              console.log('parameters[key] is null: ', parameters[key])
-              return false
-            }
-          }
-        }
+      } else if(dict.nodeInfo.id == '1.4'){
+         console.log('小波变换单独处理',modeling_nodeList.value)
+         let parameters = dict.nodeInfo.parameters
+         console.log('小波单独构建的parameters',parameters)
+      }else{
+      // 检查一般算法模块的参数设置，参数设置不能为空
+      dict.nodeInfo.parameters[dict.nodeInfo.use_algorithm] = dict.nodeInfo.use_algorithm
+              let parameters = dict.nodeInfo.parameters[dict.nodeInfo.use_algorithm]
+              console.log('parameters: ', parameters)
+              if (!parameters) {
+                console.log('parameters is null')
+                return false
+              } else {
+                for (let key in parameters) {
+                  console.log("parameters", parameters[key])
+                  console.log("key....", key)
+                  if (parameters[key] === '' || parameters[key] === null) {
+                    console.log('parameters[key] is null: ', parameters[key])
+                    return false
+                  }
+                }
+              }
       }
     }
   }
@@ -2368,62 +2439,76 @@ function checkModelOrder() {
     return false;
   }
 
-  const canRunSoloModule = (moduleStr: string) => {
-    const modulesCanRunSolo = ['插值处理', '特征提取', '小波变换', '无量纲化', 'GRU的故障诊断', 'LSTM的故障诊断', '一维卷积深度学习模型的故障诊断', 
+  const canRunSoloModule = (moduleStr: string, algorithmStr: string) => {
+    const modulesCanRunSolo = ['插值处理', '特征提取', '小波变换', '无量纲化']
+
+    const algorithmsCanRunSolo = [
+      'GRU的故障诊断', 'LSTM的故障诊断', '一维卷积深度学习模型的故障诊断', 
       '基于时频图的深度学习模型的故障诊断', '深度学习故障诊断', '多传感器信号级加权融合的故障检测', '多传感器信号时频表征自适应加权融合的故障检测',
       '多传感器特征级融合的深度学习故障检测', '多传感器决策级融合的深度学习故障检测', '基于单传感器的知识型 1D 时域深度学习故障诊断',
       '基于单传感器的时域和频域协同注意学习故障诊断', '基于单传器的多域深度特征融合故障诊断'
     ]
+    let checkPass1 = false;
+    let checkPass2 = false;
     // 检查传入的字符串中是否包含数组中任意一项，是的话返回true，否则返回false
     modulesCanRunSolo.forEach(item => {
-      if (moduleStr.match(item)) {
-        return true
+      if (moduleStr.includes(item)) {
+        checkPass1 = true
       }
     })
-    return false
+
+    algorithmsCanRunSolo.forEach(item => {
+      if (algorithmStr.includes(item)) {
+        checkPass2 = true
+      }
+    })
+
+    return checkPass1 || checkPass2
   }
 
+  console.log("checkModelOrder contentJson.schedule: ", contentJson.schedule)
 
-  if (contentJson.schedule.length == 1) {
-    console.log('modeling_nodelist:',modeling_nodeList.value[0].nodeInfo.label)
-    moduleSchedule.push(modeling_nodeList.value[0].nodeInfo.label)  // 模块名称拼接的字符串
-    algorithmSchedule.push(modeling_nodeList.value[0].nodeInfo.label_display)  // 算法名称拼接的字符串
-    console.log('moduleSchedule: ', moduleSchedule)
-    console.log('algorithmSchedule: ', algorithmSchedule)
-    // 根据是否包含多传感器的算法，判断是否是针对多传感器的模型
-    if (algorithmSchedule.indexOf("多传感器") != -1) {
-      contentJson.multipleSensor = true  // 默认为false，即对单传感器数据的模型
-    }
-  } else{
+  // if (contentJson.schedule.length == 1) {
+  //   console.log('modeling_nodelist:',modeling_nodeList.value[0].nodeInfo.label)
+  //   moduleSchedule.push(modeling_nodeList.value[0].nodeInfo.label)  // 模块名称拼接的字符串
+  //   algorithmSchedule.push(modeling_nodeList.value[0].nodeInfo.label_display)  // 算法名称拼接的字符串
+  //   console.log('moduleSchedule: ', moduleSchedule)
+  //   console.log('algorithmSchedule: ', algorithmSchedule)
+  //   // 根据是否包含多传感器的算法，判断是否是针对多传感器的模型
+  //   if (algorithmSchedule.indexOf("多传感器") != -1) {
+  //     contentJson.multipleSensor = true  // 默认为false，即对单传感器数据的模型
+  //   }
+  // } else{
     //针对多个模块
-    // 形成表示具体算法模块连接顺序的字符串
-    for (let i = 0; i < contentJson.schedule.length; i++) {
-      let module = contentJson.schedule[i]
-      console.log("module: ", module)
-      let algorithmsS =  modeling_nodeList.value.find(item => item.nodeInfo.label == module)
-      algorithmSchedule.push(algorithmsS.nodeInfo.label_display)
-      console.log("algorithmsS: ", algorithmsS)
-      moduleSchedule.push(module)
-    }
-    
-    moduleStr = Object.values(moduleSchedule).join('')   // 所有模块的名称按顺序拼接起来的字符串
-    algorithmStr = Object.values(algorithmSchedule).join('')  // 所有模块中的算法名称按顺序拼接起来的字符串
-    console.log('moduleStr', moduleStr)
-    console.log('algorithmStr', algorithmStr)
+  // 形成表示具体算法模块连接顺序的字符串
+  for (let i = 0; i < contentJson.schedule.length; i++) {
+    let module = contentJson.schedule[i]
+    console.log("checkModelOrder module: ", module)
+    let algorithmsS = modeling_nodeList.value.find(item => item.nodeInfo.label == module)
+    console.log("algorithmsS: ", algorithmsS)
+    algorithmSchedule.push(algorithmsS.nodeInfo.label_display)
+    console.log("checkModelOrder algorithmsS: ", algorithmsS)
+    moduleSchedule.push(module)
   }
+  
+  moduleStr = Object.values(moduleSchedule).join('')   // 所有模块的名称按顺序拼接起来的字符串
+  algorithmStr = Object.values(algorithmSchedule).join('')  // 所有模块中的算法名称按顺序拼接起来的字符串
+  console.log('moduleStr', moduleStr)
+  console.log('algorithmStr', algorithmStr)
+  // }
   if (modeling_nodeList.value.length) {
     // 首先判断模型中是否有数据源
     if (!moduleStr.match('数据源')) {
       ElMessage.error('模型中未包含数据源，请添加数据源模块')
-      return
+      return false
     } else {
       if (modeling_nodeList.value.length == 1) {
         ElMessage.error('模型中仅包含数据源，无法运行，请添加其他模块')
-        return
+        return false
       }
       if (moduleStr.indexOf('数据源') > 0) {
         ElMessage.error('数据源模块必须位于模型中第一个位置')
-        return
+        return false
       }
     }
     moduleStr = moduleStr.replace('数据源', '')
@@ -2432,46 +2517,7 @@ function checkModelOrder() {
     console.log('algorithmStr: ', algorithmStr)
     // 首先判断模型中是否存在除了数据源之外的1个以上的模块，如果模型中只有一个模块，判断其是否可以独立地运行而不需要其他模块的支持
     if (modeling_nodeList.value.length == 2) {
-      if (canRunSoloModule(moduleStr)) {
-        let tip
-        if (moduleStr.match('故障诊断')) {
-          tip = '模型中包含故障诊断，建议在此之前进行特征提取和特征选择等操作'
-        } else if (moduleStr.match('层次分析模糊综合评估')) {
-          tip = '模型中包含层次分析模糊综合评估，建议在此之前进行特征提取和特征选择等操作'
-        } else if (moduleStr.match('特征选择')) {
-          tip = '模型中包含特征选择，建议在此之前进行特征提取等操作'
-        } else if (moduleStr.match('故障预测')) {
-          tip = '模型中包含故障预测，建议在此之前进行故障诊断'
-        }
-
-        ElMessage({
-          message: '该算法无法单独使用，请结合相应的算法,' + tip,
-          type: 'warning',
-          showClose: true
-        })
-
-        return
-      } else {
-        // 无量纲化要检查是否使用模型训练师使用的标准化方法，对输入的原始信号无法使用模型训练时使用的标准化方法进行无量纲化
-        if (moduleStr.match('无量纲化')) {
-          let node
-          for (let item of modeling_nodeList.value) {
-            if (item.nodeInfo.label == '无量纲化') {
-              node = item.nodeInfo
-              break
-            }
-          }
-          if (node?.parameters[node.use_algorithm]['useLog'] == true) {
-
-            ElMessageBox.alert('如果要使用模型训练时使用的标准化方法进行无量纲化，请确保无量纲化模块之前对数据进行了特征提取，或者在参数设置中选择不使用模型训练时使用的标准化方法', '提示', {
-              confirmButtonText: '确定',
-              draggable: true,
-              buttonSize: 'medium',
-            })
-
-            return
-          }
-        }
+      if (canRunSoloModule(moduleStr, algorithmStr)){
         // 如果模块可以单独运行，再进行模型中各个模块的参数设置的检查
         let checkParamsRight = checkModelParam()
         let isLofical_completeness = toObject().nodes.length-toObject().edges.length
@@ -2489,8 +2535,49 @@ function checkModelOrder() {
             message: '请确保所有具有参数的模块的参数设置正确',
             type: 'warning'
           })
-          return
+          return false
         }
+      }else{
+
+        let tip
+        if (moduleStr.match('故障诊断')) {
+          tip = '模型中包含故障诊断，建议在此之前进行特征提取和特征选择等操作'
+        } else if (moduleStr.match('层次分析模糊综合评估')) {
+          tip = '模型中包含层次分析模糊综合评估，建议在此之前进行特征提取和特征选择等操作'
+        } else if (moduleStr.match('特征选择')) {
+          tip = '模型中包含特征选择，建议在此之前进行特征提取等操作'
+        } else if (moduleStr.match('故障预测')) {
+          tip = '模型中包含故障预测，建议在此之前进行故障诊断'
+        }
+
+        ElMessage({
+          message: '该算法无法单独使用，请结合相应的算法,' + tip,
+          type: 'warning',
+          showClose: true
+        })
+
+        return false
+        // 无量纲化要检查是否使用模型训练师使用的标准化方法，对输入的原始信号无法使用模型训练时使用的标准化方法进行无量纲化
+        if (moduleStr.match('无量纲化')) {
+          let node
+          for (let item of modeling_nodeList.value) {
+            if (item.nodeInfo.label == '无量纲化') {
+              node = item.nodeInfo
+              break
+            }
+          }
+          if (node?.parameters[node.use_algorithm]['useLog'] == true) {
+
+            ElMessageBox.alert('如果要使用模型训练时使用的标准化方法进行无量纲化，请确保无量纲化模块之前对数据进行了特征提取，或者在参数设置中选择不使用模型训练时使用的标准化方法', '提示', {
+              confirmButtonText: '确定',
+              draggable: true,
+              buttonSize: 'medium',
+            })
+
+            return false
+          }
+        }
+        
       }
     } else {
       // 检查模型中是否存在未被连接的模块
@@ -2499,7 +2586,7 @@ function checkModelOrder() {
           message: '请确保图中所有模块均已建立连接，且没有多余的模块',
           type: 'warning'
         })
-        return
+        return false
       } else {
         // 模型正常连接的情况下进行模型逻辑以及模型参数的检查
         if (algorithmStr.match('多传感器') && algorithmStr.match('单传感器')) {
@@ -2508,7 +2595,7 @@ function checkModelOrder() {
             message: '多传感器和单传感器的算法不能混合使用！',
             type: 'warning'
           })
-          return
+          return false
         }
         if (moduleStr.match('故障诊断')) {
           // 如果是深度学习模型的故障诊断
@@ -2522,7 +2609,7 @@ function checkModelOrder() {
                   type: 'warning',
                   showClose: true
                 })
-                return
+                return false
               }
             }
             // 如果使用深度学习模型的故障诊断之后有其他的模块
@@ -2548,7 +2635,7 @@ function checkModelOrder() {
                       type: 'warning',
                       showClose: true
                     })
-                    return
+                    return false
                   } else {
                     current = '故障预测'
                   }
@@ -2559,8 +2646,8 @@ function checkModelOrder() {
                   current = includeHealthEvaluation(moduleStr)
                   if (!current) {
                     message.error('模型检查出错，请重新链接模型')
-                    return
-                  }
+                    return false
+                  } 
                 } else {
                   current = '故障预测'
                 }
@@ -2571,7 +2658,7 @@ function checkModelOrder() {
                     type: 'warning',
                     showClose: true
                   })
-                  return
+                  return false
                 }
 
               }
@@ -2600,7 +2687,7 @@ function checkModelOrder() {
                 outlineWidth: 5,
 
               });
-              return
+              return false
             } else {
               // 如果特征提取和特征选择同时存在
               if (preModuleText.match('特征提取') && preModuleText.match('特征选择')) {
@@ -2611,7 +2698,7 @@ function checkModelOrder() {
                     type: 'warning',
                     showClose: true
                   })
-                  return
+                  return false
                 }
               } else {
                 // 如果只包含特征选择
@@ -2634,7 +2721,7 @@ function checkModelOrder() {
                     outlineWidth: 5,
 
                   });
-                  return
+                  return false
                 }
                 // 如果只包含特征提取
                 else if (preModuleText.match('特征提取')) {
@@ -2656,7 +2743,7 @@ function checkModelOrder() {
                     outlineWidth: 5,
 
                   });
-                  return
+                  return false
                 }
 
               }
@@ -2684,8 +2771,8 @@ function checkModelOrder() {
             showClose: true,
             message: '因模型中包含故障诊断，建议在特征提取之后包含特征选择',
             type: 'warning'
-          })
-          return
+          })  
+          return false
         }
         if (moduleStr.indexOf('小波变换') > 0) {
           // 小波变换只能针对信号序列，之前不能已经进行了特征提取
@@ -2712,7 +2799,7 @@ function checkModelOrder() {
               outlineWidth: 5,
 
             });
-            return
+            return false
           }
         }
         if (includeHealthEvaluation(moduleStr)) {
@@ -2739,7 +2826,7 @@ function checkModelOrder() {
               outlineStroke: 'transparent',
               outlineWidth: 5,
             });
-            return
+            return false
           }
           if (moreText(moduleStr, healthEvaluation)) {
             let sourceId = labelToId(healthEvaluation)
@@ -2759,7 +2846,7 @@ function checkModelOrder() {
               message: '注意健康评估之后无法连接更多的模块',
               type: 'warning'
             })
-            return
+            return false
           }
 
         }
@@ -2784,7 +2871,7 @@ function checkModelOrder() {
 
             });
 
-            return
+            return false
           }
         }
         if (algorithmStr.match('深度学习模型的故障诊断') || algorithmStr.match('GRU的故障诊断') || algorithmStr.match('LSTM的故障诊断')) {
@@ -2799,7 +2886,7 @@ function checkModelOrder() {
                 message: '使用深度学习模型的故障诊断不需要进行特征提取或是特征选择，请删除相关模块！',
                 type: 'warning'
               })
-              return
+              return false
             }
 
           }
@@ -2810,7 +2897,7 @@ function checkModelOrder() {
             message: '针对单传感器的算法无法与针对多传感器的算法共用',
             type: 'warning'
           })
-          return
+          return false
         }
         if (moduleStr.match('无量纲化')) {
           let node
@@ -2831,7 +2918,7 @@ function checkModelOrder() {
                 draggable: true,
                 buttonSize: 'medium',
               })
-              return
+              return false
             }
           } else {
 
@@ -2847,7 +2934,7 @@ function checkModelOrder() {
                     buttonSize: 'medium',
                   }
               )
-              return
+              return false
             } else if (!preModule.match('特征提取') && useLog == true) {
               ElMessageBox.alert(
                   '无量纲化模块之前未进行特征提取，因此无法使用模型训练时使用的标准化方法进行无量纲化，请在无量纲化的参数设置中选择不使用模型训练时使用的标准化方法进行无量纲化',
@@ -2887,7 +2974,7 @@ function checkModelOrder() {
               outlineWidth: 5,
 
             });
-            return
+            return false
           }
         }
         if (moduleStr.match('故障预测')) {
@@ -2899,7 +2986,7 @@ function checkModelOrder() {
               type: 'warning'
             })
 
-            return
+            return false
           } else {
             let preModuleText = moduleStr.substring(0, moduleStr.indexOf('故障预测'))
             if (!preModuleText.match('故障诊断')) {
@@ -2922,7 +3009,7 @@ function checkModelOrder() {
                 outlineWidth: 5,
 
               });
-              return
+              return false
             }
 
           }
@@ -2953,7 +3040,7 @@ function checkModelOrder() {
 
               });
 
-              return
+              return false
             }
           }
           // 如果模型中包含SVM的故障诊断，则需要先加入无量纲化操作
@@ -2978,7 +3065,7 @@ function checkModelOrder() {
                 outlineWidth: 5,
 
               });
-              return
+              return false
             } else {
               if (!algorithmStr.match('z-score标准化')) {
                 ElMessage({
@@ -2986,7 +3073,7 @@ function checkModelOrder() {
                   message: '因模型中包含SVM的故障诊断，需要在此之前加入z-score标准化操作',
                   type: 'warning'
                 })
-                return
+                return false
               }
             }
 
@@ -3009,7 +3096,7 @@ function checkModelOrder() {
             message: '请确保所有具有参数的模块的参数设置正确',
             type: 'warning'
           })
-          return
+          return false
         }
       }
     }
@@ -3018,21 +3105,38 @@ function checkModelOrder() {
       message: '请先建立模型',
       type: 'warning'
     })
-    return
+    return false
   }
+  return true
 };
+
+// 标记模型已经通过检查
+const modelHasBeenChecked = ref(false)
 //检查模型
 function checkModelOfViewFlow() {
-
+  let checkContent = false
+  let checkOrder = false
   //检查时构建contentJson
-  if(modeling_nodeList.value.length>1){
-    buildContentJson()
+  if(modeling_nodeList.value.length > 1){
+    checkContent = buildContentJson()
+  }else{
+    ElMessage({
+      message: '请先建立包含数据源与至少一个组件的模型',
+      type: 'warning'
+    })
+    return false
   }
 
   console.log("检查模型时构建contentJson: ", contentJson)
   // 进行模型参数设置和逻辑的检查
-  var check_order_right = checkModelOrder()
-  console.log("check_order_right: ", buildContentJson())
+  checkOrder = checkModelOrder()
+
+  if (checkContent && checkOrder){
+    modelHasBeenChecked.value = true
+    // disabledStateOfControlBtn.value.saveModelOfViewFlowBtn = false
+    // disabledStateOfControlBtn.value.runModelOfViewFlowBtn = false
+  }
+  // console.log("check_order_right: ", buildContentJson())
 }
 
 //构建处理顺序
@@ -3075,7 +3179,8 @@ function buildContentJson() {
   console.log("构建处理逻辑: ")
   let isLofical_completeness = toObject().nodes.length-toObject().edges.length
   if(isLofical_completeness != 1){
-   return
+    console.log("构建处理逻辑: ", toObject().edges)
+   return true
   }else{
     toObject().edges.forEach(edge => {
       console.log("edge: ", edge)
@@ -3110,7 +3215,7 @@ function buildContentJson() {
           message: '请设置每个算法的必选属性',
           type: 'error'
         })
-        return
+        return false
       }
 
       contentJson.algorithms[dict.nodeInfo.label] = dict.nodeInfo.use_algorithm
@@ -3121,15 +3226,18 @@ function buildContentJson() {
 
       // 选择特征提取需要提取的参数
       if (dict.nodeInfo.id == '1.2') {
-        let params = dict.nodeInfo.parameters[dict.nodeInfo.use_algorithm]
+        let params: Object = dict.nodeInfo.parameters[dict.nodeInfo.use_algorithm]
         if (!features.value.length) {
           ElMessage({
             message: '请设置每个算法的必选属性',
             type: 'error'
           })
-          return
+          return false
         }
         console.log('features: ', features.value)
+        for(let key of Object.keys(params)){
+          params[key] = false
+        }
         features.value.forEach(element => {
           if (params[element] == false) {
             console.log(' element设为真',element)
@@ -3149,15 +3257,17 @@ function buildContentJson() {
     //将顺序转化成中文名称
     const lettersOnly = order.value.map(item => {
       //处理单个字符串
-      return item.replace(/[^a-zA-Z_]/g, '')
-    })
-        .filter(item => item.length > 0); // 过滤掉空字符串
+      return item.replace(/[^a-zA-Z_\u4e00-\u9fa5]/g, '')
+    }).filter(item => item.length > 0); // 过滤掉空字符串
+    console.log('新模型顺序22222: ', lettersOnly)
+
     for (let i = 0; i < lettersOnly.length; i++) {
       let obj = Object.keys(contentJson.algorithms).find(key => contentJson.algorithms[key] === lettersOnly[i])
       contentJson.schedule.push(obj)
     }
     console.log('构建的contentJson', contentJson);
   }
+  return true
 }
 
 
@@ -3186,6 +3296,10 @@ const getComponentTrees = async() => {
 
 //保存模型
 async function saveModelOfViewFlow() {
+  if (!modelHasBeenChecked.value){
+    ElMessage.warning("请先完成模型检查，再保存模型")
+    return
+  }
   //显示保存模型表单
   await getComponentTrees();
   console.log("saveModelOfViewFlow trees: ", dataSourceOfTree)
@@ -3195,6 +3309,11 @@ async function saveModelOfViewFlow() {
 //运行模型
 function runModelOfViewFlow() {
 
+  if (!modelHasBeenChecked.value){
+    ElMessage.warning("请先完成模型检查，再运行模型")
+    return
+  }
+
   if (!usingDatafile.value) {
     ElMessage({
       message: '请先加载数据',
@@ -3202,7 +3321,7 @@ function runModelOfViewFlow() {
     })
     return
   }
-
+  console.log("runModelOfViewFlow modelLoaded: ", modelLoaded.value)
   const data = new FormData()
   data.append("file_name", usingDatafile.value)  // 所使用的数据文件
   data.append('params', JSON.stringify(contentJson))  // 模型信息
@@ -3338,6 +3457,7 @@ import {useRunProcess} from './vueflow/useRunProcess'
 import {useShuffle} from './vueflow/useShuffle'
 import {useLayout} from './vueflow/useLayout'
 import CustomForm from "@/components/vueflow/CustomForm.vue";
+import { result } from 'lodash';
 
 const cancelOnError = ref(true)
 const shuffle = useShuffle()
@@ -3388,6 +3508,9 @@ watch(modeling_nodeList, (newVal, oldVal) => {
     parameter_dict.value = {}
     console.log("监听器添加元素后parameter_dict: ", parameter_dict.value)
     console.log("动态修改数据: ",item.use_algorithm)
+    missionComplete.value = false
+    // disabledStateOfControlBtn.value.saveModelOfViewFlowBtn = true
+    // disabledStateOfControlBtn.value.runModelOfViewFlowBtn = true
     if(item.nodeId=='1.2'){
       console.log("进入1.2",)
          transfer.value['特征提取'] = item.use_algorithm
@@ -3410,9 +3533,13 @@ watch(modeling_nodeList, (newVal, oldVal) => {
       containsMenuSettings.value.push(item.nodeInfo.id);
 
     })
+    
   } else {
     const removedItems = oldVal.filter(item => !newVal.includes(item));
     if (removedItems.length) {
+      missionComplete.value = false
+      // disabledStateOfControlBtn.value.saveModelOfViewFlowBtn = true
+      // disabledStateOfControlBtn.value.runModelOfViewFlowBtn = true
       console.log('删除的元素:', removedItems);
       parameter_dict.value = {}
       console.log("parameter_dict.value: ", parameter_dict.value)
@@ -4159,7 +4286,7 @@ const menuList2 = ref([
       {
         label: '无量纲化', id: '1.5', use_algorithm: null, parameters: {
           'max_min': {useLog: false},
-          'z-score': {useLog: false},
+          'z_score': {useLog: false},
           'robust_scaler': {useLog: false},
           'max_abs_scaler': {useLog: false},
         }, tip_show: false, tip: '对输入数据进行无量纲化处理', optional: true
@@ -4176,7 +4303,7 @@ const menuList2 = ref([
       },
       {
         label: '小波变换', id: '1.4', use_algorithm: null, parameters: {
-          'wavelet_trans_denoise': {'wavelet': '', 'wavelet_level': ''},
+          'wavelet_trans_denoise': {'wavelet': 'db1', 'wavelet_level': '1'},
         }, tip_show: false, tip: '对输入信号进行小波变换', optional: true
       }
     ], tip_show: false, tip: '包含添加噪声、插值以及特征提取等'
@@ -4241,10 +4368,7 @@ const menuList2 = ref([
 
 // 算法参数的推荐值，目前包括小波变换的变换类型和变换层数、特征选择的依据规则及相应阈值
 const recommendParams = {
-  'wavelet': [{value: 'db1', label: 'db1'}, {value: 'db2', label: 'db2'}, {
-    value: 'sym1',
-    label: 'sym1'
-  }, {value: 'sym2', label: 'sym2'}, {value: 'coif1', label: 'coif1'}],
+  'wavelet': [{value: 'db1', label: 'db1'}, {value: 'db2', label: 'db2'}, {value: 'sym2', label: 'sym2'}, {value: 'coif1', label: 'coif1'}],
   'wavelet_level': [{value: 1, label: '1'}, {value: 2, label: '2'}, {value: 3, label: '3'}],
   // 规则一的各算法的阈值推荐值
   'threshold1': {
@@ -5680,21 +5804,21 @@ const handleClear = () => {
   done.value = false
   nodeList.value = []  // 可视化建模区的节点列表
   // features.value = []  // 特征提取选择的特征
-  features.value = ['均值', '方差', '标准差', '峰度', '偏度', '四阶累积量', '六阶累积量', '最大值', '最小值', '中位数', '峰峰值', '整流平均值', '均方根', '方根幅值',
-    '波形因子', '峰值因子', '脉冲因子', '裕度因子', '重心频率', '均方频率', '均方根频率', '频率方差', '频率标准差', '谱峭度的均值', '谱峭度的标准差', '谱峭度的峰度', '谱峭度的偏度']
+  // features.value = ['均值', '方差', '标准差', '峰度', '偏度', '四阶累积量', '六阶累积量', '最大值', '最小值', '中位数', '峰峰值', '整流平均值', '均方根', '方根幅值',
+  //   '波形因子', '峰值因子', '脉冲因子', '裕度因子', '重心频率', '均方频率', '均方根频率', '频率方差', '频率标准差', '谱峭度的均值', '谱峭度的标准差', '谱峭度的峰度', '谱峭度的偏度']
   jsonClear()    // 向后端发送的模型信息
   isShow.value = false
-  plumbIns.deleteEveryConnection()
-  plumbIns.deleteEveryEndpoint()
-  linkedList.head = null
-  linkedList.tail = null
+  // plumbIns.deleteEveryConnection()
+  // plumbIns.deleteEveryEndpoint()
+  // linkedList.head = null
+  // linkedList.tail = null
   missionComplete.value = false // 程序处理完成
   modelSetup.value = false   // 模型设置完成
   showPlainIntroduction.value = false
   showStatusMessage.value = false
   modelHasBeenSaved = false  //复用历史模型，不做模型检查
   toRectifyModel.value = false  // 禁用修改模型
-  canCompleteModeling.value = true
+  // canCompleteModeling.value = true
   canCheckModel.value = true
   canSaveModel.value = true
   processIsShutdown.value = false
@@ -6013,7 +6137,8 @@ const filterTreeData = (data) => {
   });
 }
 
-
+// 用于控制模型树子组件
+const superComponentTree = ref()
 // 完成模型名称等信息的填写后，确定保存模型
 const saveModelConfirm = async (formEl: FormInstance | undefined) => {
   if(contentJson.schedule.length==0){
@@ -6068,6 +6193,9 @@ const saveModelConfirm = async (formEl: FormInstance | undefined) => {
             message: '保存模型成功',
             type: 'success'
           })
+          // 刷新模型结构树
+          // superComponentTree.value.getComponentTrees()
+
           modelsDrawer.value = true       // 关闭历史模型抽屉
           dialogFormVisible.value = false    // 关闭提示窗口
           dialogModle.value = false
@@ -6106,6 +6234,7 @@ const canShowResults = ref(false)
 // 健康评估结果展示
 const healthEvaluation = ref('')
 const displayHealthEvaluation = ref(false)
+const generateHealthEvaluationFigure = ref(false)
 const activeName1 = ref('first')
 const healthEvaluationOfExample = ref('样本1')
 const resultsBarOfAllExamples = ref({});
@@ -6257,6 +6386,7 @@ nextTick(() => {
     var pieChartOption;
 
     pieChartOption = {
+      animation: false,
       title: {
         text: '评估结果中不同状态所属的样本数量比例',
         // subtext: 'Fake Data',
@@ -6301,8 +6431,12 @@ nextTick(() => {
         backgroundColor: '#fff',
         excludeComponents: ['toolbox']
     });
+    // 去除图片Base64编码前缀
+    imgSrc = imgSrc.replace(/^data:image\/[a-z]+;base64,/, "");
+
     // 向最终报告添加健康评估的结果
     resultsToGenerateConclusion['healthEvaluation']['imageBase64'] = imgSrc
+    resultsToGenerateConclusion['healthEvaluation']['text'] = finalSuggestion.value
   }
 
 })
@@ -6314,10 +6448,9 @@ nextTick(() => {
 }
 
 
-
-
 // 特征提取结果展示
 const displayFeatureExtraction = ref(false)
+const generateFeatureExtractionFigure = ref(false)
 // const transformedData = ref([])
 // const columns = ref([])
 const numOfSensors = ref<number>(0)
@@ -6400,7 +6533,6 @@ nextTick(() => {
             symbol: 'circle',
             symbolSize: 2,
             data: dataSeries.map((value, index) => [index, value]),
-            
           }
         ]
       }
@@ -6472,7 +6604,7 @@ nextTick(() => {
       });
       // 提取 Base64 编码部分
       var base64Image = imgSrc.split(',')[1];
-      console.log(" feature extraction base64Image: ", base64Image)
+      // console.log(" feature extraction base64Image: ", base64Image)
       // 将imgsrc编码为字符串
       resultsToGenerateConclusion['featureExtraction']['imageBase64'] = base64Image
     }
@@ -6488,6 +6620,7 @@ nextTick(() => {
 
 // 特征选择结果可视化
 const displayFeatureSelection = ref(false)
+const generateFeatureSelectionFigure = ref(false)
 const featureSelectionFigure = ref('')
 const featuresSelected = ref('')
 const selectFeatureRule = ref('')
@@ -6537,7 +6670,7 @@ const feedBackDialogVisible = ref(false)
 const feedBackFormRef = ref()
 
 const feedBackRules = {
-  selectedModule: [
+  module: [
     { required: true, message: '请选择一个模块', trigger: 'change' }
   ],
   feedbackContent: [
@@ -6554,12 +6687,13 @@ const feedBackFormRefState = reactive({
 
 const feedBack = () => {
   // console.log("feedBackFormRef: ", feedBackFormRef.value)
-  // feedBackFormRef.value.validate.then(() => {
+  feedBackFormRef.value.validate().then(() => {
     
     const formData = new FormData();
     formData.append('username', username.value)
     formData.append('datafile', usingDatafile.value)
-    formData.append('modelName', modelLoaded.value)
+    // console.log("feedBack modelLoaded: ", modelLoaded.value)
+    formData.append('modelName', modelLoadedName.value)
     formData.append('module', feedBackFormRefState.module)
     formData.append('question', feedBackFormRefState.feedbackContent)
     formData.append('modelId', modelLoadedId)
@@ -6576,17 +6710,17 @@ const feedBack = () => {
       console.log("上传反馈失败", error)
       message.error("上传反馈失败")
     })
-//   })
-//   .catch((error: any) => {
-//     console.error('反馈提交失败', error);
-//     message.error('反馈提交失败，请重试');
-//   })
+  })
+  .catch((error: any) => {
+    console.error('反馈提交失败', error);
+  })
 }
 
 
 
 // 故障诊断结果展示
 const displayFaultDiagnosis = ref(false)
+const generateFaultDiagnosisFigure = ref(false)
 const faultDiagnosis = ref('')
 const faultDiagnosisFigure = ref('')
 const faultDiagnosisResultsText = ref('')
@@ -6741,6 +6875,8 @@ const faultDiagnosisResultOption = ref('2')
 //   faultDiagnosisFigure.value = 'data:image/png;base64,' + figure1
 
 // }
+
+const canShowIndicator = ref(false)
 
 const faultDiagnosisDisplay = async(resultsObject: any) => {
   // displayFaultDiagnosis.value = true
@@ -6914,6 +7050,7 @@ const faultDiagnosisDisplay = async(resultsObject: any) => {
 
 // 故障预测结果展示
 const displayFaultRegression = ref(false)
+const generateFaultRegressionFigure = ref(false)
 const haveFault = ref(0)
 const faultRegression = ref('')
 const timeToFault = ref('')
@@ -6968,6 +7105,7 @@ const faultRegressionDisplay = async(resultsObject: any) => {
 // 插值处理可视化
 const activeName3 = ref('1')
 const displayInterpolation = ref(false)
+const generateInterpolationFigure = ref(false)
 const interpolationFigures = ref([]) // 插值处理结果图像
 const interpolationResultsOfSensors = ref([])   // 插值处理结果中有几个传感器
 
@@ -6996,13 +7134,12 @@ const interpolationDisplay = async(resultsObject: any) => {
   for (const [key, value] of Object.entries(resultsObject)) {
     sensorId += 1
     interpolationFigures.value.push('data:image/png;base64,' + value)
-    if (!resultsToGenerateConclusion['featureSelection']['imageBase64']){
-      resultsToGenerateConclusion['featureSelection']['imageBase64'] = value
-      resultsToGenerateConclusion['featureSelection']['text'] = '插值处理结果'
+    if (!resultsToGenerateConclusion['interpolation']['imageBase64']){
+      resultsToGenerateConclusion['interpolation']['imageBase64'] = value
+      resultsToGenerateConclusion['interpolation']['text'] = '插值处理结果'
     }
     interpolationResultsOfSensors.value.push({label: key.split('_')[0], name: sensorId.toString()})
   }
-  resultsToGenerateConclusion['featureSelection']['imageBase64']
   // console.log('interpolationResultsOfSensors: ', interpolationResultsOfSensors)
   // console.log('interpolationFigures: ', interpolationFigures)
   // displayDenoise.value = true
@@ -7014,6 +7151,7 @@ const interpolationDisplay = async(resultsObject: any) => {
 // 无量纲化可视化
 const activeName4 = ref('1')
 const displayNormalization = ref(false)
+const generateNormalizationFigure = ref(false)
 const normalizationFormdataRaw = ref([])
 const normalizationFormdataScaled = ref([])  // 无量纲的结果表格
 const normalizationColumns = ref([])
@@ -7089,6 +7227,7 @@ const normalizationDisplay = async(resultsObject: any) => {
 // 小波降噪可视化
 const activeName2 = ref('1')
 const displayDenoise = ref(false)
+const generateDenoiseFigure = ref(false)
 const denoiseFigures = ref([])  // 存放小波降噪结果图片
 
 interface waveletResults {
@@ -7156,12 +7295,7 @@ const toggleSelectAll = () => {
   if (selectAllModuleToGenerateResult.value) {
     moduleResultToGenerateList.value = [...contentJson.schedule];
   } else {
-    // 取消全选时至少保留第一项
-    if (moduleResultToGenerateList.value.length > 0) {
-      moduleResultToGenerateList.value = [contentJson.schedule[0]];
-    } else {
-      moduleResultToGenerateList.value = [];
-    }
+    moduleResultToGenerateList.value = [];
   }
   // 去除“数据源”这一项
   moduleResultToGenerateList.value = moduleResultToGenerateList.value.filter(item => item !== '数据源');
@@ -7179,7 +7313,9 @@ const outputConfig = () => {
     })
     return;
   }
+  moduleResultToGenerateList.value = []
   outputConfigVisible.value = true
+  selectAllModuleToGenerateResult.value = false
 }
 
 
@@ -7187,6 +7323,7 @@ let mapping = {
   '层次分析模糊综合评估': 'healthEvaluation',
   '层次朴素贝叶斯评估': 'healthEvaluation',
   '层次逻辑回归评估': 'healthEvaluation',
+  '健康评估': 'healthEvaluation',
   '特征提取': 'featureExtraction',
   '特征选择': 'featureSelection',
   '故障诊断': 'faultDiagnosis',
@@ -7208,12 +7345,16 @@ const generateConclusion = async() => {
     return
   }
   // 将中文的模块名转换为英文
-  resultsToGenerateConclusion.includedModules = moduleResultToGenerateList.value.map(item => mapping[item]);
+  resultsToGenerateConclusion.includedModules = moduleResultToGenerateList.value.map(item => mapping[item])
+  // console.log('resultsToGenerateOutput: ', resultsToGenerateConclusion)
+  resultsViewClear()
+  canShowResults.value = true
+  console.log("canShowResults: ", canShowResults.value)
   moduleResultToGenerateList.value.forEach(moduleName => {
     if (missionComplete.value){
       // console.log("moduleName: ", moduleName)
       
-    generateResultsToDisplay(moduleName, false);
+     generateResultsToDisplay(moduleName, false);
        // 输出结果总体描述
     
       // console.log('moduleResultToGenerateList: ', moduleResultToGenerateList.value)
@@ -7290,9 +7431,19 @@ const resultsViewClear = () => {
   displayDenoise.value = false
   displayRawDataWaveform.value = false
 
-  if (!done.value) {
-    currentDisplayedItem = ''
-  }
+  // 重置报告生成配置
+  generateFeatureExtractionFigure.value = false
+  generateHealthEvaluationFigure.value = false
+  generateFaultDiagnosisFigure.value = false
+  generateFeatureSelectionFigure.value = false
+  generateDenoiseFigure.value = false
+  generateNormalizationFigure.value = false
+  generateInterpolationFigure.value = false
+  generateFaultRegressionFigure.value = false
+
+  currentDisplayedItem = ''
+  // if (!done.value) {
+  // }
 }
 
 // 当前显示的算法模块结果
@@ -7301,90 +7452,182 @@ let currentDisplayedItem = ''
 const generateResultsToDisplay = async(moduleName: string, display: boolean) => {
   if (moduleName == '层次分析模糊综合评估') {
       let results_to_show = responseResults.层次分析模糊综合评估
-      if (currentDisplayedItem != '层次分析模糊综合评估') {
+      if (currentDisplayedItem != '层次分析模糊综合评估' && display) {
         currentDisplayedItem = '层次分析模糊综合评估'
-      } else {
         displayHealthEvaluation.value = display  // 显示健康评估结果
-        return
+        await healthEvaluationDisplay(results_to_show)
+      } else {
+        if (display && currentDisplayedItem == '层次分析模糊综合评估'){
+          displayHealthEvaluation.value = display  // 显示健康评估结果
+        }
+        if (!display) {
+          generateHealthEvaluationFigure.value = true
+          await healthEvaluationDisplay(results_to_show)
+        }
       }
-      displayHealthEvaluation.value = display  // 显示健康评估结果
-      await healthEvaluationDisplay(results_to_show)
     } else if (moduleName == '特征提取') {
-      if (currentDisplayedItem != '特征提取') {
-        currentDisplayedItem = '特征提取'
-      } else {
-        displayFeatureExtraction.value = display  // 显示特征提取结果
-        return
-      }
       let results_to_show = responseResults.特征提取
-      displayFeatureExtraction.value = display
-      await featureExtractionDisplay(results_to_show)
+      if (currentDisplayedItem != '特征提取' && display) {
+        currentDisplayedItem = '特征提取'
+        displayFeatureExtraction.value = display
+        await featureExtractionDisplay(results_to_show)
+      } else {
+        if(display && currentDisplayedItem == '特征提取'){
+          displayFeatureExtraction.value = display  // 显示特征提取结果
+        }
+        if(!display){
+          generateFeatureExtractionFigure.value = true
+          // displayFeatureExtraction.value = display
+          featureExtractionDisplay(results_to_show)
+        }
+      }
     } else if (moduleName == '特征选择') {
-      if (currentDisplayedItem != '特征选择') {
-        currentDisplayedItem = '特征选择'
-      } else {
-        displayFeatureSelection.value = display  // 显示特征选择结果
-        return
-      }
       let results_to_show = responseResults.特征选择
-      displayFeatureSelection.value = display
-      await featuresSelectionDisplay(results_to_show)
-    } else if (moduleName == '故障诊断') {
-      if (currentDisplayedItem != '故障诊断') {
-        currentDisplayedItem = '故障诊断'
+      if (currentDisplayedItem != '特征选择' && display) {
+        currentDisplayedItem = '特征选择'
+        displayFeatureSelection.value = display
+        await featuresSelectionDisplay(results_to_show)
       } else {
-        displayFaultDiagnosis.value = display
-        return
+        if(display && currentDisplayedItem == '特征选择'){
+          displayFeatureSelection.value = display  // 显示特征选择结果
+        }
+        if(!display){
+          generateFeatureSelectionFigure.value = true
+          featuresSelectionDisplay(results_to_show)
+        }
       }
+      
+    } else if (moduleName == '故障诊断') {
       let results_to_show = responseResults.故障诊断
-      displayFaultDiagnosis.value = display
-      await faultDiagnosisDisplay(results_to_show)
+      if (currentDisplayedItem != '故障诊断' && display) {
+        currentDisplayedItem = '故障诊断'
+        displayFaultDiagnosis.value = display
+        await faultDiagnosisDisplay(results_to_show)
+      } else {
+        if(display && currentDisplayedItem == '故障诊断'){
+          displayFaultDiagnosis.value = display
+        }
+        if(!display){
+          generateFaultDiagnosisFigure.value = true
+          console.log("generateFaultDiagnosisFigure: ", generateFaultDiagnosisFigure.value)
+          await faultDiagnosisDisplay(results_to_show)
+        }
+      }
     } else if (moduleName == '故障预测') {
       let results_to_show = responseResults.故障预测
-      displayFaultRegression.value = display
-      await faultRegressionDisplay(results_to_show)
+      if (currentDisplayedItem != '故障预测' && display) {
+        currentDisplayedItem = '故障预测'
+        displayFaultRegression.value = display
+        await faultRegressionDisplay(results_to_show)
+      }else{
+        if(display && currentDisplayedItem == '故障预测'){
+          displayFaultRegression.value = display
+        }
+        if(!display){
+          // 仅生成报告所需图片结果而不显示
+          generateFaultRegressionFigure.value = true
+          faultRegressionDisplay(results_to_show)
+        }
+      }
     } else if (moduleName == '插值处理') {
       let results_to_show = responseResults.插值处理
-      displayInterpolation.value = display
-      await interpolationDisplay(results_to_show)
+      if (currentDisplayedItem != '插值处理' && display) {
+        currentDisplayedItem = '插值处理'
+        displayInterpolation.value = display
+        await interpolationDisplay(results_to_show)
+      }else{
+        if(display && currentDisplayedItem == '插值处理'){
+          displayInterpolation.value = display
+        }
+        if(!display){
+          // 仅生成报告所需图片结果而不显示
+          generateInterpolationFigure.value = true
+          interpolationDisplay(results_to_show)
+        }
+      }
     } else if (moduleName == '无量纲化') {
       let results_to_show = responseResults.无量纲化
-      displayNormalization.value = display
-      await normalizationDisplay(results_to_show)
+      if (currentDisplayedItem != '无量纲化' && display) {
+        currentDisplayedItem = '无量纲化'
+        displayNormalization.value = display
+        await normalizationDisplay(results_to_show)
+      } else {
+        if(display && currentDisplayedItem == '无量纲化'){
+          displayNormalization.value = display
+        }
+        if(!display){
+          // 仅生成报告所需图片结果而不显示
+          generateNormalizationFigure.value = true
+          normalizationDisplay(results_to_show)
+        }
+      }
     } else if (moduleName == '小波变换') {
       let results_to_show = responseResults.小波变换
-      displayDenoise.value = display
-      await denoiseDisplay(results_to_show)
-    } else if (moduleName == '层次朴素贝叶斯评估') {
-      let results_to_show = responseResults.层次朴素贝叶斯评估
-      if (currentDisplayedItem != '层次朴素贝叶斯评估') {
-        currentDisplayedItem = '层次朴素贝叶斯评估'
+      if (currentDisplayedItem != '小波变换' && display) {
+        currentDisplayedItem = '小波变换'
+        displayDenoise.value = display
+        await denoiseDisplay(results_to_show)
       } else {
-        displayHealthEvaluation.value = display
-        return
+        if(display && currentDisplayedItem == '小波变换'){
+          displayDenoise.value = display
+        }
+        if(!display){
+          // 仅生成报告所需图片结果而不显示
+          generateDenoiseFigure.value = true
+          denoiseDisplay(results_to_show)
+        }
       }
-      displayHealthEvaluation.value = display
-      await healthEvaluationDisplay(results_to_show)
+    } else if (moduleName == '层次朴素贝叶斯评估' ) {
+      let results_to_show = responseResults.层次朴素贝叶斯评估
+      if (currentDisplayedItem != '层次朴素贝叶斯评估' && display) {
+        currentDisplayedItem = '层次朴素贝叶斯评估'
+        displayHealthEvaluation.value = display
+        await healthEvaluationDisplay(results_to_show)
+      } else {
+        if(display && currentDisplayedItem == '层次朴素贝叶斯评估'){
+          displayHealthEvaluation.value = display
+        }
+        if(!display){
+          // 仅生成报告所需图片结果而不显示
+          generateHealthEvaluationFigure.value = true
+          healthEvaluationDisplay(results_to_show)
+        }
+      }
+      
+      
     } else if (moduleName == '层次逻辑回归评估') {
       let results_to_show = responseResults.层次逻辑回归评估
-      if (currentDisplayedItem != '层次逻辑回归评估') {
+      if (currentDisplayedItem != '层次逻辑回归评估' && display) {
         currentDisplayedItem = '层次逻辑回归评估'
-      } else {
         displayHealthEvaluation.value = display
-        return
+        await healthEvaluationDisplay(results_to_show)
+      } else {
+        if(display && currentDisplayedItem == '层次逻辑回归评估'){
+          displayHealthEvaluation.value = display
+        }
+        if(!display){
+          // 仅生成报告所需图片结果而不显示
+          generateHealthEvaluationFigure.value = true
+          healthEvaluationDisplay(results_to_show)
+        }
       }
-      displayHealthEvaluation.value = display
-      await healthEvaluationDisplay(results_to_show)
     } else if (moduleName == '健康评估') {
       let results_to_show = responseResults.健康评估
-      if (currentDisplayedItem != '健康评估') {
+      if (currentDisplayedItem != '健康评估' && display) {
         currentDisplayedItem = '健康评估'
-      } else {
         displayHealthEvaluation.value = display
-        return
+        await healthEvaluationDisplay(results_to_show)
+      } else {
+        if(display && currentDisplayedItem == '健康评估'){
+          displayHealthEvaluation.value = display
+        }
+        if(!display){
+          // 仅生成报告所需图片结果而不显示
+          generateHealthEvaluationFigure.value = true
+          healthEvaluationDisplay(results_to_show)
+        }
       }
-      displayHealthEvaluation.value = display
-      await healthEvaluationDisplay(results_to_show)
+      
     } else {
       ElMessage({
         message: '无效的算法模块',
@@ -7426,6 +7669,7 @@ const toggleFullscreen = () => {
 // 复用历史模型，不需要进行模型检查等操作
 let modelHasBeenSaved = false
 const modelLoaded = ref('无')  // 已加载的历史模型
+let modelLoadedId = ''
 
 //恢复画布
 function restoreCanvas(objects) {
@@ -7739,6 +7983,35 @@ const useDataset = (row_in: any) => {
   }, 1000)
 
 }
+
+
+// 按关键字搜索用户数据文件
+const searchDataset = () => {
+  api
+    .get("user/search_dataset/?keywords=" + searchDataKeyword.value)
+    .then((response: any) => {
+      if (response.data.code == 401) {
+        ElMessageBox.alert("登录状态已失效，请重新登陆", "提示", {
+          confirmButtonText: "确定",
+          callback: () => {
+            router.push("/");
+          },
+        });
+      } else if (response.data.code == 200) {
+        fetchedDataFiles.value.length = 0;
+        for (let item of response.data.data) {
+          fetchedDataFiles.value.push(item);
+        }
+      }
+    })
+    .catch(() => {
+      // message.error("搜索失败，请重试");
+      ElMessage({
+        message: "搜索失败，请重试",
+        type: "error",
+      });
+    });
+};
 
 // const handleSwitchDrawer = (fetchData: any[]) => {
 
@@ -8165,6 +8438,7 @@ body {
 
 .welcome-message {
   font-size: 16px;
+  font-family: 'Microsoft YaHei';
   //color: #409EFF;
   color: black;
   margin-right: 18px;
@@ -8174,6 +8448,7 @@ body {
 
 .action-item {
   display: flex;
+  font-family: 'Microsoft YaHei';
   align-items: center;
   margin-right: 18px;
   cursor: pointer;
@@ -8310,6 +8585,7 @@ import '@fortawesome/fontawesome-free/css/all.css';
   //overflow: auto;
   overflow-y: hidden;
   flex-grow: 1;
+  height: 100%
 }
 
 .buttonsOfElMain {

@@ -1,7 +1,7 @@
 <template>
   <a-button class="private-algorithm-button" ghost @click="uploadPrivateAlgorithmFiles()">
     <i class="fa-solid fa-cloud-arrow-up" style="margin-right: 3px;"></i>
-    <span style="font-family: 'JetBrains Mono', monospace;">上传组件</span>
+    <span style="font-family: 'Microsoft YaHei';">上传组件</span>
   </a-button>
   <!-- 上传增值服务组件的操作面板 -->
   <a-modal
@@ -246,6 +246,45 @@
             :max-scale="7"
             :min-scale="0.2"
             :preview-src-list="interpolationFigures"
+            :initial-index="4"
+            fit="cover"
+          />
+        </div>
+        <!-- 无量纲化组件校验的结果 -->
+        <div v-if="canDisplayDimensionlessValidationResult" style="width: 100%; height: 250px;" >
+          <el-image
+            :src="dimensionlessFigures[0]"
+            :zoom-rate="1.2"
+            :max-scale="7"
+            :min-scale="0.2"
+            :preview-src-list="dimensionlessFigures"
+            :initial-index="4"
+            fit="cover"
+          />
+        </div>
+
+        <!-- 小波变换组件校验的结果 -->
+        <div v-if="canDisplayWaveletTransformValidationResult" style="width: 100%; height: 250px;" >
+          <el-image
+            :src="waveletTransformFigures[0]"
+            :zoom-rate="1.2"
+            :max-scale="7"
+            :min-scale="0.2"
+            :preview-src-list="waveletTransformFigures"
+            :initial-index="4"
+            fit="cover"
+          />
+        </div>
+
+        <!-- 故障诊断组件校验的结果 -->
+        <div v-if="canDisplayFaultDiagnosisValidationResult" style="width: 100%; height: auto;" >
+          <el-image
+            style="width: auto; height: 100px;"
+            :src="faultDiagnosisFigures[0]"
+            :zoom-rate="1.2"
+            :max-scale="7"
+            :min-scale="0.2"
+            :preview-src-list="faultDiagnosisFigures"
             :initial-index="4"
             fit="cover"
           />
@@ -737,7 +776,7 @@ let contentJsonForFaultDiagnosisML = {
       谱峭度的均值: true,
       谱峭度的峰度: true,
     },
-    correlation_coefficient_importance: {'rule': 1, 'threshold1': 0.45, 'threshold2': 0.1},
+    correlation_coefficient_importance: {'rule': 1, 'threshold1': 0.25, 'threshold2': 0.1},
     private_fault_diagnosis_machine_learning: '',
   },
   schedule: ["数据源", "特征提取", "特征选择", "故障诊断"],
@@ -765,7 +804,25 @@ const startValidating = () => {
   const data = new FormData();
   // data.append("file_name", validateExtraAlgorithmUsingFileName.value); // 所使用的数据文件
   data.append("params", JSON.stringify(contentJson)); // 模型信息
-  data.append('validationExample', 'single_sensor_example')
+  let algorithmType = unknownform.algorithmType;
+
+  switch (algorithmType) {
+    case "插值处理":
+      data.append("validationExample", "example_for_interpolation_validation");
+      break;
+    case "小波变换":
+      data.append("validationExample", "single_sensor_example");
+      break;
+    case "无量纲化":
+      data.append("validationExample", "single_sensor_example");
+      break;
+    case "故障诊断":
+      data.append("validationExample", "example_for_fault_diagnosis_validation");
+      break;
+    default:
+      data.append("validationExample", "single_sensor_example");
+  }
+  // data.append('validationExample', 'single_sensor_example')
 
   return api
     .post("user/run_with_datafile_on_cloud/", data, {
@@ -854,22 +911,37 @@ const deleteExtraModule = () => {
     });
 };
 
-const canDisplayInterpolationValidationResult = ref(false)
-const canDisplayWaveletTransformValidationResult = ref(false)
+const canDisplayInterpolationValidationResult = ref(false)  // 插值处理组件校验结果
+const canDisplayWaveletTransformValidationResult = ref(false)  // 小波变换组件校验结果
+const canDisplayDimensionlessValidationResult = ref(false)  // 无量纲化组件校验结果
+const canDisplayFaultDiagnosisValidationResult = ref(false)  // 故障诊断组件校验结果
 
 const resetDisplay = () => {
   canDisplayInterpolationValidationResult.value = false
   canDisplayWaveletTransformValidationResult.value = false
+  canDisplayDimensionlessValidationResult.value = false
+  canDisplayFaultDiagnosisValidationResult.value = false
 }
 
+// 关闭组件校验结果
 const closeValidationResult = () => {
   canShowValidationResult.value = false
 }
 
-const interpolationFigures = ref([])
+const interpolationFigures = ref<string[]>([])  // 插值处理组件校验结果
+const waveletTransformFigures = ref<string[]>([])  // 小波变换组件校验结果
+const dimensionlessFigures = ref<string[]>([])  // 无量纲化组件校验结果
+const faultDiagnosisFigures = ref<string[]>([])  // 故障诊断组件校验结果
 // const interpolationResultsOfSensors = ref([])
+interface ResultsObject {  // 完整性校验结果
+  插值处理: Object
+  小波变换: Object
+  无量纲化: Object
+  故障诊断: Object
+}
+
 // 完整性校验通过后的结果展示
-const displayValidationResult = (algorithmType: string, resultsObject: Object) => {
+const displayValidationResult = (algorithmType: string, resultsObject: ResultsObject) => {
   interpolationFigures.value.length = 0
   // interpolationResultsOfSensors.value.length = 0
   // 清除显示结果
@@ -878,11 +950,33 @@ const displayValidationResult = (algorithmType: string, resultsObject: Object) =
     canDisplayInterpolationValidationResult.value = true
     for(const [key, value] of Object.entries(resultsObject.插值处理)){
       // 将插值处理的结果添加到插值图展示
-      console.log('value: ', value)
+      // console.log('value: ', value)
       interpolationFigures.value.push('data:image/png;base64,' + value)
       // interpolationResultsOfSensors.value.push({label: key.split('_')[0], name: sensorId.toString()})
     }
+  }else if(algorithmType == "无量纲化"){
+    canDisplayDimensionlessValidationResult.value = true
+    for(const [key, value] of Object.entries(resultsObject.无量纲化)){
+      // interpolationFigures.value.push('data:image/png;base64,' + value)
+      dimensionlessFigures.value.push('data:image/png;base64,' + value)
+    }
+  }else if(algorithmType == "故障诊断"){
+    canDisplayFaultDiagnosisValidationResult.value = true
+    let faultDiagnosisValidationResult: string = resultsObject.故障诊断.fd_validation_result
+    // interpolationFigures.value.push('data:image/png;base64,' + value)
+    faultDiagnosisFigures.value.push('data:image/png;base64,' + faultDiagnosisValidationResult)
+    
   }
+
+  if (algorithmType == "小波变换"){
+    canDisplayWaveletTransformValidationResult.value = true
+    // interpolationFigures.value.push('data:image/png;base64,' + resultsObject.小波变换)
+    for(const [key, value] of Object.entries(resultsObject.小波变换)){
+      waveletTransformFigures.value.push('data:image/png;base64,' + value)
+    }
+  }
+
+  
 }
 
 
@@ -915,6 +1009,7 @@ const extraModuleUploadAndValidate = async () => {
     Object.assign(contentJson, contentJsonForDimensionless);
   } else if (unknownform.algorithmType == '故障诊断') {
     if (unknownform.faultDiagnosisType == 'machineLearning'){
+      // 基于机器学习的故障诊断的组件校验
       contentJsonForFaultDiagnosisML.parameters['private_fault_diagnosis_machine_learning'] = algorithmName;
       Object.assign(contentJson, contentJsonForFaultDiagnosisML)
     }

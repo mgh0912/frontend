@@ -1,5 +1,5 @@
 <template>
-  <div style="display: flex; width: 100%; height: 100vh;">
+  <div style="display: flex; width: 100%; height: 100vh; font-family: 'Microsoft YaHei';">
     <!-- 左侧导航栏 -->
     <div style="background-color: #262a2d; width: 200px; height: 100%;">
       <div class="left-header">
@@ -26,7 +26,7 @@
         <div class="left-content">
           <el-breadcrumb separator="/" class="navigation"></el-breadcrumb>
         </div>
-        <div class="page-title">轨道车辆智能运维通用算法和工具软件系统管理</div> <!-- 添加页面标题 -->
+        <div class="page-title">轨道车辆智能运维通用算法和工具软件管理平台</div> <!-- 添加页面标题 -->
         <div class="user-info-container" id="userInfo" style="position: absolute; right: 50px; top: 20px; color: black;">
           <span style="margin-right: 10px;">欢迎！ {{ username }}</span>
           <span @click="logout" class="clickable">退出登录</span>
@@ -102,6 +102,7 @@ const logout = () => {
   display: flex;
   height: 40px;
   
+  font-family: 'Microsoft YaHei';
   justify-content: space-between;
   align-items: center;
   padding: 10px;

@@ -34,7 +34,7 @@ export const labelsForAlgorithms = {
     lstm_multiple: "多传感器LSTM的故障诊断",
     wavelet_trans_denoise: "小波变换降噪",
     max_min: "max_min标准化",
-    "z-score": "z-score标准化",
+    "z_score": "z-score标准化",
     robust_scaler: "鲁棒标准化",
     max_abs_scaler: "最大绝对值标准化",
     neighboring_values_interpolation: "邻近值插值",

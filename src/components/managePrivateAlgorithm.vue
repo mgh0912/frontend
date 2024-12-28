@@ -2,7 +2,7 @@
 <template>
   <a-button class="private-algorithm-button" ghost @click="showExtraModules">
     <i class="fa-solid fa-screwdriver-wrench" style="margin-right: 3px;"></i>
-    <span style="font-family: 'JetBrains Mono', monospace;">管理组件</span>
+    <span style="font-family: 'Microsoft YaHei';">管理组件</span>
   </a-button>
   <!-- 管理增值服务组件的弹窗 -->
   <a-modal

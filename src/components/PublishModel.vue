@@ -8,14 +8,18 @@
   <div>
     <div
     >
-      <div style="flex-direction: column;display: flex;">
-        <a-button v-if="props.userRole === 'superuser'" @click="openPublishModelPanel" >
-          <span style="font-family: 'JetBrains Mono', monospace;width:100%">模型管理</span>
+      <a-button class="private-algorithm-button" ghost @click="openPublishModelPanel">
+        <i class="fa-solid fa-screwdriver-wrench" style="margin-right: 3px;"></i>
+        <span style="font-family: 'Microsoft YaHei'">模型管理</span>
       </a-button>
-      <a-button v-if="props.userRole === 'superuser'" @click="fetchModels" >
+      
+        <!-- <a-button v-if="props.userRole === 'superuser'" @click="openPublishModelPanel" >
+          <span style="font-family: 'Microsoft YaHei';">模型管理</span>
+        </a-button> -->
+      <!-- <a-button v-if="props.userRole === 'superuser'" @click="fetchModels" >
           <span style="font-family: 'JetBrains Mono', monospace;width:100%">打开模型库</span>
-      </a-button>
-     </div>
+      </a-button> -->
+     
       
       <!-- <div
         class="highlight"
@@ -458,4 +462,16 @@ const getColor = (value: string) => {
 };
 </script>
 
-<style></style>
+<style scoped>
+.private-algorithm-button {
+  background-color: #ffffff;
+  color: #333333;
+  font-size: 16px;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border-radius: 0;
+}
+
+
+</style>

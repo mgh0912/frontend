@@ -7,29 +7,43 @@
       style="width: 100%; margin-bottom: 5px"
     />
     <!-- 新增树形结构 -->
-    <div style="width: 100%; display: flex; flex-direction: row" v-if="props.userRole === 'superuser'">
+    <!-- <div style="width: 100%; display: flex; flex-direction: row" v-if="props.userRole === 'superuser'">
       <el-input
         v-model="nameOfNewTree"
         placeholder="输入名称"
         style="width: 60%; margin-bottom: 5px"
       />
       <el-button style="width: 40%" @click="addNewComponentTree"
-        >新增模型结构树</el-button
+        >新增结构树</el-button
       >
+    </div> -->
+     <!-- 新增树形结构 -->
+    <div style="width: 100%; margin-bottom: 15px;" v-if="props.userRole === 'superuser'">
+      <el-form :model="form" style="width: 100%; display: flex; flex-direction: row" :rules="rules" ref="formRef">
+        <el-form-item prop="nameOfNewTree" style="width: 60%;">
+          <el-input
+            v-model="form.nameOfNewTree"
+            placeholder="输入结构树名称"
+          />
+        </el-form-item>
+        <el-form-item style="width: 40%">
+          <el-button style="width: 100%"@click="submitForm">新增结构树</el-button>
+        </el-form-item>
+      </el-form>
     </div>
     <!-- 已有树形结构，使用 scoped-slot 渲染 -->
-    <div style="width: 100%; overflow-x: auto">
-      <div style="">
+    <div style="width: 100%; overflow-x: auto;">
         <el-tree
           ref="treeRef"
           :data="filteredDataOfTree"
-          style="width: 100%; max-width: 100%"
           node-key="id"
           :highlight-current="true"
           :expand-on-click-node="false"
           :default-expand-all="isExpandAllOfTree"
           :filter-node-method="filterNodeOfTree"
           :accordion="false"
+          empty-text="无数据"
+          style="display: inline-block; min-width: 100%;"
         >
           <template #default="{ data }">
               <span class="custom-tree-node" style="">
@@ -99,12 +113,11 @@
           </template>
         </el-dialog>
       </div>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ElMessage, ElMessageBox, ElTree} from "element-plus";
+import {ElForm, ElMessage, ElMessageBox, ElTree} from "element-plus";
 import { ref, watch, reactive, onMounted } from "vue";
 import api from "../utils/api.js";
 import { isNode } from "@vue-flow/core";
@@ -141,6 +154,33 @@ const modelClick =(data) => {
   emit("loadModel", store);
 
 }
+
+
+const form = reactive({
+  nameOfNewTree: ""
+});
+
+const rules = reactive({
+  nameOfNewTree: [
+    { required: true, message: '请输入新增结构树名称', trigger: 'blur' },
+    { pattern: /^[a-zA-Z0-9_\u4e00-\u9fa5]+$/, message: '组件名称只能包含中英文、下划线和数字', trigger: 'blur' }
+  ]
+});
+
+const formRef = ref<InstanceType<typeof ElForm>>();
+
+const submitForm = () => {
+  formRef.value!.validate((valid) => {
+    if (valid) {
+      addNewComponentTree();
+    } else {
+      console.log('校验失败');
+      return false;
+    }
+  });
+};
+
+
 // 点击子组件的加载模型，加载模型并到父组件userPlatForm.vue显示出来
 const loadModel = (row: modelInfo) => {
   modelLoaded.value = row.model_name;
@@ -324,21 +364,21 @@ const getComponentTrees = () => {
   });
 };
 
-const nameOfNewTree = ref("");
+// const nameOfNewTree = ref("");
 // 新增组件树形结构
 const addNewComponentTree = () => {
   // 检验nameOfNewTree的格式，不能为空，且只能包含中英文、下划线和数字
-  if (nameOfNewTree.value.trim() === "") {
-    ElMessage.error("请输入组件名称");
-    return;
-  }
-  if (!/^[a-zA-Z0-9_\u4e00-\u9fa5]+$/.test(nameOfNewTree.value)) {
-    ElMessage.error("组件名称只能包含中英文、下划线和数字");
-    return;
-  }
+  // if (nameOfNewTree.value.trim() === "") {
+  //   ElMessage.error("请输入新增结构树名称");
+  //   return;
+  // }
+  // if (!/^[a-zA-Z0-9_\u4e00-\u9fa5]+$/.test(nameOfNewTree.value)) {
+  //   ElMessage.error("组件名称只能包含中英文、下划线和数字");
+  //   return;
+  // }
   // 向后端发送建立新的结构树的post请求，请求内容包含新的结构树的树名
   let formData = new FormData();
-  formData.append("treeName", nameOfNewTree.value);
+  formData.append("treeName", form.nameOfNewTree);
   api
     .post("user/create_component_tree", formData)
     .then((response: any) => {
@@ -348,7 +388,7 @@ const addNewComponentTree = () => {
         ElMessage.success("添加成功");
         getComponentTrees();
         // 重置输入框
-        nameOfNewTree.value = "";
+        form.nameOfNewTree = "";
       } else {
         ElMessage.error("新建树失败，" + response.data.message);
       }

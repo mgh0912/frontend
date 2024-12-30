@@ -4,21 +4,22 @@
     <el-table
       :data="tableData"
       style="width: 100%"
-      height="500px"
+      height="100%"
       :stripe="true"
       :header-cell-style="{ backgroundColor: '#f5f7fa', color: '#606266' }"
       border
       empty-text="暂无数据"
     >
       <!-- <el-table-column prop="id" label="ID" /> -->
-      <el-table-column prop="id" label="序号" width="100px" />
+      <el-table-column prop="id" label="序号" width="70px" />
       <el-table-column prop="username" label="反馈用户" />
+      <el-table-column prop="time" label="反馈时间" />
       <el-table-column prop="model" label="使用模型" />
       <el-table-column prop="datafile" label="使用数据文件" />
       <!-- <el-table-column prop="password" label="密码" /> -->
       <el-table-column prop="module" label="有疑问的组件" />
       <el-table-column prop="status" label="处理状态" />
-      <el-table-column label="操作">
+      <el-table-column label="操作" width="250px">
         <template #default="scope">
           <div style="display: flex">
             <!-- 单选框 -->
@@ -110,14 +111,20 @@
       </el-table-column>
     </el-table>
   </div>
-  <div v-if="selectedFeedback" class="detail-container">
-    <h3>反馈详情</h3>
-    <p><strong>反馈序号:</strong> {{ selectedFeedback.id }}</p>
-    <p><strong>反馈用户:</strong> {{ selectedFeedback.username }}</p>
-    <p><strong>使用模型:</strong> {{ selectedFeedback.model }}</p>
-    <p><strong>使用数据文件:</strong> {{ selectedFeedback.datafile }}</p>
-    <p><strong>有疑问的组件:</strong> {{ selectedFeedback.module }}</p>
-    <p><strong>问题描述:</strong> {{ selectedFeedback.question }}</p>
+  <div v-if="selectedFeedback.id" class="detail-container">
+    <el-scrollbar height="100%">
+      
+      <h3>反馈详情</h3>
+      <p><strong>反馈序号:</strong> {{ selectedFeedback.id }}</p>
+      <p><strong>反馈用户:</strong> {{ selectedFeedback.username }}</p>
+      <p><strong>反馈时间:</strong> {{ selectedFeedback.time }}</p>
+      <p><strong>使用模型:</strong> {{ selectedFeedback.model }}</p>
+      <p><strong>使用数据文件:</strong> {{ selectedFeedback.datafile }}</p>
+      <p><strong>有疑问的组件:</strong> {{ selectedFeedback.module }}</p>
+      
+      <p><strong>问题描述:</strong> {{ selectedFeedback.question }}</p>
+      
+    </el-scrollbar>
   </div>
 </template>
 
@@ -138,6 +145,7 @@ interface Feedback {
   module: string;
   question: string;
   status: string;
+  time: string;
   processed: boolean;
 }
 const tableData = reactive<Feedback[]>([]);
@@ -152,6 +160,7 @@ const selectedFeedback = reactive<Feedback>({
   module: "",
   question: "",
   status: "",
+  time: "",
   processed: false,
 });
 // 获取用户模型
@@ -232,6 +241,7 @@ const handleProcessedChange = (row: Feedback) => {
   });
 };
 
+// 显示反馈详情
 const handleSelectFeedback = (row: any) => {
   selectedFeedback.id = row.id;
   selectedFeedback.username = row.username;
@@ -240,10 +250,11 @@ const handleSelectFeedback = (row: any) => {
   selectedFeedback.module = row.module;
   selectedFeedback.question = row.question;
   selectedFeedback.status = row.status;
+  selectedFeedback.time = row.time;
 };
 </script>
 
-<style>
+<style scoped>
 
 .shadow-border {
   width: 200px;
@@ -271,7 +282,7 @@ const handleSelectFeedback = (row: any) => {
 
 .table-container {
   width: 86%;
-  height: 510px;
+  height: 40%;
   padding: 20px;
   background-color: white;
   border-radius: 5px;
@@ -282,13 +293,12 @@ const handleSelectFeedback = (row: any) => {
 
 .detail-container {
   width: 86%;
-  padding: 20px;
+  height: 30%;
   background-color: white;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
   margin-left: 30px;
-  margin-top: 20px;
   text-align: left;
 }
 

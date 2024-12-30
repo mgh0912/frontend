@@ -1,7 +1,7 @@
 <template>
   <a-button class="private-algorithm-button" ghost @click="uploadPrivateAlgorithmFiles()">
     <i class="fa-solid fa-cloud-arrow-up" style="margin-right: 3px;"></i>
-    <span style="font-family: 'JetBrains Mono', monospace;">上传组件</span>
+    <span style="font-family: 'Microsoft YaHei';">上传组件</span>
   </a-button>
   <!-- 上传增值服务组件的操作面板 -->
   <a-modal
@@ -17,6 +17,7 @@
         padding: 10px;
         flex-direction: column;
         justify-content: center;
+        font-family: 'Microsoft YaHei';
       "
     >
       <div style="width: 100%">
@@ -25,7 +26,7 @@
           <span><span style="color: red">*</span>选择上传组件的类型：</span>
       
           <a-tree-select
-            v-model:value="unknownform.algorithmType"
+            v-model:value="uploadAlgorithmForm.algorithmType"
             show-search
             style="width: 40%"
             :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
@@ -45,10 +46,10 @@
         <!-- 当上传无量纲化算法时，需要进一步选择是提取特征还是原始信号进行无量纲化 -->
         <div
           style="padding-top: 0; padding-bottom: 10px"
-          v-if="unknownform.algorithmType === '无量纲化'"
+          v-if="uploadAlgorithmForm.algorithmType === '无量纲化'"
         >
           <span><span style="color: red">*</span>选择无量纲化的对象：</span>
-          <a-radio-group v-model:value="unknownform.useLog" name="gradioGroup">
+          <a-radio-group v-model:value="uploadAlgorithmForm.useLog" name="gradioGroup">
             <a-radio :value="false">对原始信号无量纲化</a-radio>
             <a-radio :value="true">对提取的特征无量纲化</a-radio>
           </a-radio-group>
@@ -90,10 +91,10 @@
           <div></div>
 
           <!-- 当上传故障诊断算法时，需要进一步选择是机器学习的还是深度学习的故障诊断 -->
-          <div style="margin-top: 20px" v-if="unknownform.algorithmType === '故障诊断'">
+          <div style="margin-top: 20px" v-if="uploadAlgorithmForm.algorithmType === '故障诊断'">
             <span><span style="color: red">*</span>选择所使用的模型类型：</span>
             <a-radio-group
-              v-model:value="unknownform.faultDiagnosisType"
+              v-model:value="uploadAlgorithmForm.faultDiagnosisType"
               name="gradioGroup"
               @change="removeModelFile"
             >
@@ -107,7 +108,7 @@
             style="display: flex; flex-direction: row; margin-top: 20px"
             v-if="
               canUploadModelFile ||
-              (unknownform.algorithmType === '无量纲化' && unknownform.useLog)
+              (uploadAlgorithmForm.algorithmType === '无量纲化' && uploadAlgorithmForm.useLog)
             "
           >
             <span><span style="color: red">*</span>选择使用的模型文件：</span>
@@ -194,7 +195,10 @@
                   </a-select-option>
                 </a-select>
               </div> -->
-
+              <!-- <a-radio-group v-model:value="uploadAlgorithmForm.validationDataType">
+                <a-radio value="single">单传感器</a-radio>
+                <a-radio value="multiple">多传感器</a-radio>
+              </a-radio-group> -->
               <a-button
                 type="primary"
                 :disabled="
@@ -213,12 +217,12 @@
               <!-- 显示校验结果 -->
               <span style="font-size: 20px" v-if="canShowValidationResult">
                 <!-- <a-icon v-if="extraModuleValidationResult === 'success'" type="check-circle" theme="twoTone" twoToneColor="#52c41a" /> -->
-                <span v-if="extraModuleValidationResult === true" style="display: flex;align-items: center">
+                <span v-if="extraModuleValidationResult === true && !uploading" style="display: flex;align-items: center">
                   <CheckCircleOutlined style="color: green" />
                   <span style="font-size: 12px; margin-left: 5px">校验通过，上传成功</span>
                 </span>
 
-                <span v-else style="display: flex;align-items: center">
+                <span v-if="extraModuleValidationResult === false && !uploading" style="display: flex;align-items: center">
                   <CloseCircleOutlined style="color: red" />
                   <span style="font-size: 12px; margin-left: 5px">校验失败</span>
                 </span>
@@ -248,6 +252,57 @@
             :preview-src-list="interpolationFigures"
             :initial-index="4"
             fit="cover"
+          />
+        </div>
+        <!-- 无量纲化组件校验的结果 -->
+        <div v-if="canDisplayDimensionlessValidationResult" style="width: 100%; height: 250px;" >
+          <el-image
+            :src="dimensionlessFigures[0]"
+            :zoom-rate="1.2"
+            :max-scale="7"
+            :min-scale="0.2"
+            :preview-src-list="dimensionlessFigures"
+            :initial-index="4"
+            fit="cover"
+          />
+        </div>
+
+        <!-- 小波变换组件校验的结果 -->
+        <div v-if="canDisplayWaveletTransformValidationResult" style="width: 100%; height: 250px;" >
+          <el-image
+            :src="waveletTransformFigures[0]"
+            :zoom-rate="1.2"
+            :max-scale="7"
+            :min-scale="0.2"
+            :preview-src-list="waveletTransformFigures"
+            :initial-index="4"
+            fit="cover"
+          />
+        </div>
+
+        <!-- 故障诊断组件校验的结果 -->
+        <div v-if="canDisplayFaultDiagnosisValidationResult" style="width: 100%; height: auto;" >
+          <el-image
+            style="width: auto; height: 100px;"
+            :src="faultDiagnosisFigures[0]"
+            :zoom-rate="1.2"
+            :max-scale="7"
+            :min-scale="0.2"
+            :preview-src-list="faultDiagnosisFigures"
+            :initial-index="4"
+            fit="cover"
+          />
+        </div>
+
+        <!-- 健康评估组件校验结果 -->
+        <div v-if="canDisplayHealthEvaluationValidationResult" style="width: 100%; height: auto;" >
+          <el-image
+            style="width: auto; height: 100px;"
+            :src="healthEvaluationFigures[0]"
+            :zoom-rate="1.2"
+            :max-scale="7"
+            :min-scale="0.2"
+            :preview-src-list="healthEvaluationFigures"
           />
         </div>
         
@@ -291,6 +346,7 @@
     :title="templateName + '参考模版'"
     :ok-button-props="{ style: { display: 'none' } }"
     :cancel-button-props="{ style: { display: 'none' } }"
+    style="font-size: 20px; font-family: 'Microsoft YaHei'"
   >
     <el-scrollbar :height="600">
       <div v-if="templateName === '插值处理'">
@@ -601,8 +657,8 @@ const canSelectPythonFile = ref(true);
 // 私有算法
 const privateAlgorithms = [
   "插值处理",
-  "特征提取",
-  "特征选择",
+  // "特征提取",
+  // "特征选择",
   "小波变换",
   "无量纲化",
   "故障诊断",
@@ -623,10 +679,11 @@ const router = useRouter();
 const pythonFileList = ref<UploadProps["fileList"]>([]); //算法源文件列表
 const modelFileList = ref<UploadProps["fileList"]>([]); //模型源文件列表
 const uploading = ref<boolean>(false);
-const unknownform = reactive({
+const uploadAlgorithmForm = reactive({
   algorithmType: '', // 私有算法类型
   fileList: [],
   faultDiagnosisType: "machineLearning", // 故障诊断算法类型，可选值为machineLearning和deepLearning
+  validationDataType: "single",  // 验证数据类型，可选择为单传感器和多传感器
   useLog: false, // 是否使用训练模型时的标准化方法，为true时，使用训练模型时的标准化方法，为false时，使用当前数据集的标准化方法
 });
 
@@ -690,7 +747,7 @@ let contentJsonForDimensionless = {
   multipleSensor: false, // 是否为多传感器数据
 };
 
-// 校验故障诊断增值组件
+// 校验深度学习故障诊断增值组件
 let contentJsonForFaultDiagnosisDL = {
   modules: ["故障诊断"],
   algorithms: { 故障诊断: "private_fault_diagnosis_deeplearning" },
@@ -737,12 +794,53 @@ let contentJsonForFaultDiagnosisML = {
       谱峭度的均值: true,
       谱峭度的峰度: true,
     },
-    correlation_coefficient_importance: {'rule': 1, 'threshold1': 0.45, 'threshold2': 0.1},
+    correlation_coefficient_importance: {'rule': 1, 'threshold1': 0.25, 'threshold2': 0.1},
     private_fault_diagnosis_machine_learning: '',
   },
   schedule: ["数据源", "特征提取", "特征选择", "故障诊断"],
   mutipleSensor: false,
 };
+
+// 校验健康评估增值服务组件
+let contentJsonForHealthEvaluation = {
+  modules: ["特征提取", "健康评估"],
+  algorithms: { 
+    特征提取: "time_frequency_domain_features",
+    健康评估: "private_health_evaluation",
+  },
+  parameters: { 
+    time_frequency_domain_features: {
+      均值: true,
+      方差: true,
+      标准差: true,
+      峰度: true,
+      偏度: true,
+      四阶累积量: true,
+      六阶累积量: true,
+      最大值: true,
+      最小值: true,
+      中位数: true,
+      峰峰值: true,
+      整流平均值: true,
+      均方根: true,
+      方根幅值: true,
+      波形因子: true,
+      峰值因子: true,
+      脉冲因子: true,
+      裕度因子: true,
+      重心频率: true,
+      均方频率: true,
+      均方根频率: true,
+      频率方差: true,
+      频率标准差: true,
+      谱峭度的均值: true,
+      谱峭度的峰度: true,
+    },
+    private_health_evaluation: "" 
+  },
+  schedule: ["数据源", "特征提取", "健康评估"],
+  multipleSensor: false, // 是否为多传感器数据
+}
 
 // 校验小波变换增值组件
 // let contentJsonForWaveletTrans = {
@@ -764,8 +862,34 @@ let validationResultsToDisplay: Object;
 const startValidating = () => {
   const data = new FormData();
   // data.append("file_name", validateExtraAlgorithmUsingFileName.value); // 所使用的数据文件
-  data.append("params", JSON.stringify(contentJson)); // 模型信息
-  data.append('validationExample', 'single_sensor_example')
+  data.append("params", JSON.stringify(contentJson)); // 需要进行组件校验时的默认校验模型
+  let algorithmType = uploadAlgorithmForm.algorithmType;
+
+  switch (algorithmType) {
+    case "插值处理":
+      data.append("validationExample", "example_for_interpolation_validation");
+      break;
+    case "小波变换":
+      data.append("validationExample", "single_sensor_example");
+      break;
+    case "无量纲化":
+      data.append("validationExample", "single_sensor_example");
+      break;
+    case "健康评估":
+      data.append("validationExample", "example_for_fault_diagnosis_validation");
+      break;
+    case "故障诊断":
+      if (uploadAlgorithmForm.faultDiagnosisType === "machineLearning") {
+        data.append("validationExample", "example_for_fault_diagnosis_validation");
+      } else {
+        data.append("validationExample", "example_for_fault_diagnosis_validation_multiple");
+      }
+      break;
+    default:
+      data.append("validationExample", "single_sensor_example");
+  }
+
+  // data.append('validationExample', 'single_sensor_example')
 
   return api
     .post("user/run_with_datafile_on_cloud/", data, {
@@ -854,22 +978,40 @@ const deleteExtraModule = () => {
     });
 };
 
-const canDisplayInterpolationValidationResult = ref(false)
-const canDisplayWaveletTransformValidationResult = ref(false)
+const canDisplayInterpolationValidationResult = ref(false)  // 插值处理组件校验结果
+const canDisplayWaveletTransformValidationResult = ref(false)  // 小波变换组件校验结果
+const canDisplayDimensionlessValidationResult = ref(false)  // 无量纲化组件校验结果
+const canDisplayFaultDiagnosisValidationResult = ref(false)  // 故障诊断组件校验结果
+const canDisplayHealthEvaluationValidationResult = ref(false)
 
 const resetDisplay = () => {
   canDisplayInterpolationValidationResult.value = false
   canDisplayWaveletTransformValidationResult.value = false
+  canDisplayDimensionlessValidationResult.value = false
+  canDisplayFaultDiagnosisValidationResult.value = false
+  canDisplayHealthEvaluationValidationResult.value = false
 }
 
+// 关闭组件校验结果
 const closeValidationResult = () => {
   canShowValidationResult.value = false
 }
 
-const interpolationFigures = ref([])
+const interpolationFigures = ref<string[]>([])  // 插值处理组件校验结果
+const waveletTransformFigures = ref<string[]>([])  // 小波变换组件校验结果
+const dimensionlessFigures = ref<string[]>([])  // 无量纲化组件校验结果
+const faultDiagnosisFigures = ref<string[]>([])  // 故障诊断组件校验结果
+const healthEvaluationFigures = ref<string[]>([])  // 健康评估组件校验结果
 // const interpolationResultsOfSensors = ref([])
+interface ResultsObject {  // 完整性校验结果
+  插值处理: Object
+  小波变换: Object
+  无量纲化: Object
+  故障诊断: Object
+}
+
 // 完整性校验通过后的结果展示
-const displayValidationResult = (algorithmType: string, resultsObject: Object) => {
+const displayValidationResult = (algorithmType: string, resultsObject: ResultsObject) => {
   interpolationFigures.value.length = 0
   // interpolationResultsOfSensors.value.length = 0
   // 清除显示结果
@@ -878,16 +1020,43 @@ const displayValidationResult = (algorithmType: string, resultsObject: Object) =
     canDisplayInterpolationValidationResult.value = true
     for(const [key, value] of Object.entries(resultsObject.插值处理)){
       // 将插值处理的结果添加到插值图展示
-      console.log('value: ', value)
+      // console.log('value: ', value)
       interpolationFigures.value.push('data:image/png;base64,' + value)
       // interpolationResultsOfSensors.value.push({label: key.split('_')[0], name: sensorId.toString()})
     }
+  }else if(algorithmType == "无量纲化"){
+    canDisplayDimensionlessValidationResult.value = true
+    for(const [key, value] of Object.entries(resultsObject.无量纲化)){
+      // interpolationFigures.value.push('data:image/png;base64,' + value)
+      dimensionlessFigures.value.push('data:image/png;base64,' + value)
+    }
+  }else if(algorithmType == "故障诊断"){
+    canDisplayFaultDiagnosisValidationResult.value = true
+    let faultDiagnosisValidationResult: string = resultsObject.故障诊断.fd_validation_result
+    // interpolationFigures.value.push('data:image/png;base64,' + value)
+    faultDiagnosisFigures.value.push('data:image/png;base64,' + faultDiagnosisValidationResult)
+    
+  }else if(algorithmType == "健康评估"){
+    canDisplayHealthEvaluationValidationResult.value = true
+    let healthEvaluationValidationResult: string = resultsObject.健康评估.he_validation_result
+    healthEvaluationFigures.value.push('data:image/png;base64,' + healthEvaluationValidationResult)
   }
+
+  else if (algorithmType == "小波变换"){
+    canDisplayWaveletTransformValidationResult.value = true
+    // interpolationFigures.value.push('data:image/png;base64,' + resultsObject.小波变换)
+    for(const [key, value] of Object.entries(resultsObject.小波变换)){
+      waveletTransformFigures.value.push('data:image/png;base64,' + value)
+    }
+  }
+
+  
 }
 
 
 // 校验增值服务组件所使用的用户样本
 const validateExtraAlgorithmUsingFileName = ref("");
+
 // 提交上传组件并进行校验
 const extraModuleUploadAndValidate = async () => {
   // extraModuleValidationResult.value = true
@@ -902,22 +1071,34 @@ const extraModuleUploadAndValidate = async () => {
     return;
   }
   let algorithmName = extraAlgorithmFileFormState.algorithmName;
-  if (unknownform.algorithmType == "小波变换") {
+  if (uploadAlgorithmForm.algorithmType == "小波变换") {
     contentJsonForWaveletTrans.parameters["extra_wavelet_transform"] = algorithmName;
     // 将contentJsonForWaveletTrans的值复制给contentJson
     Object.assign(contentJson, contentJsonForWaveletTrans);
-  } else if (unknownform.algorithmType == "插值处理") {
+  } else if (uploadAlgorithmForm.algorithmType == "插值处理") {
     contentJsonForInterpolation.parameters["private_interpolation"] = algorithmName;
     Object.assign(contentJson, contentJsonForInterpolation);
-  } else if (unknownform.algorithmType == "无量纲化") {
+  } else if (uploadAlgorithmForm.algorithmType == "无量纲化") {
     contentJsonForDimensionless.parameters["private_scaler"]["algorithm"] = algorithmName;
-    contentJsonForDimensionless.parameters["private_scaler"]["useLog"] = unknownform.useLog;
+    contentJsonForDimensionless.parameters["private_scaler"]["useLog"] = uploadAlgorithmForm.useLog;
     Object.assign(contentJson, contentJsonForDimensionless);
-  } else if (unknownform.algorithmType == '故障诊断') {
-    if (unknownform.faultDiagnosisType == 'machineLearning'){
+  } else if (uploadAlgorithmForm.algorithmType == '故障诊断') {
+    if (uploadAlgorithmForm.faultDiagnosisType == 'machineLearning'){
+      // 基于机器学习的故障诊断的组件校验
       contentJsonForFaultDiagnosisML.parameters['private_fault_diagnosis_machine_learning'] = algorithmName;
       Object.assign(contentJson, contentJsonForFaultDiagnosisML)
     }
+    if (uploadAlgorithmForm.faultDiagnosisType == 'deepLearning'){
+      // 基于深度学习的故障诊断的组件校验
+      contentJsonForFaultDiagnosisDL.parameters['private_fault_diagnosis_deeplearning'] = algorithmName;
+      Object.assign(contentJson, contentJsonForFaultDiagnosisDL)
+    }
+  } else if (uploadAlgorithmForm.algorithmType == '健康评估'){
+    contentJsonForHealthEvaluation.parameters['private_health_evaluation'] = algorithmName;
+    Object.assign(contentJson, contentJsonForHealthEvaluation)
+  } else {
+    // message.error("上传增值服务组件失败，请检查算法类型是否正确");
+    return;
   }
   // emit("validateExtraModule", {
   //   contentJson: contentJson,
@@ -928,7 +1109,7 @@ const extraModuleUploadAndValidate = async () => {
     await startValidating();
     canShowValidationResult.value = true;
     if (extraModuleValidationResult.value === true) {
-      displayValidationResult(unknownform.algorithmType, validationResultsToDisplay)
+      displayValidationResult(uploadAlgorithmForm.algorithmType, validationResultsToDisplay)
       // message.success("组件校验通过");
     } else {
       // 组件校验失败，删除已上传的组件
@@ -1008,8 +1189,8 @@ const uploadExtraModuleWithName = () => {
         let formData = new FormData();
         formData.append("algorithmName", extraAlgorithmFileFormState.algorithmName);
         formData.append("statement", extraAlgorithmFileFormState.statement);
-        formData.append("algorithm_type", unknownform.algorithmType);
-        formData.append("faultDiagnosisType", unknownform.faultDiagnosisType);
+        formData.append("algorithm_type", uploadAlgorithmForm.algorithmType);
+        formData.append("faultDiagnosisType", uploadAlgorithmForm.faultDiagnosisType);
 
         // 将pythonFileList和modelFileList中的文件添加到formData中
         for (let i = 0; i < pythonFileList.value.length; i++) {
@@ -1059,10 +1240,10 @@ const uploadExtraModuleWithName = () => {
 };
 const removePythonFile: UploadProps["onRemove"] = (file) => {
   // 在删除文件列表中文件的同时，重新计算ruleOfDFA，以保证用户上传私有故障诊断算法时，同时包含用于故障诊断的模型以及模型参数文件。
-  const isFaultDiagnosis = unknownform.algorithmType === "故障诊断";
-  const isFaultPrediction = unknownform.algorithmType === "故障预测";
-  const isNormalization = unknownform.algorithmType === "无量纲化";
-  const isHealthEvaluation = unknownform.algorithmType === "健康评估";
+  const isFaultDiagnosis = uploadAlgorithmForm.algorithmType === "故障诊断";
+  const isFaultPrediction = uploadAlgorithmForm.algorithmType === "故障预测";
+  const isNormalization = uploadAlgorithmForm.algorithmType === "无量纲化";
+  const isHealthEvaluation = uploadAlgorithmForm.algorithmType === "健康评估";
   const isPyFile = file.type === "application/x-python-code" || file.name.endsWith(".py");
   const isPklFile = file.name.endsWith(".pkl");
   const isPthFile = file.name.endsWith(".pth");
@@ -1105,7 +1286,7 @@ const algorithmTypeChange = (value: string, label: any, extra: any) => {
     value === "无量纲化"
   ) {
     if (value === "无量纲化") {
-      if (!unknownform.useLog) {
+      if (!uploadAlgorithmForm.useLog) {
         canUploadModelFile.value = false;
       }
       return;
@@ -1137,18 +1318,18 @@ const treeData = ref([
         label: "插值处理",
         value: "插值处理",
       },
-      {
-        label: "特征提取",
-        value: "特征提取",
-      },
+      // {
+      //   label: "特征提取",
+      //   value: "特征提取",
+      // },
       {
         label: "小波变换",
         value: "小波变换",
       },
-      {
-        label: "特征选择",
-        value: "特征选择",
-      },
+      // {
+      //   label: "特征选择",
+      //   value: "特征选择",
+      // },
       {
         label: "无量纲化",
         value: "无量纲化",
@@ -1231,16 +1412,16 @@ const removeModelFile: UploadProps["onRemove"] = (file) => {
 // 上传模型文件
 const canUploadModelFile = ref(false);
 const beforeUploadModelFile = (file: any) => {
-  let isFaultDiagnosis = unknownform.algorithmType === "故障诊断" ? true : false;
-  let isHealthEvaluation = unknownform.algorithmType === "健康评估" ? true : false;
-  let isNormalization = unknownform.algorithmType === "无量纲化" ? true : false;
+  let isFaultDiagnosis = uploadAlgorithmForm.algorithmType === "故障诊断" ? true : false;
+  let isHealthEvaluation = uploadAlgorithmForm.algorithmType === "健康评估" ? true : false;
+  let isNormalization = uploadAlgorithmForm.algorithmType === "无量纲化" ? true : false;
   let uploadModelFileType;
   let isPklFile = file.name.endsWith(".pkl");
   let isPthFile = file.name.endsWith(".pth");
   let faultDiagnosisType;
   if (isFaultDiagnosis) {
     // 如果上传故障诊断组件，如果是机器学习的故障诊断，需要上传.pkl的文件，深度学习的故障诊断需要上传.pth的文件
-    faultDiagnosisType = unknownform.faultDiagnosisType;
+    faultDiagnosisType = uploadAlgorithmForm.faultDiagnosisType;
     if (faultDiagnosisType === "machineLearning") {
       if (!isPklFile) {
         message.warning("上传基于机器学习的算法，请上传.pkl的模型文件");
@@ -1264,7 +1445,7 @@ const beforeUploadModelFile = (file: any) => {
   }
 
   if (isNormalization) {
-    if (unknownform.useLog) {
+    if (uploadAlgorithmForm.useLog) {
       if (!isPklFile) {
         message.warning("上传对于所提取特征的无量纲化算法，请上传.pkl的模型文件");
         return false;

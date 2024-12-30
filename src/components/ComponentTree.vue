@@ -77,7 +77,7 @@
         <el-dialog
           v-model="isEditDialogVisibleOfTree"
           title="编辑节点"
-          :close-on-click-modal="false"
+          :close-on-click-modal="true"
           :before-close="handleCloseOfTree"
           class="custom-dialog"
           style="width: 40%"
@@ -573,6 +573,7 @@ const saveEditOfTree = () => {
         // getComponentTrees();
         if (nodeOfTreeBeingEdited) {
           nodeOfTreeBeingEdited.data.label = editNodeLabelOfTree.value;
+          nodeOfTreeBeingEdited.data.disabled = isNodeEditable.value;
         }else{
           console.log("nodeOfTreeBeingEdited is null");
         }

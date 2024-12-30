@@ -250,11 +250,13 @@
                                  backgroundColor: '#ffffff',
                                  width: '250px',
                                  height: '40px',
+
                               }"
                               :content-style="{
                                  backgroundColor: '#ffffff',
                                  paddingLeft: '30px',
                                  paddingRight: '10px',
+
                               }"
                           >
                             <template #icon>
@@ -594,7 +596,7 @@
                     :max-zoom="4"
                     @dragover="onDragOver"
                     @dragleave="onDragLeave"
-                    @node-click="handleNodeClick"
+                    @edges-change="changes => logEvent(changes)"
                 >
                   <div id="statusIndicator" class="status-indicator">未建立模型</div>
                   <!-- 背景 -->
@@ -700,7 +702,7 @@
                   </Controls>
                   <!-- 自定义节点 -->
                   <template #node-menu="props">
-                    <ModelingCustomNode :id="props.id" :data="props.data"/>
+                    <ModelingCustomNode :id="props.id" :data="props.data" @showResults="handleNodeClick"/>
                   </template>
                   <!-- 自定义边 -->
                   <template #edge-button="buttonEdgeProps">
@@ -1109,6 +1111,9 @@
                     <el-scrollbar height="600px" v-show="canShowResults && !processing" v-if="canShowResults && !processing" style="background-color: white;">
                       <!-- 健康评估可视化 -->
                       <!-- 不同样本的评估结果 -->
+                      <div>
+
+                      </div>
                       <el-tabs type="border-card" tab-position="top" v-model="healthEvaluationOfExample"
                                v-show="displayHealthEvaluation" v-if="displayHealthEvaluation">
                         <el-tab-pane label="总结论" name="总结论">
@@ -1200,46 +1205,41 @@
                       </div>
                       <!-- 特征选择可视化 -->
                       <div v-show="displayFeatureSelection" v-if="displayFeatureSelection">
-                        <el-tabs v-model="featuresSelectionTabs">
-                          <el-tab-pane label="特征选择结果" name="first">
-                            <el-scrollbar height="480px">
-                              <el-image
-                                  style="width: auto; height: 430px;"
-                                  :src="featureSelectionFigure"
-                                  :zoom-rate="1.2"
-                                  :max-scale="7"
-                                  :min-scale="0.2"
-                                  :preview-src-list="[featureSelectionFigure]"
-                                  :initial-index="4"
-                                  fit="cover"
-                              />
-                              <br>
-                              <div style="width: 1000px; margin-left: 250px;">
+                        <div v-show="showResultSs==='特征选择结果'">
+                          <el-scrollbar height="480px">
+                            <el-image
+                                style="width: auto; height: 430px;"
+                                :src="featureSelectionFigure"
+                                :zoom-rate="1.2"
+                                :max-scale="7"
+                                :min-scale="0.2"
+                                :preview-src-list="[featureSelectionFigure]"
+                                :initial-index="4"
+                                fit="cover"
+                            />
+                            <br>
+                            <div style="width: 1000px; margin-left: 250px;">
                         <span style="font-weight: bold; font-size: 15px;">根据规则：{{ selectFeatureRule }}，选取特征结果为： {{
                             featuresSelected
                           }}</span>
-                              </div>
-                            </el-scrollbar>
+                            </div>
+                          </el-scrollbar>
+                        </div>
+                        <div v-show="showResultSs==='相关系数矩阵热力图'">
+                          <el-scrollbar height="480px">
+                            <el-image
+                                style="width: auto; height: 500px;"
+                                :src="correlationFigure"
+                                :zoom-rate="1.2"
+                                :max-scale="7"
+                                :min-scale="0.2"
+                                :preview-src-list="[correlationFigure]"
+                                :initial-index="4"
+                                fit="cover"
+                            />
+                          </el-scrollbar>
+                        </div>
 
-                          </el-tab-pane>
-
-                          <el-tab-pane label="相关系数矩阵热力图" name="second">
-                            <el-scrollbar height="480px">
-                              <el-image
-                                  style="width: auto; height: 500px;"
-                                  :src="correlationFigure"
-                                  :zoom-rate="1.2"
-                                  :max-scale="7"
-                                  :min-scale="0.2"
-                                  :preview-src-list="[correlationFigure]"
-                                  :initial-index="4"
-                                  fit="cover"
-                              />
-                            </el-scrollbar>
-
-                          </el-tab-pane>
-
-                        </el-tabs>
 
                       </div>
                       <!-- 故障诊断可视化 -->
@@ -1270,6 +1270,21 @@
                             </a-form-item>
                           </a-form>
                         </a-modal>
+                        <div v-show="showResultSs==='连续样本指标变化'">
+                          <div style="width: 1200px; height: 500px">
+                            <el-image
+                                style="width: auto; height: 450px;"
+                                :src="faultDiagnosisFigure"
+                                :zoom-rate="1.2"
+                                :max-scale="7"
+                                :min-scale="0.2"
+                                :preview-src-list="[faultDiagnosisFigure]"
+                                :initial-index="4"
+                                fit="cover"
+                            />
+                          </div>
+                        </div>
+
                         <el-tabs v-model="faultDiagnosisResultOption" tab-position="top">
                           <el-tab-pane key="1" label="连续样本指标变化">
                             <!-- 连续样本指标变化的折线图 -->
@@ -1280,18 +1295,7 @@
                             <div id="faultExampleRatioFigure" style="width: 1200px; height: 500px"></div>
                           </el-tab-pane>
                           <el-tab-pane key="3" label="原始信号波形图">
-                            <div style="width: 1200px; height: 500px">
-                              <el-image
-                                  style="width: auto; height: 450px;"
-                                  :src="faultDiagnosisFigure"
-                                  :zoom-rate="1.2"
-                                  :max-scale="7"
-                                  :min-scale="0.2"
-                                  :preview-src-list="[faultDiagnosisFigure]"
-                                  :initial-index="4"
-                                  fit="cover"
-                              />
-                            </div>
+
 
                           </el-tab-pane>
                         </el-tabs>
@@ -1901,7 +1905,7 @@ import ModelingCustomNode from '../components/vueflow/ModelingCustomNode.vue'
 import ModelingCustomEdge from "../components/vueflow/ModelingCustomEdge.vue";
 import {initialEdges, initialNodes, initialNodes2} from './vueflow/initial-elements.js'
 
-const {onInit, onNodeDragStop, onConnect, addEdges, addNodes, setViewport, toObject} = useVueFlow()
+const {onInit, onNodeDragStop, onConnect, addEdges, addNodes, setViewport, toObject,removeEdges} = useVueFlow()
 const {screenToFlowCoordinate, onNodesInitialized, updateNode, getNodes, getEdges, fromObject} = useVueFlow()
 //节点
 // const modeling_nodes = ref(initialNodes)
@@ -1915,6 +1919,8 @@ const modeling_edgesList = ref([])
 //暗黑模式
 const dark = ref(false)
 
+
+
 onInit((vueFlowInstance) => {
   // instance is the same as the return of `useVueFlow`
   vueFlowInstance.fitView()
@@ -1924,6 +1930,9 @@ onNodeDragStop(({event, nodes, node}) => {
   // console.log('Node Drag Stop', {event, nodes, node})
 })
 
+// removeEdges(()){
+//   console.log('removeEdges')
+// }
 //连接时触发
 onConnect((connection) => {
   console.log('Connection Connected', {connection})
@@ -1994,7 +2003,7 @@ function getModelingNode(algorithm, node, nodeDataInfo) {
   return {
     id: node.id + '-' + algorithm,
     type: 'menu',
-    data: {label: nodeDataInfo.label_display, toolbarPosition: Position.Top},
+    data: {label: nodeDataInfo.label_display, toolbarPosition: Position.Top,laglabel: nodeDataInfo.label},
     nodeInfo: nodeDataInfo, //这个是自定义的属性，原来vueflow没有
     position: {x: 0, y: 0},
     class: 'light',
@@ -2027,8 +2036,10 @@ const model_model = reactive([])
 // const dragEnd = ref(false)
 //which_init_method: 就是指的那个方法初始化的节点：handleDragend | handleDragendAdd
 function onDragStart(event, algorithms, node, which_init_method, type) {
+  console.log("拖进来的小波...",node)
   let algorithm = algorithms
   showParameterEdit.value = node.id
+  // console.log("showParameterEdit.value:", showParameterEdit.value)
   if (which_init_method == "handleDragend") {
     const evClientX = event.clientX
     const evClientY = event.clientY
@@ -2067,6 +2078,7 @@ function onDragStart(event, algorithms, node, which_init_method, type) {
 
     dd_newNode = getModelingNode(algorithm, node, nodeInfo)
     item = dd_newNode.nodeInfo
+    console.log("dd_newNode", dd_newNode)
   } else if (which_init_method == "handleDragendAdd") {
     // 使用find方法查找具有特定alias的对象
     const foundObject = fetchedExtraAlgorithmList.value.find(obj => obj.alias === algorithm)
@@ -2130,6 +2142,9 @@ function onDragOver(event) {
   }
  
 }
+function logEvent(changes){
+
+}
 
 function onDragLeave() {
   console.log("onDragLeave执行了...")
@@ -2186,13 +2201,23 @@ function onDrop(event) {
   console.log("索引字典", parameter_dict)
 }
 
+const showResultSs = ref('')
 //节点被点击
-function handleNodeClick(event) {
-  showParameterEdit.value = event.node.nodeInfo.id
-  //运行完毕showResul
-
-  let itemRusult = event.node.nodeInfo.label
-  showResult(itemRusult);
+function handleNodeClick(Props:any,action:any) {
+  showResultSs.value =  action
+  console.log('传入的标签',showResultSs.value)
+  console.log('传入的标签',Props.data.laglabel)
+  console.log("传入的值", Props.id.match( /\d+\.\d+|\d+/g)[0])
+  showParameterEdit.value = Props.id.match( /\d+\.\d+|\d+/g)[0]
+  let itemRusult = Props.data.laglabel
+  showResult(itemRusult)
+  //
+  // showParameterEdit.value = event.node.nodeInfo.id
+  // //运行完毕showResul
+  // console.log("showParameterEdit.value",showParameterEdit.value )
+  // let itemRusult = event.node.nodeInfo.label
+  // console.log("itemRusult",itemRusult )
+  // showResult(itemRusult);
 }
 
 //建模区域中的功能操作菜单（清空模型、检查模型...）
@@ -3023,7 +3048,7 @@ function checkModelOrder() {
 };
 //检查模型
 function checkModelOfViewFlow() {
-
+    console.log('进来时的model',modeling_nodeList.value)
   //检查时构建contentJson
   if(modeling_nodeList.value.length>1){
     buildContentJson()
@@ -3032,7 +3057,6 @@ function checkModelOfViewFlow() {
   console.log("检查模型时构建contentJson: ", contentJson)
   // 进行模型参数设置和逻辑的检查
   var check_order_right = checkModelOrder()
-  console.log("check_order_right: ", buildContentJson())
 }
 
 //构建处理顺序
@@ -3099,10 +3123,14 @@ function buildContentJson() {
     console.log('头节点：', filteredKeys);
 // 从第一个节点开始构建顺序
 //   const startNode = filteredKeys; // 假设第一个边的 source 是起始节点
+    console.log('进入构建顺序前',modeling_nodeList.value)
     buildOrder(filteredKeys[0]);
     console.log('构建的顺序：', order); // 输出构建的顺序
+    //在这之前
+    console.log('进入参数构建前',modeling_nodeList.value)
     jsonClear()
     for (let i = 0; i < modeling_nodeList.value.length; i++) {
+      console.log('开始进入参数构建: ', modeling_nodeList.value[i])
       let dict = modeling_nodeList.value[i]
       console.log('保存的dict.use_algorithm: ', dict.nodeInfo.use_algorithm)
       if (!dict.nodeInfo.use_algorithm) {
@@ -3112,7 +3140,9 @@ function buildContentJson() {
         })
         return
       }
-
+      if(dict.nodeInfo.id == '1.4'){
+        console.log('小波参数: ', dict.nodeInfo)
+      }
       contentJson.algorithms[dict.nodeInfo.label] = dict.nodeInfo.use_algorithm
       console.log("contentJson: ", contentJson)
       if (!contentJson.modules.includes(dict.nodeInfo.label) && dict.nodeInfo.id !== '4') {
@@ -3139,6 +3169,7 @@ function buildContentJson() {
         contentJson.parameters[dict.nodeInfo.use_algorithm] = params
         continue
       }
+
       contentJson.parameters[dict.nodeInfo.use_algorithm] = dict.nodeInfo.parameters[dict.nodeInfo.use_algorithm]
 
     }
@@ -3380,6 +3411,13 @@ const isHiddenConfigPanelOfNode = ref(false)
 //包含那些菜单(添加的是：拖拽组件nodeInfo.id)
 const containsMenuSettings = ref([])
 //监控（浅监控，只是观察添加和删除的变化）的modeling_nodeList变化
+watch(modeling_edgesList, (newVal, oldVal) => {
+  console.log("modeling_edges变化了")
+  const addedItems = newVal.filter(item => !oldVal.includes(item));
+  if (addedItems.length) {
+    console.log("modeling_edges变化了")
+  }
+})
 watch(modeling_nodeList, (newVal, oldVal) => {
   const addedItems = newVal.filter(item => !oldVal.includes(item));
   if (addedItems.length) {
@@ -5856,6 +5894,7 @@ const modelInfoForm = ref({
 
 // 检查模型参数设置
 const checkModelParams = () => {
+  console.log('111: ')
   for (let i = 0; i < nodeList.value.length; i++) {
     let dict = nodeList.value[i]
     console.log('dict.use_algorithm: ', dict.use_algorithm)
@@ -5878,7 +5917,10 @@ const checkModelParams = () => {
         if (!features.value.length) {
           return false
         }
-      } else {
+      } else if(dict.id == '1.4'){
+           console.log('检测到小波变换，单独赋值: ', dict.parameters)
+
+      } else{
         console.log('dict信息: ', dict)
         console.log('dict.use: ', dict.use_algorithm)
         console.log('dict.parameters: ', dict.parameters)
@@ -7172,6 +7214,7 @@ const outputConfigVisible = ref(false)
 
 // 打开结果输出配置面板
 const outputConfig = () => {
+  console.log('变量小波：',modeling_nodeList.value[parameter_dict.value[transfer.value['小波变换']]].nodeInfo.parameters['wavelet_trans_denoise'])
   if(!missionComplete.value){
     ElMessage({
       message: "无运行结果",
@@ -7215,8 +7258,11 @@ const generateConclusion = async() => {
       
     generateResultsToDisplay(moduleName, false);
        // 输出结果总体描述
-    
-      // console.log('moduleResultToGenerateList: ', moduleResultToGenerateList.value)
+      setTimeout(function() {
+        console.log('继续执行代码');
+        generateResultsToDisplay(moduleName, false);
+      }, 3000); // 暂停3秒
+      console.log('moduleResultToGenerateList: ', moduleResultToGenerateList.value)
     }else{
       ElMessage({
         message: '无运行结果',

@@ -3,19 +3,18 @@ import {Handle, Position, useVueFlow} from '@vue-flow/core'
 import {NodeToolbar} from '@vue-flow/node-toolbar'
 import {NodeResizer} from '@vue-flow/node-resizer'
 import {ref, nextTick} from "vue"
-
 const {updateNodeData, removeNodes, findNode} = useVueFlow()
 
 const props = defineProps(['id', 'data'])
 
-const actions = ['delete']
-// const actions = ['insert', 'delete', 'update']
+// const actions = ['delete']
+const actions = ['结果', '特征选择结果','相关系数矩阵热力图','连续样本指标变换','不同类型样本占比','原始信号波形图','总结论','详情']
 
 // 编辑状态绑定到每个节点
 const isEditing = ref(false)
 const editedLabel = ref(props.data.label)
 const inputRef = ref(null)
-
+const emit = defineEmits(['showResults'])
 // 切换编辑状态
 function toggleEdit(event) {
   isEditing.value = !isEditing.value
@@ -48,19 +47,37 @@ function saveEdit() {
 }
 
 function getIconClassByAction(action) {
-  if (action === 'insert')
-    return `fa-solid fa-plus`
-  if (action === 'delete')
-    return `fa-solid fa-xmark`
-  if (action === 'update')
-    return `fa-regular fa-pen-to-square`
-  return ''
+  if (action === '结果')
+    return `fa-solid fa-square-poll-vertical`
+  if (action === '特征选择结果')
+    return 'fa-solid fa-square-poll-vertical'
+  if (action === '相关系数矩阵热力图')
+    return 'fa-solid fa-magnet'
+  if (action){
+    return 'fa-solid fa-magnet'
+  }
+
 }
 
 //根据action来操作node
 function updateNodeDataByAction(id, action) {
-  if (action === 'delete') {
-    removeNodes(id)
+  emit('showResults', props,action)
+}
+
+function shouldShowIcon(props, action){
+  if(props.data.laglabel === '数据源' ){
+    return false
+  }else if(props.data.laglabel === '特征选择' && (action === '特征选择结果' | action === '相关系数矩阵热力图')){
+    return true
+  }else if((props.data.laglabel === '特征选择' | props.data.laglabel === '层次分析模糊综合评估'| props.data.laglabel === '故障诊断') && action === '结果') {
+    return false
+  }else if(props.data.laglabel !== '数据源' && action === '结果') {
+    return true
+  }else if(props.data.laglabel == '层次分析模糊综合评估' && (action === '总结论' | action==='详情')) {
+    return true
+  }
+  else if(props.data.laglabel == '故障诊断' && (action === '连续样本指标变换' | action==='不同类型样本占比' | action==='原始信号波形图')) {
+    return true
   }
 }
 
@@ -69,6 +86,10 @@ function preventClick(event) {
   event.stopPropagation()
 }
 
+//删除
+function delete_button(id){
+  removeNodes(id)
+}
 </script>
 
 <template>
@@ -76,35 +97,37 @@ function preventClick(event) {
                :handle-style="{width: 0, height: 0,background: '#ccd0d6'}"/>
 
   <NodeToolbar :is-visible="data.toolbarVisible" :position="data.toolbarPosition">
-    <button
-        v-for="action of actions"
+    <el-tooltip
+        v-for="action in actions"
         :key="action"
+        class="box-item"
+        effect="dark"
+        :content="action"
+    placement="top-start"
+    >
+    <template #content>
+      {{ action }}
+    </template>
+    <button
+        v-if="shouldShowIcon(props, action)"
         type="button"
         :class="{ selected: action === data.action }"
-        @click="updateNodeDataByAction(props.id, action)"
+        @click="updateNodeDataByAction(props.id, action, props)"
     >
-      <!--      {{ action }}-->
-      <i :class="getIconClassByAction(action)"></i>
-    </button>
-  </NodeToolbar>
+      <i v-if="shouldShowIcon(props, action)" :class="getIconClassByAction(action)"></i>
 
-<!--  <div @dblclick="toggleEdit" class="node-content">-->
+    </button>
+    </el-tooltip>
+
+  </NodeToolbar>
+  <!-- 删除按钮 -->
+  <button class="delete-button" @click="delete_button(id)">
+    <i class="fa-solid fa-xmark"></i>
+  </button>
   <div class="node-content">
     <span class="node-label" v-if="!isEditing">{{ data.label }}</span>
-<!--    <input v-else-->
-<!--           v-model="editedLabel"-->
-<!--           @blur="saveEdit"-->
-<!--           @click="preventClick"-->
-<!--           @keyup.enter="saveEdit"-->
-<!--           class="node-input"-->
-<!--           ref="inputRef"-->
-<!--           placeholder="请输入..."/>-->
   </div>
 
-  <!--  <Handle id="source-a" type="source" :position="Position.Right"/>-->
-  <!--  <Handle id="source-b" type="source" :position="Position.Bottom"/>-->
-  <!--  <Handle id="source-a" type="target" :position="Position.Left"/>-->
-  <!--  <Handle id="source-b" type="target" :position="Position.Top"/>-->
   <Handle id="source-a" type="source" :position="Position.Right"/>
   <Handle id="source-b" type="source" :position="Position.Bottom"/>
   <Handle id="source-c" type="source" :position="Position.Left"/>
@@ -112,6 +135,11 @@ function preventClick(event) {
 </template>
 
 <style scoped>
+.delete-button{
+  position: absolute;
+  top: 0;
+  right: 0;
+}
 .node-content {
   font-family: 'JetBrains Mono', monospace;
   display: flex;
@@ -126,7 +154,7 @@ function preventClick(event) {
 }
 
 .node-label {
-  font-size: 14px;
+  font-size: 30px;
   color: #333;
 }
 

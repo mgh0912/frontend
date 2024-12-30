@@ -12,28 +12,31 @@
       title="管理增值服务组件"
       width="800px"
   >
+    <div style="display: flex; flex-direction: row; font-family: 'Microsoft YaHei';">
+      <el-input v-model="searchKeyword" placeholder="输入组件名称" style="width: 200px; margin-right: 15px" />
+      <el-button type="primary" :icon="Search" style="width: 100px" @click="searchExtraAlgorithm(searchKeyword)">搜索</el-button>
+    </div>
     <el-table :data="fetchedExtraAlgorithm" height="500" stripe>
       <!-- <el-table-column :width="100" property="author" label="模型作者" /> -->
       <el-table-column
-          :width="120"
           property="algorithmType"
           label="组件类型"
           show-overflow-tooltip
       />
       <el-table-column
-          :width="180"
+          
           property="alias"
           label="组件名称"
           show-overflow-tooltip
       />
       <el-table-column
-          :width="180"
+          width="200"
           property="statement"
           label="组件描述"
           show-overflow-tooltip
       />
       <el-table-column
-          :width="200"
+          
           property="algorithmName"
           label="组件源文件"
           show-overflow-tooltip
@@ -94,10 +97,14 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+import { onMounted, ref } from "vue";
 import api from "../utils/api.js";
-import {ElMessage, ElMessageBox} from "element-plus";
-import {useRouter} from "vue-router";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { useRouter } from "vue-router";
+import { Search } from "@element-plus/icons-vue";
+
+// 按关键字搜索增值服务组件
+const searchKeyword = ref("");
 
 const dialogVisible = ref(false);
 const router = useRouter();
@@ -124,6 +131,22 @@ const getExtraAlgorithm = () => {
     }
   });
 };
+// 根据关键字搜索已上传的增值服务组件
+const searchExtraAlgorithm = (keyword: string) => {
+  api.get("/user/user_fetch_extra_algorithm/?keyword=" + keyword).then((response: any) => {
+    if (response.data.code == 401) {
+      ElMessageBox.alert("登录状态失效，请重新登陆", "提示", {
+        confirmButtonText: "确定",
+        callback: () => {
+          router.push("/");
+        },
+      });
+    }
+    if (response.data.code == 200) {
+      fetchedExtraAlgorithm.value = response.data.data;
+    }
+  });
+};
 
 const emit = defineEmits(["deleteExtraModule"]);
 
@@ -131,56 +154,56 @@ const emit = defineEmits(["deleteExtraModule"]);
 const deleteExtraModule = (index: number, row: any) => {
   // 发送删除请求到后端，row 是要删除的数据行
   api
-      .get("/user/delete_extra_algorithm/?algorithmAlias=" + row.alias)
-      .then((response: any) => {
-        if (response.data.code == 401) {
-          ElMessageBox.alert("登录状态失效，请重新登陆", "提示", {
-            confirmButtonText: "确定",
-            callback: () => {
-              router.push("/");
-            },
+    .get("/user/delete_extra_algorithm/?algorithmAlias=" + row.alias)
+    .then((response: any) => {
+      if (response.data.code == 401) {
+        ElMessageBox.alert("登录状态失效，请重新登陆", "提示", {
+          confirmButtonText: "确定",
+          callback: () => {
+            router.push("/");
+          },
+        });
+      }
+      if (response.data.code == 200) {
+        // 如果被删除的模型已经被加载，则需要取消加载
+        // if (modelLoaded.value == row.model_name) {
+        //   modelLoaded.value = '无'
+        //   modelHasBeenSaved = false
+        //   canStartProcess.value = true
+        //   handleClear()
+        // }
+        emit("deleteExtraModule", index);
+        if (index !== -1) {
+          // 删除前端表中数据
+          fetchedExtraAlgorithm.value.splice(index, 1);
+
+          ElMessage({
+            message: "删除组件成功",
+            type: "success",
           });
         }
-        if (response.data.code == 200) {
-          // 如果被删除的模型已经被加载，则需要取消加载
-          // if (modelLoaded.value == row.model_name) {
-          //   modelLoaded.value = '无'
-          //   modelHasBeenSaved = false
-          //   canStartProcess.value = true
-          //   handleClear()
-          // }
-          emit("deleteExtraModule", index);
-          if (index !== -1) {
-            // 删除前端表中数据
-            fetchedExtraAlgorithm.value.splice(index, 1);
-
-            ElMessage({
-              message: "删除组件成功",
-              type: "success",
-            });
-          }
+      } else {
+        if (response.data.code == 404) {
+          ElMessage({
+            message: "没有权限删除该组件",
+            type: "error",
+          });
         } else {
-          if (response.data.code == 404) {
-            ElMessage({
-              message: "没有权限删除该组件",
-              type: "error",
-            });
-          } else {
-            ElMessage({
-              message: "删除组件失败，请稍后重试",
-              type: "error",
-            });
-          }
+          ElMessage({
+            message: "删除组件失败，请稍后重试",
+            type: "error",
+          });
         }
-      })
-      .catch((error: any) => {
-        // 处理错误
-        console.error(error);
-        ElMessage({
-          message: "删除组件失败," + error,
-          type: "error",
-        });
+      }
+    })
+    .catch((error: any) => {
+      // 处理错误
+      console.error(error);
+      ElMessage({
+        message: "删除组件失败," + error,
+        type: "error",
       });
+    });
 };
 </script>
 

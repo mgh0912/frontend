@@ -8,7 +8,7 @@
   更新页面 --v6.1
   版本  2024-12-25
   -->
-  <div style="height: 100vh;overflow-x: hidden;">
+  <div style="height: 100vh;overflow-x: hidden; font-family: 'Microsoft YaHei'">
     <el-container class="fullscreen_container">
       <!-- 头部栏目 -->
       <el-header class="header" style="z-index: 2;">
@@ -2057,8 +2057,12 @@ function modeling_toggleDarkMode() {
 
 //侧边栏拖拽组件后，根据拖拽组件的信息获取要渲染的节点
 function getModelingNode(algorithm, node, nodeDataInfo) {
+  // console.log("生成边",node)
+  // console.log("生成边",nodeDataInfo)
+  // console.log("生成边",algorithm)
+  // if
   return {
-    id: node.id + '-' + algorithm,
+    id: node.id + '-' + nodeDataInfo.use_algorithm,
     type: 'menu',
     data: {label: nodeDataInfo.label_display, toolbarPosition: Position.Top},
     nodeInfo: nodeDataInfo, //这个是自定义的属性，原来vueflow没有
@@ -2141,8 +2145,10 @@ function onDragStart(event, algorithms, node, which_init_method, type) {
     if (foundObject) {
       console.log("找到的算法文件", parametersKey); // 输出: ['private_fault_diagnosis_deeplearning', 'private_fault_diagnosis_machine_learning']
     }
-    node.parameters[parametersKey] = node.alias
+    
+    node.parameters[parametersKey] = node.alias 
     // 拖拽进来相对于地址栏偏移量
+    console.log("add增值", node)
     const evClientX = event.clientX
     const evClientY = event.clientY
     let left
@@ -2154,6 +2160,7 @@ function onDragStart(event, algorithms, node, which_init_method, type) {
     let top = 50 + 'px'
     const nodeId = node.id
     const nodeInfo = {
+    
       label_display: node.alias,   // 具体算法的名称
       label: node.label,      // 算法模块名称
       id: node.id,
@@ -2166,7 +2173,7 @@ function onDragStart(event, algorithms, node, which_init_method, type) {
       parameters: node.parameters,
       optional: node.optional
     }
-
+    console.log("add增值1111",nodeInfo )
     // 针对时域或是频域特征给出不同的可选特征
     dd_newNode = getModelingNode(algorithm, node, nodeInfo)
     item = dd_newNode.nodeInfo
@@ -2363,24 +2370,28 @@ function checkModelParam() {
          console.log('小波变换单独处理',modeling_nodeList.value)
          let parameters = dict.nodeInfo.parameters
          console.log('小波单独构建的parameters',parameters)
+      }else if(dict.nodeInfo.id == '1.5'){
+         console.log('无量纲单独处理',modeling_nodeList.value)
+         let parameters = dict.nodeInfo.parameters
+         console.log('无量纲构建的parameters',parameters)
       }else{
       // 检查一般算法模块的参数设置，参数设置不能为空
-      dict.nodeInfo.parameters[dict.nodeInfo.use_algorithm] = dict.nodeInfo.use_algorithm
-              let parameters = dict.nodeInfo.parameters[dict.nodeInfo.use_algorithm]
-              console.log('parameters: ', parameters)
-              if (!parameters) {
-                console.log('parameters is null')
-                return false
-              } else {
-                for (let key in parameters) {
-                  console.log("parameters", parameters[key])
-                  console.log("key....", key)
-                  if (parameters[key] === '' || parameters[key] === null) {
-                    console.log('parameters[key] is null: ', parameters[key])
-                    return false
-                  }
-                }
-              }
+      // 
+        if (!dict.nodeInfo.use_algorithm.includes('private_') && !dict.nodeInfo.use_algorithm.includes('extra_'))
+          dict.nodeInfo.parameters[dict.nodeInfo.use_algorithm] = dict.nodeInfo.use_algorithm
+        let parameters = dict.nodeInfo.parameters[dict.nodeInfo.use_algorithm]
+        console.log('parameters: ', parameters)
+        if (!parameters) {
+          console.log('parameters is null')
+          return false
+        } else {
+          for (let key in parameters) {
+            if (parameters[key] === '' || parameters[key] === null) {
+              console.log('parameters[key] is null: ', parameters[key])
+              return false
+            }
+          }
+        }
       }
     }
   }
@@ -3156,6 +3167,9 @@ function buildOrder(nodeId) {
   }
   // 查找下一条边（从当前节点出发的边）
   const nextNodes = toObject().edges.find(edge => edge.source == nodeId)?.target;
+  //找到下一条边
+  const nextNodes1 = toObject().edges.find(edge => edge.source == nodeId)
+  console.log('增值组件的构建',nextNodes1)
   if (!nextNodes) {
     return
   }
@@ -3457,7 +3471,7 @@ import {useRunProcess} from './vueflow/useRunProcess'
 import {useShuffle} from './vueflow/useShuffle'
 import {useLayout} from './vueflow/useLayout'
 import CustomForm from "@/components/vueflow/CustomForm.vue";
-import { result } from 'lodash';
+import { get, result } from 'lodash';
 
 const cancelOnError = ref(true)
 const shuffle = useShuffle()
@@ -6194,7 +6208,8 @@ const saveModelConfirm = async (formEl: FormInstance | undefined) => {
             type: 'success'
           })
           // 刷新模型结构树
-          // superComponentTree.value.getComponentTrees()
+          superComponentTree.value.getComponentTrees()
+          getComponentTrees();
 
           modelsDrawer.value = true       // 关闭历史模型抽屉
           dialogFormVisible.value = false    // 关闭提示窗口

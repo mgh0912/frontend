@@ -32,7 +32,7 @@
       </el-form>
     </div>
     <!-- 已有树形结构，使用 scoped-slot 渲染 -->
-    <div style="width: 100%; overflow-x: auto;">
+    <div style="width: 100%; overflow-x: auto; font-size: 20px">
         <el-tree
           ref="treeRef"
           :data="filteredDataOfTree"
@@ -43,22 +43,22 @@
           :filter-node-method="filterNodeOfTree"
           :accordion="false"
           empty-text="无数据"
-          style="display: inline-block; min-width: 100%;"
+          style="display: inline-block; min-width: 100%; font-size: 20px"
         >
-          <template #default="{ data }">
+          <template #default="{ node, data }">
               <span class="custom-tree-node" style="">
                   <el-icon v-if="data.isModel" class="model-icon">
                     <img src="@/assets/model-icon.svg" style="width: 20px; height: 20px;" alt="model">
                  </el-icon>
               <span class="node-label" >{{ getNodeLable(data) }}</span>
               <span class="node-actions" v-if="props.userRole === 'superuser' && !data.isModel">
-                <el-icon @click="appendNodeOfTree(data)" :style="{ color: '#67c23a' }" v-if="data.disabled === true">
+                <el-icon @click="appendNodeToTree(data)" :style="{ color: '#67c23a' }" v-if="data.disabled === true">
                   <Plus />
                 </el-icon>
-                <el-icon @click="removeNodeOfTree(data)" :style="{ color: '#f56c6c' }">
+                <el-icon @click="removeNodeOfTree(node, data)" :style="{ color: '#f56c6c' }">
                   <Delete />
                 </el-icon>
-                <el-icon @click="editOfTree(data)" :style="{ color: '#409eff' }">
+                <el-icon @click="editOfTree(node, data)" :style="{ color: '#409eff' }">
                   <Edit />
                 </el-icon>
               </span>
@@ -66,7 +66,7 @@
                   <el-icon  class="model-icon" @click="modelClick(data)">
                     <i class="fa-solid fa-square-binary"></i>
                  </el-icon>
-                 <el-icon v-if="props.userRole=='superuser'" @click="deleteModelConfirm(data)" :style="{ color: '#f56c6c' }">
+                 <el-icon v-if="props.userRole=='superuser'" @click="deleteModelConfirm(node, data)" :style="{ color: '#f56c6c' }">
                   <Delete />
                 </el-icon>
               </div>
@@ -120,6 +120,7 @@
 import {ElForm, ElMessage, ElMessageBox, ElTree} from "element-plus";
 import { ref, watch, reactive, onMounted } from "vue";
 import api from "../utils/api.js";
+import type Node from 'element-plus/es/components/tree/src/model/node'
 import { isNode } from "@vue-flow/core";
 import { useRouter } from "vue-router";
 //向父组件传递信息
@@ -231,7 +232,7 @@ const fetchModelInfoFromDatabase = () => {
       });
 };
 //删除模型
-const deleteModelConfirm = (data) => {
+const deleteModelConfirm = (node: Node, data: Tree) => {
   // 发送删除请求到后端，row 是要删除的数据行
   api
       .get("/user/delete_model/?row_id=" + data.modelId)
@@ -249,7 +250,13 @@ const deleteModelConfirm = (data) => {
           emit("resetModel", data.label);
           console.log('删除成功');
           // 刷新数据
-          getComponentTrees();
+          // getComponentTrees();
+          const parent = node.parent
+          const children: Tree[] = parent.data.children || parent.data
+          const index = children.findIndex((d) => d.value === data.value)
+          children.splice(index, 1)
+          // dataSourceOfTree = [...dataSourceOfTree]
+          Object.assign(dataSourceOfTree, [...dataSourceOfTree])
         } else {
           if (response.data.code == 404) {
             ElMessage({
@@ -303,6 +310,8 @@ const editNodeLabelOfTree = ref("");
 const props = defineProps({
   userRole: String,
 });
+
+
 
 // 树形结构数据
 const dataSourceOfTree = reactive<Tree[]>([]);
@@ -364,6 +373,12 @@ const getComponentTrees = () => {
   });
 };
 
+// 将子组件的刷新树形结构操作暴露给父组件
+// 暴露给父组件的方法
+defineExpose({
+  getComponentTrees,
+});
+
 // const nameOfNewTree = ref("");
 // 新增组件树形结构
 const addNewComponentTree = () => {
@@ -405,7 +420,7 @@ const addNewComponentTree = () => {
 const filteredDataOfTree = ref<Tree[]>(dataSourceOfTree);
 
 // 添加子节点
-const appendNodeOfTree = (data: Tree) => {
+const appendNodeToTree = (data: Tree) => {
   console.log("添加节点方法执行...");
   console.log("data: ", data);
 
@@ -421,7 +436,14 @@ const appendNodeOfTree = (data: Tree) => {
       .then((response: any) => {
         if (response.data.code === 200) {
           ElMessage.success("添加节点成功");
-          getComponentTrees();
+          // getComponentTrees();
+          const newChild = response.data.node;
+          console.log("appendNodeToTree newChild: ", newChild);
+          if (!data.children) {
+            data.children = []
+          }
+          data.children.push(newChild)
+          // Object.assign(dataSourceOfTree, [...dataSourceOfTree])
         } else {
           ElMessage.error("添加节点失败, " + response.data.message);
         }
@@ -438,11 +460,11 @@ const appendNodeOfTree = (data: Tree) => {
   //     data.children = [];
   //   }
   //   data.children.push(newChild);
-  data.children = [];
+  // data.children = [];
 };
 
 // 删除节点
-const removeNodeOfTree = (data: Tree) => {
+const removeNodeOfTree = (node: Node, data: Tree) => {
   console.log("删除节点方法执行...");
   let formData = new FormData();
   formData.append("treeName", data.value.split(".")[0]);
@@ -454,7 +476,15 @@ const removeNodeOfTree = (data: Tree) => {
       if (response.data.code == 200) {
         ElMessage.success("节点删除成功");
         // 刷新数据
-        getComponentTrees();
+        // getComponentTrees();
+        const parent = node.parent
+        const children: Tree[] = parent.data.children || parent.data
+        console.log("removeNodeOfTree children: ", children)
+        const index = children.findIndex((d) => d.value === data.value)
+        console.log("removeNodeOfTree index: ", index)
+        children.splice(index, 1)
+        // dataSourceOfTree = [...dataSourceOfTree]
+        // Object.assign(dataSourceOfTree, [...dataSourceOfTree])
       } else {
         ElMessage.error("节点删除失败, " + response.data.message);
       }
@@ -477,18 +507,28 @@ const getNodeLable = (data: Tree) => {
   }
 };
 
+
+let nodeOfTreeBeingEdited: Node
 // 编辑节点
-const editOfTree = (data: Tree) => {
+const editOfTree = (node: Node, data: Tree) => {
 
   editingNodeOfTree.value = data; // 正在修改的节点
   isEditDialogVisibleOfTree.value = true;
 
   editNodeLabelOfTree.value = data.label
+  nodeOfTreeBeingEdited = node
   isNodeEditable.value = data.disabled
 };
 
 // 修改节点的可修改性
 const isNodeEditable = ref(true);
+
+// 递归遍历节点子节点的isModel属性是否为真
+const nodeHasSubModels = (node: Tree) => {
+  if (node.children?.length){
+    return node.children[0].isModel
+  }
+}
 
 // 保存编辑
 const saveEditOfTree = () => {
@@ -506,7 +546,7 @@ const saveEditOfTree = () => {
   } else {
     let formData = new FormData();
     if (editingNodeOfTree.value) {
-      if(!isNodeEditable.value && editingNodeOfTree.value.children?.length){
+      if(!isNodeEditable.value && editingNodeOfTree.value.disabled && editingNodeOfTree.value.children?.length){
         ElMessage.warning("无法将已经添加子节点的节点设置为最终类型节点")
         return
       }
@@ -530,7 +570,12 @@ const saveEditOfTree = () => {
           type: "success",
         });
         // 刷新树
-        getComponentTrees();
+        // getComponentTrees();
+        if (nodeOfTreeBeingEdited) {
+          nodeOfTreeBeingEdited.data.label = editNodeLabelOfTree.value;
+        }else{
+          console.log("nodeOfTreeBeingEdited is null");
+        }
 
         isEditDialogVisibleOfTree.value = false;
       } else {
@@ -625,5 +670,9 @@ const filterNodeOfTree = (value: string, data: any) => {
 .model-icon {
   width: 20px; 
   height: 20px;
+}
+
+.node-label {
+  font-size: 17px
 }
 </style>

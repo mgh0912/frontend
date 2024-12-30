@@ -1140,12 +1140,9 @@
                     <el-scrollbar height="100%" v-show="canShowResults && !processing" v-if="canShowResults && !processing" style="background-color: white;">
                       <!-- 健康评估可视化 -->
                       <!-- 不同样本的评估结果 -->
-                      <div>
+                      <div v-show="displayHealthEvaluation" v-if="displayHealthEvaluation || generateHealthEvaluationFigure">
+                        <div v-show="showResultSs==='总结论'">
 
-                      </div>
-                      <el-tabs type="border-card" tab-position="top" v-model="healthEvaluationOfExample"
-                               v-show="displayHealthEvaluation" v-if="displayHealthEvaluation || generateHealthEvaluationFigure">
-                        <el-tab-pane label="总结论" name="总结论">
                           <div style="display:flex; flex-direction: row; align-items: center;">
                             <div id="healthEvaluationPieChart" style="width: 600px; height: 500px"></div>
                             <div style="width: 700px;">
@@ -1156,70 +1153,95 @@
                             </div>
                             <!-- 绘制饼状图 -->
                           </div>
-                        </el-tab-pane>
+                        </div>
+                        <div v-show="showResultSs==='详情'">
+                          <el-tabs type="border-card" tab-position="top" v-model="healthEvaluationOfExample"
+                                   v-show="displayHealthEvaluation" v-if="displayHealthEvaluation || generateHealthEvaluationFigure">
+                            <el-tab-pane v-for="(value, key) in resultsBarOfAllExamples" :key="key" :label="key"
+                                         :name="key">
+                              <el-tabs type="border-card" tab-position="left" v-model="activeName1">
+                                <el-tab-pane label="层级有效指标" name="first">
+                                  <!-- <img :src="healthEvaluationFigure1" alt="figure1" id="health_evaluation_figure_1"
+                                    class="result_image" style="width: auto; height: 450px;" /> -->
+                                  <el-image
+                                      style="width: auto; height: 450px;"
+                                      :src="resultsBarOfAllExamples[key]"
+                                      :zoom-rate="1.2"
+                                      :max-scale="7"
+                                      :min-scale="0.2"
+                                      :preview-src-list="[resultsBarOfAllExamples[key]]"
+                                      :initial-index="4"
+                                      fit="cover"
+                                  />
+                                </el-tab-pane>
+                                <el-tab-pane label="指标权重" name="second">
+                                  <!-- <img :src="healthEvaluationFigure2" alt="figure2" id="health_evaluation_figure_2"
+                                    class="result_image" style="width: auto; height: 450px;" /> -->
+                                  <el-image
+                                      style="width: auto; height: 450px;"
+                                      :src="levelIndicatorsOfAllExamples[key]"
+                                      :zoom-rate="1.2"
+                                      :max-scale="7"
+                                      :min-scale="0.2"
+                                      :preview-src-list="[levelIndicatorsOfAllExamples[key]]"
+                                      :initial-index="4"
+                                      fit="cover"
+                                  />
+                                </el-tab-pane>
+                                <el-tab-pane label="评估结果" name="third">
+                                  <div
+                                      style="display:flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%">
+                                    <el-image
+                                        style="width: 800px; height: auto;"
+                                        :src="statusOfExamples[key]"
+                                        :zoom-rate="1.2"
+                                        :max-scale="7"
+                                        :min-scale="0.2"
+                                        :preview-src-list="[statusOfExamples[key]]"
+                                        :initial-index="4"
+                                        fit="cover"
+                                    />
+                                    <br>
 
-                        <el-tab-pane v-for="(value, key) in resultsBarOfAllExamples" :key="key" :label="key"
-                                     :name="key">
-                          <el-tabs type="border-card" tab-position="left" v-model="activeName1">
-                            <el-tab-pane label="层级有效指标" name="first">
-                              <!-- <img :src="healthEvaluationFigure1" alt="figure1" id="health_evaluation_figure_1"
-                                class="result_image" style="width: auto; height: 450px;" /> -->
-                              <el-image
-                                  style="width: auto; height: 450px;"
-                                  :src="resultsBarOfAllExamples[key]"
-                                  :zoom-rate="1.2"
-                                  :max-scale="7"
-                                  :min-scale="0.2"
-                                  :preview-src-list="[resultsBarOfAllExamples[key]]"
-                                  :initial-index="4"
-                                  fit="cover"
-                              />
-                            </el-tab-pane>
-                            <el-tab-pane label="指标权重" name="second">
-                              <!-- <img :src="healthEvaluationFigure2" alt="figure2" id="health_evaluation_figure_2"
-                                class="result_image" style="width: auto; height: 450px;" /> -->
-                              <el-image
-                                  style="width: auto; height: 450px;"
-                                  :src="levelIndicatorsOfAllExamples[key]"
-                                  :zoom-rate="1.2"
-                                  :max-scale="7"
-                                  :min-scale="0.2"
-                                  :preview-src-list="[levelIndicatorsOfAllExamples[key]]"
-                                  :initial-index="4"
-                                  fit="cover"
-                              />
-                            </el-tab-pane>
-                            <el-tab-pane label="评估结果" name="third">
-                              <div
-                                  style="display:flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%">
-                                <el-image
-                                    style="width: 800px; height: auto;"
-                                    :src="statusOfExamples[key]"
-                                    :zoom-rate="1.2"
-                                    :max-scale="7"
-                                    :min-scale="0.2"
-                                    :preview-src-list="[statusOfExamples[key]]"
-                                    :initial-index="4"
-                                    fit="cover"
-                                />
-                                <br>
-
-                                <div style="width: 700px;">
-                                  <el-text :v-model="suggestionOfAllExamples[key]"
-                                           style="font-weight: bold; font-size: 18px;">
-                                    {{
-                                      suggestionOfAllExamples[key]
-                                    }}
-                                  </el-text>
-                                </div>
-                              </div>
-                              <!-- <img :src="healthEvaluationFigure3" alt="figure3" id="health_evaluation_figure_3"
-                                class="result_image" style="width: auto; height: 360px;" /> -->
+                                    <div style="width: 700px;">
+                                      <el-text :v-model="suggestionOfAllExamples[key]"
+                                               style="font-weight: bold; font-size: 18px;">
+                                        {{
+                                          suggestionOfAllExamples[key]
+                                        }}
+                                      </el-text>
+                                    </div>
+                                  </div>
+                                  <!-- <img :src="healthEvaluationFigure3" alt="figure3" id="health_evaluation_figure_3"
+                                    class="result_image" style="width: auto; height: 360px;" /> -->
+                                </el-tab-pane>
+                              </el-tabs>
                             </el-tab-pane>
                           </el-tabs>
-                        </el-tab-pane>
 
-                      </el-tabs>
+
+                        </div>
+                      </div>
+
+<!--                      <el-tabs type="border-card" tab-position="top" v-model="healthEvaluationOfExample"-->
+<!--                               v-show="displayHealthEvaluation" v-if="displayHealthEvaluation || generateHealthEvaluationFigure">-->
+<!--                        <el-tab-pane label="总结论" name="总结论">-->
+<!--                          <div style="display:flex; flex-direction: row; align-items: center;">-->
+<!--                            <div id="healthEvaluationPieChart" style="width: 600px; height: 500px"></div>-->
+<!--                            <div style="width: 700px;">-->
+<!--                              <el-text style="font-weight: bold; font-size: 18px;">{{-->
+<!--                                  finalSuggestion-->
+<!--                                }}-->
+<!--                              </el-text>-->
+<!--                            </div>-->
+
+<!--                            &lt;!&ndash; 绘制饼状图 &ndash;&gt;-->
+<!--                          </div>-->
+<!--                        </el-tab-pane>-->
+
+
+
+<!--                      </el-tabs>-->
 
                       <!-- 特征提取可视化 -->
                       <div v-if="displayFeatureExtraction || generateFeatureExtractionFigure" v-show="displayFeatureExtraction && missionComplete" style="justify-content: center;">
@@ -1236,8 +1258,7 @@
 
                       <!-- 特征选择可视化 -->
                       <div v-show="displayFeatureSelection && missionComplete" v-if="displayFeatureSelection || generateFeatureSelectionFigure">
-                        <el-tabs v-model="featuresSelectionTabs">
-                          <el-tab-pane label="特征选择结果" name="first">
+                          <div v-show="showResultSs==='特征选择结果'">
                             <el-scrollbar height="480px">
                               <el-image
                                   style="width: auto; height: 430px;"
@@ -1254,10 +1275,10 @@
                         <span style="font-weight: bold; font-size: 15px;">根据规则：{{ selectFeatureRule }}，选取特征结果为： {{
                             featuresSelected
                           }}</span>
-                            </div>
-                          </el-scrollbar>
-                        </div>
-                        <div v-show="showResultSs==='相关系数矩阵热力图'">
+                              </div>
+                            </el-scrollbar>
+                          </div>
+                          <div v-show="showResultSs==='相关系数矩阵热力图'">
                           <el-scrollbar height="480px">
                             <el-image
                                 style="width: auto; height: 500px;"
@@ -1271,7 +1292,6 @@
                             />
                           </el-scrollbar>
                         </div>
-
 
                       </div>
 
@@ -1331,47 +1351,68 @@
                             </a-form>
                           </a-modal>
                         </div>
-                        <el-tabs v-model="faultDiagnosisResultOption" tab-position="top">
-                        
-                          <el-tab-pane key="1" label="连续样本指标变化" v-if="canShowIndicator">
-                            <!-- 连续样本指标变化的折线图 -->
-                            <div id="indicatorVaryingFigure" style="width: 1200px; height: 500px"></div>
-                          </el-tab-pane>
-                          <el-tab-pane key="2" label="不同类型样本占比">
-                            <!-- 故障样本与非故障样本数量饼状图 -->
-                            <div id="faultExampleRatioFigure" style="width: 1200px; height: 500px"></div>
-                          </el-tab-pane>
-                          <el-tab-pane key="4" label="故障诊断结果">
-                            <div style="width: 1200px; height: 500px;display: flex; flex-direction: column; align-items: center">
-                              <span>{{ faultDiagnosisComplementarySummary }}</span>
-                              <el-image
-                                  style="width: auto; height: 450px;"
-                                  :src="faultDiagnosisComplementaryFigure"
-                                  :zoom-rate="1.2"
-                                  :max-scale="7"
-                                  :min-scale="0.2"
-                                  :preview-src-list="[faultDiagnosisComplementaryFigure]"
-                                  :initial-index="4"
-                                  fit="cover"
-                              />
-                            </div>
-                          </el-tab-pane>
-                          <el-tab-pane key="3" label="原始信号波形图">
-                            <div style="width: 1200px; height: 500px">
-                              <el-image
-                                  style="width: auto; height: 450px;"
-                                  :src="faultDiagnosisFigure"
-                                  :zoom-rate="1.2"
-                                  :max-scale="7"
-                                  :min-scale="0.2"
-                                  :preview-src-list="[faultDiagnosisFigure]"
-                                  :initial-index="4"
-                                  fit="cover"
-                              />
-                            </div>
-                          </el-tab-pane>
-                          
-                        </el-tabs>
+                        <div   v-show="showResultSs==='连续样本指标变换'">
+                          <div id="indicatorVaryingFigure" style="width: 1200px; height: 500px"></div>
+                        </div>
+                        <div  v-show="showResultSs==='不同类型样本占比'">
+                          <!-- 故障样本与非故障样本数量饼状图 -->
+                          <div id="faultExampleRatioFigure" style="width: 1200px; height: 500px"></div>
+                        </div>
+                        <div  v-if="showResultSs==='原始信号波形图'">
+                          <div style="width: 1200px; height: 500px">
+                            <el-image
+                                style="width: auto; height: 450px;"
+                                :src="faultDiagnosisFigure"
+                                :zoom-rate="1.2"
+                                :max-scale="7"
+                                :min-scale="0.2"
+                                :preview-src-list="[faultDiagnosisFigure]"
+                                :initial-index="4"
+                                fit="cover"
+                            />
+                          </div>
+                        </div>
+<!--                        <el-tabs v-model="faultDiagnosisResultOption" tab-position="top">-->
+<!--                        -->
+<!--&lt;!&ndash;                          <el-tab-pane key="1" label="连续样本指标变化" v-if="canShowIndicator">&ndash;&gt;-->
+<!--&lt;!&ndash;                            &lt;!&ndash; 连续样本指标变化的折线图 &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                            <div id="indicatorVaryingFigure" style="width: 1200px; height: 500px"></div>&ndash;&gt;-->
+<!--&lt;!&ndash;                          </el-tab-pane>&ndash;&gt;-->
+<!--&lt;!&ndash;                          <el-tab-pane key="2" label="不同类型样本占比">&ndash;&gt;-->
+<!--&lt;!&ndash;                            &lt;!&ndash; 故障样本与非故障样本数量饼状图 &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                            <div id="faultExampleRatioFigure" style="width: 1200px; height: 500px"></div>&ndash;&gt;-->
+<!--&lt;!&ndash;                          </el-tab-pane>&ndash;&gt;-->
+<!--                          <el-tab-pane key="4" label="故障诊断结果">-->
+<!--                            <div style="width: 1200px; height: 500px;display: flex; flex-direction: column; align-items: center">-->
+<!--                              <span>{{ faultDiagnosisComplementarySummary }}</span>-->
+<!--                              <el-image-->
+<!--                                  style="width: auto; height: 450px;"-->
+<!--                                  :src="faultDiagnosisComplementaryFigure"-->
+<!--                                  :zoom-rate="1.2"-->
+<!--                                  :max-scale="7"-->
+<!--                                  :min-scale="0.2"-->
+<!--                                  :preview-src-list="[faultDiagnosisComplementaryFigure]"-->
+<!--                                  :initial-index="4"-->
+<!--                                  fit="cover"-->
+<!--                              />-->
+<!--                            </div>-->
+<!--                          </el-tab-pane>-->
+<!--                          <el-tab-pane key="3" label="原始信号波形图">-->
+<!--                            <div style="width: 1200px; height: 500px">-->
+<!--                              <el-image-->
+<!--                                  style="width: auto; height: 450px;"-->
+<!--                                  :src="faultDiagnosisFigure"-->
+<!--                                  :zoom-rate="1.2"-->
+<!--                                  :max-scale="7"-->
+<!--                                  :min-scale="0.2"-->
+<!--                                  :preview-src-list="[faultDiagnosisFigure]"-->
+<!--                                  :initial-index="4"-->
+<!--                                  fit="cover"-->
+<!--                              />-->
+<!--                            </div>-->
+<!--                          </el-tab-pane>-->
+<!--                          -->
+<!--                        </el-tabs>-->
                       </div>
 
                       <!-- 故障故障预测可视化 -->

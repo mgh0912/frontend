@@ -8,7 +8,7 @@ const {updateNodeData, removeNodes, findNode} = useVueFlow()
 const props = defineProps(['id', 'data'])
 
 // const actions = ['delete']
-const actions = ['结果', '特征选择结果','相关系数矩阵热力图','连续样本指标变换','不同类型样本占比','原始信号波形图','总结论','详情']
+const actions = ['结果', '特征选择结果','相关系数矩阵热力图','连续样本指标变换','不同类型样本占比','原始信号波形图','总结论','详情','层次逻辑回归评估']
 
 // 编辑状态绑定到每个节点
 const isEditing = ref(false)
@@ -69,11 +69,11 @@ function shouldShowIcon(props, action){
     return false
   }else if(props.data.laglabel === '特征选择' && (action === '特征选择结果' | action === '相关系数矩阵热力图')){
     return true
-  }else if((props.data.laglabel === '特征选择' | props.data.laglabel === '层次分析模糊综合评估'| props.data.laglabel === '故障诊断') && action === '结果') {
+  }else if((props.data.laglabel === '特征选择' | props.data.laglabel === '层次分析模糊综合评估'| props.data.laglabel === '故障诊断'|props.data.laglabel === '层次逻辑回归评估'| props.data.laglabel === '层次朴素贝叶斯评估') && action === '结果') {
     return false
   }else if(props.data.laglabel !== '数据源' && action === '结果') {
     return true
-  }else if(props.data.laglabel == '层次分析模糊综合评估' && (action === '总结论' | action==='详情')) {
+  }else if((props.data.laglabel == '层次分析模糊综合评估'| props.data.laglabel === '层次逻辑回归评估' | props.data.laglabel === '层次朴素贝叶斯评估') && (action === '总结论' | action==='详情')) {
     return true
   }
   else if(props.data.laglabel == '故障诊断' && (action === '连续样本指标变换' | action==='不同类型样本占比' | action==='原始信号波形图')) {

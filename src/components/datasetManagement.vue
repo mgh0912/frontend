@@ -1,5 +1,5 @@
 <template>
-  <div>
+  
     <div
       id="datasetManagementPanel"
       style="
@@ -7,9 +7,10 @@
         flex-direction: row;
         justify-content: center;
         align-items: center;
+        width: 100%;
       "
     >
-    <span style="font-size: 20px; width: 100%; text-align: left;" @click="openDatasetManagementPanel">数据管理</span>
+      <span style="font-size: 20px; width: 100%; text-align: left;" @click="openDatasetManagementPanel">数据管理</span>
       
     </div>
 
@@ -712,7 +713,7 @@
         </div>
       </div>
     </el-dialog>
-  </div>
+
 </template>
 
 <script setup lang="ts">

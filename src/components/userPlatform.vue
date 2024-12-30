@@ -207,7 +207,7 @@
                 <!--      可以内容自定义，可以设置占满父div        -->
                 <template #title>
                   <div style="padding: 10px;">
-                    <span style="font-size: 20px;">基础组件</span>
+                    <span class="menu-item-first">基础组件</span>
                   </div>
                 </template>
                 <!--      可以不要图标，将下面删除即可          -->
@@ -228,7 +228,7 @@
                     <my-collapse-item name="1-0" :data="{name:'1-0'}">
                       <template #title>
                         <div style="padding: 10px 0 10px 20px;">
-                          <span style="font-size: 18px;">数据源</span>
+                          <span class="menu-item-second">数据源</span>
                         </div>
                       </template>
                       <template #arrow="{ isActive }">
@@ -240,6 +240,7 @@
                           style="width: 100%;display: flex;flex-wrap: wrap;gap: 0;padding: 0;background-color: #ffffff;flex-direction: column;">
                         <div :draggable="true"
                              style="width: 100%;"
+                             class="menu-item-second"
                              @dragstart="onDragStart($event,'dataSource',dataSourceNode,'handleDragend','default')"
                              @click="showIntroduction('dataSource'.replace(/_multiple/g, ''))"
                         >
@@ -253,13 +254,18 @@
                               }"
                               :content-style="{
                                  backgroundColor: '#ffffff',
-                                 paddingLeft: '30px',
+                                 paddingLeft: '50px',
                                  paddingRight: '10px',
+                                 fontSize: '18px'
                               }"
                           >
                             <template #icon>
                               <i class="fa-solid fa-database"></i>
                             </template>
+                            <!-- <template #default>
+                              <span> 数据源组件</span>
+                            </template> -->
+                            
                           </DragModelItem>
                         </div>
                       </div>
@@ -298,9 +304,9 @@
                                 <img style="height: 20px;width: 20px;" :src="setIconOfAlgorithms(option.label)"
                                      alt="none"/>
                                 <span
-                                    style="font-size: 16px;margin-left: 8px;">{{
-                                    option.label
-                                  }}</span>
+                                  class="menu-item-second"
+                                  style="margin-left: 8px;">
+                                  {{option.label}}</span>
                               </div>
                             </template>
                             <template #arrow="{ isActive }">
@@ -595,6 +601,7 @@
                     @dragover="onDragOver"
                     @dragleave="onDragLeave"
                     @node-click="handleNodeClick"
+                    @edges-change="change => handleEdgesChange(change)"
                 >
                   <div id="statusIndicator" class="status-indicator">未建立模型</div>
                   <!-- 背景 -->
@@ -604,8 +611,8 @@
                     <p v-if="isDragOver">拖入到此</p>
                   </DragDropzoneBackground>
                   <!-- 基础操作栏 -->
-                  <Controls @interaction-change="onInteractionChangeOfControls" position="top-left" style="">
-                    <ControlButton title="重置" @click="modeling_resetTransform">
+                  <Controls @interaction-change="onInteractionChangeOfControls" position="top-left" >
+                    <ControlButton title="重置" @click="modeling_resetTransform" class="menu-item-second"> 
                       <Icon name="reset"/>
                     </ControlButton>
 
@@ -640,15 +647,16 @@
                   </Controls>
                   <!-- 功能操作栏 -->
                   <Controls position="top-right" :show-zoom="false" :show-fit-view="false" :show-interactive="false"
+                            class="menu-item-second"
                             style="display: flex;flex-direction: row;right: 300px;">
-                            <ControlButton
+                    <ControlButton
                         @click="outputConfig"
                         class="control-operator-btn-default-css"
                         :disabled="disabledStateOfControlBtn.clearModelOfViewFlowBtn"
                         :style="{color: dark ? '#ffffff' : '#000000'}"
                         title="下载报告">
                               <i class="fa-solid fa-download"></i>
-                      <span style="font-size: 10px;margin-top: 3px;">报告</span>
+                      <span class="menu-item-second" >报告</span>
                     </ControlButton>
                     <ControlButton
                         @click="clearModelOfViewFlow"
@@ -657,7 +665,7 @@
                         :style="{color: dark ? '#ffffff' : '#000000'}"
                         title="清空模型">
                       <i class="fa-solid fa-broom"></i>
-                      <span style="font-size: 10px;margin-top: 3px;">清空</span>
+                      <span class="menu-item-second" >清空</span>
                     </ControlButton>
                     <ControlButton
                         v-if="userRole === 'superuser'"
@@ -667,7 +675,7 @@
                         :style="{color: dark ? '#ffffff' : '#000000'}"
                         title="检查模型">
                       <i class="fa-solid fa-magnifying-glass"></i>
-                      <span style="font-size: 10px;margin-top: 3px;">检查</span>
+                      <span class="menu-item-second" >检查</span>
                     </ControlButton>
                     <ControlButton
                         v-if="userRole === 'superuser'"
@@ -677,7 +685,7 @@
                         :style="{color: dark ? '#ffffff' : '#000000'}"
                         title="保存模型">
                       <i class="fa-solid fa-floppy-disk"></i>
-                      <span style="font-size: 10px;margin-top: 3px;">保存</span>
+                      <span class="menu-item-second" >保存</span>
                     </ControlButton>
                     <ControlButton
                         @click="runModelOfViewFlow"
@@ -686,7 +694,7 @@
                         :style="{color: dark ? '#ffffff' : '#000000'}"
                         title="运行模型">
                       <i class="fa-solid fa-power-off"></i>
-                      <span style="font-size: 10px;margin-top: 3px;">运行</span>
+                      <span class="menu-item-second" >运行</span>
                     </ControlButton>
                     <ControlButton
                         @click="openConfigPanelOfModelNode"
@@ -695,7 +703,7 @@
                         :style="{color: dark ? '#ffffff' : '#000000'}"
                         title="模型配置">
                       <i class="fa-solid fa-gear"></i>
-                      <span style="font-size: 10px;margin-top: 3px;">配置</span>
+                      <span class="menu-item-second" >配置</span>
                     </ControlButton>
                   </Controls>
                   <!-- 自定义节点 -->
@@ -744,7 +752,7 @@
                                     item-background="#ebeef4">
                     <template #title>
                       <div style="padding: 6px;">
-                        <span style="font-size: 16px;">数据源配置</span>
+                        <span style="font-size: 18px;">数据源配置</span>
                       </div>
                     </template>
                     <template #arrow="{ isActive }">
@@ -753,7 +761,7 @@
                       </div>
                     </template>
                     <div class="" style="width: 100%;background-color: white;">
-                      <div style="font-size: 20px">加载数据集</div>
+                      <div style="font-size: 18px">加载数据集</div>
                       <a-button
                               type="default"
                               style="margin-top: 25px; margin-left: 0px; width: 160px; font-size: 16px;  background-color: #2082F9; color: white"
@@ -1091,17 +1099,17 @@
                             <div style="text-align: left; padding-left: 40px;">
                               <h4>1.机器学习的故障诊断流程推荐</h4>
                               <img src="../assets/customize-model-1.png" width="900px" alt="">
-                              <div>模版用例：
+                              <!-- <div>模版用例：
                                 <a-button @click="useModel(predefinedModel['templateModel1'])">用例1</a-button>
                                 <a-button>用例2</a-button>
-                              </div>
+                              </div> -->
                               <br>
-                              <h4>1.深度学习的故障诊断流程推荐</h4>
+                              <h4>2.深度学习的故障诊断流程推荐</h4>
                               <img src="../assets/customize-model-2.png" width="600px" alt="">
-                              <div>模版用例：
+                              <!-- <div>模版用例：
                                 <a-button @click="useModel(predefinedModel['templateModel1'])">用例1</a-button>
                                 <a-button>用例2</a-button>
-                              </div>
+                              </div> -->
                             </div>
                           </div>
 
@@ -1272,8 +1280,8 @@
                       <div v-if="displayFaultDiagnosis || generateFaultDiagnosisFigure" v-show="displayFaultDiagnosis && missionComplete" class="result-visualization-container">
                         <v-md-preview style="padding: 0px; margin: 0px"
                                       :text="faultDiagnosisResultsText"></v-md-preview>
-                        <span><a-button circle :icon="h(EditOutlined)"
-                                        @click="feedBackDialogVisible = true"></a-button> 反馈</span>
+                        <!-- <span><a-button circle :icon="h(EditOutlined)"
+                                        @click="feedBackDialogVisible = true"></a-button> 反馈</span> -->
                         <!-- 用户填写反馈的对话框 -->
                         <!-- <a-modal v-model:open="feedBackDialogVisible" title="用户反馈" cancelText="取消" okText="确定">
                           <div style="font-weight: 600; font-size: 14px">
@@ -1325,13 +1333,29 @@
                           </a-modal>
                         </div>
                         <el-tabs v-model="faultDiagnosisResultOption" tab-position="top">
-                          <el-tab-pane key="1" label="连续样本指标变化">
+                        
+                          <el-tab-pane key="1" label="连续样本指标变化" v-if="canShowIndicator">
                             <!-- 连续样本指标变化的折线图 -->
                             <div id="indicatorVaryingFigure" style="width: 1200px; height: 500px"></div>
                           </el-tab-pane>
                           <el-tab-pane key="2" label="不同类型样本占比">
                             <!-- 故障样本与非故障样本数量饼状图 -->
                             <div id="faultExampleRatioFigure" style="width: 1200px; height: 500px"></div>
+                          </el-tab-pane>
+                          <el-tab-pane key="4" label="故障诊断结果">
+                            <div style="width: 1200px; height: 500px;display: flex; flex-direction: column; align-items: center">
+                              <span>{{ faultDiagnosisComplementarySummary }}</span>
+                              <el-image
+                                  style="width: auto; height: 450px;"
+                                  :src="faultDiagnosisComplementaryFigure"
+                                  :zoom-rate="1.2"
+                                  :max-scale="7"
+                                  :min-scale="0.2"
+                                  :preview-src-list="[faultDiagnosisComplementaryFigure]"
+                                  :initial-index="4"
+                                  fit="cover"
+                              />
+                            </div>
                           </el-tab-pane>
                           <el-tab-pane key="3" label="原始信号波形图">
                             <div style="width: 1200px; height: 500px">
@@ -1346,18 +1370,14 @@
                                   fit="cover"
                               />
                             </div>
-
                           </el-tab-pane>
+                          
                         </el-tabs>
-
-                        <!-- <img :src="faultDiagnosisFigure" alt="fault_diagnosis_figure" class="result_image"
-                          style="width: auto; height: 450px;" /> -->
-
                       </div>
 
                       <!-- 故障故障预测可视化 -->
                       <div v-show="displayFaultRegression && missionComplete"  v-if="displayFaultRegression || generateFaultRegressionFigure" style="margin-top: 20px; font-size: 18px;">
-                        <div style="width: 1000px; margin-left: 250px;  font-weight: bold">
+                        <div style="width: 1000px; margin-left: 250px; font-weight: bold; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                           经故障诊断算法，目前该部件<span :v-model="faultRegression"
                                                          style="font-weight: bold; color: red;">{{
                             faultRegression
@@ -2268,6 +2288,21 @@ function handleNodeClick(event) {
   showResult(itemRusult);
 }
 
+// 节点间的连线改变
+function handleEdgesChange(change: any) {
+  console.log("handleEdgeChange", change)
+  // 删除连线时，删除对应的节点
+  if (change.length){
+    missionComplete.value = false
+    modelHasBeenChecked.value = false
+    updateStatus("请建立模型并点击检查模型")
+  }
+
+  console.log("missionComplete: ", missionComplete.value)
+  console.log("modelHasBeenChecked: ", modelHasBeenChecked.value)
+}
+
+
 //建模区域中的功能操作菜单（清空模型、检查模型...）
 //控制各个按钮的disabled状态
 const disabledStateOfControlBtn = ref({
@@ -2300,6 +2335,7 @@ function clearModelOfViewFlow() {
   item = {}
   adjacencyList.value = [];
   inDegree.value = {};
+  modelHasBeenChecked.value = false
 // 排序
 // 初始化顺序数组和已访问节点集合
   order.value = [];
@@ -2455,9 +2491,9 @@ function checkModelOrder() {
 
     const algorithmsCanRunSolo = [
       'GRU的故障诊断', 'LSTM的故障诊断', '一维卷积深度学习模型的故障诊断', 
-      '基于时频图的深度学习模型的故障诊断', '深度学习故障诊断', '多传感器信号级加权融合的故障检测', '多传感器信号时频表征自适应加权融合的故障检测',
-      '多传感器特征级融合的深度学习故障检测', '多传感器决策级融合的深度学习故障检测', '基于单传感器的知识型 1D 时域深度学习故障诊断',
-      '基于单传感器的时域和频域协同注意学习故障诊断', '基于单传器的多域深度特征融合故障诊断'
+      '基于时频图的深度学习模型的故障诊断', '深度学习故障诊断', '信号级加权融合的故障诊断', '信号时频表征自适应加权融合的故障诊断',
+      '特征级融合的深度学习故障诊断', '决策级融合的深度学习故障诊断', '基于单传感器的知识型 1D 时域深度学习故障诊断',
+      '基于单传感器的时域和频域协同注意学习故障诊断', '基于单传感器的多域深度特征融合故障诊断'
     ]
     let checkPass1 = false;
     let checkPass2 = false;
@@ -3311,7 +3347,7 @@ const getComponentTrees = async() => {
 //保存模型
 async function saveModelOfViewFlow() {
   if (!modelHasBeenChecked.value){
-    ElMessage.warning("请先完成模型检查，再保存模型")
+    ElMessage.warning("请先点击检查按钮，完成模型检查")
     return
   }
   //显示保存模型表单
@@ -3324,7 +3360,7 @@ async function saveModelOfViewFlow() {
 function runModelOfViewFlow() {
 
   if (!modelHasBeenChecked.value){
-    ElMessage.warning("请先完成模型检查，再运行模型")
+    ElMessage.warning("请先点击检查按钮，完成模型检查")
     return
   }
 
@@ -3517,6 +3553,9 @@ const containsMenuSettings = ref([])
 watch(modeling_nodeList, (newVal, oldVal) => {
   const addedItems = newVal.filter(item => !oldVal.includes(item));
   if (addedItems.length) {
+    modelHasBeenChecked.value = false
+    missionComplete.value = false
+    updateStatus("请建立模型并点击检查模型")
     console.log('添加的元素:', addedItems);
     console.log("添加元素后的modeling_nodeList: ", modeling_nodeList)
     parameter_dict.value = {}
@@ -3552,6 +3591,8 @@ watch(modeling_nodeList, (newVal, oldVal) => {
     const removedItems = oldVal.filter(item => !newVal.includes(item));
     if (removedItems.length) {
       missionComplete.value = false
+      modelHasBeenChecked.value = false
+      updateStatus("请建立模型并点击检查模型")
       // disabledStateOfControlBtn.value.saveModelOfViewFlowBtn = true
       // disabledStateOfControlBtn.value.runModelOfViewFlowBtn = true
       console.log('删除的元素:', removedItems);
@@ -3579,6 +3620,72 @@ function openConfigPanelOfModelNode() {
     isHiddenConfigPanelOfNode.value = false;
   }
 }
+
+
+// 监听边的变化
+watch(modeling_edgesList, (newVal, oldVal) => {
+  const addedItems = newVal.filter(item => !oldVal.includes(item));
+  console.log("监听器添加元素后newVal: ", newVal)
+  if (addedItems.length) {
+    modelHasBeenChecked.value = false
+    missionComplete.value = false
+
+    console.log('添加的元素:', addedItems);
+    console.log("添加元素后的modeling_edgesList: ", modeling_edgesList)
+    parameter_dict.value = {}
+    // console.log("监听器添加元素后parameter_dict: ", .value.value)
+    console.log("动态修改数据: ",item.use_algorithm)
+    missionComplete.value = false
+    // disabledStateOfControlBtn.value.saveModelOfViewFlowBtn = true
+    // disabledStateOfControlBtn.value.runModelOfViewFlowBtn = true
+    // if(item.nodeId=='1.2'){
+    //   console.log("进入1.2",)
+    //      transfer.value['特征提取'] = item.use_algorithm
+    // }
+    // if(item.nodeId=='1.3'){
+    //   transfer.value['特征选择'] = item.use_algorithm
+    // }
+    // if(item.nodeId=='1.4'){
+    //   transfer.value['小波变换'] = item.use_algorithm
+    // }
+    // if(item.nodeId=='1.5'){
+    //   transfer.value['无量纲化'] = item.use_algorithm
+    // }
+    // console.log("监听器添加元素后transfer: ", transfer.value)
+    // modeling_nodeList.value.forEach((items,index) => {
+    //     parameter_dict.value[items.nodeInfo.use_algorithm] = index
+    // })
+
+    // addedItems.forEach(item => {
+    //   containsMenuSettings.value.push(item.nodeInfo.id);
+
+    // })
+    
+  } else {
+    const removedItems = oldVal.filter(item => !newVal.includes(item));
+    if (removedItems.length) {
+      missionComplete.value = false
+      modelHasBeenChecked.value = false
+      // disabledStateOfControlBtn.value.saveModelOfViewFlowBtn = true
+      // disabledStateOfControlBtn.value.runModelOfViewFlowBtn = true
+      console.log('删除的元素:', removedItems);
+      parameter_dict.value = {}
+      console.log("parameter_dict.value: ", parameter_dict.value)
+      // modeling_nodeList.value.forEach((items,index) => {
+      //   parameter_dict.value[items.nodeInfo.use_algorithm] = index
+      // })
+      console.log("监听器删除元素后parameter_dict: ", parameter_dict)
+      // removedItems.forEach(item => {
+      //   let id = containsMenuSettings.value.indexOf(item.nodeInfo.id)
+      //   if (id != -1) {
+      //     containsMenuSettings.value.splice(id, 1)
+      //   }
+      // })
+    }
+  }
+  // console.log("containsMenuSettings: ", containsMenuSettings)
+}, {deep: false});
+
 
 //关闭配置菜单
 function closeConfigPanelOfModelNode() {
@@ -6737,7 +6844,9 @@ const feedBack = () => {
 const displayFaultDiagnosis = ref(false)
 const generateFaultDiagnosisFigure = ref(false)
 const faultDiagnosis = ref('')
-const faultDiagnosisFigure = ref('')
+const faultDiagnosisFigure = ref('')  // 原始信号波形图
+const faultDiagnosisComplementaryFigure = ref('')  // 补充的故障诊断结果图
+const faultDiagnosisComplementarySummary = ref('')  // 补充的故障诊断结果总结
 const faultDiagnosisResultsText = ref('')
 const faultDiagnosisResultOption = ref('2')
 
@@ -6891,6 +7000,7 @@ const faultDiagnosisResultOption = ref('2')
 
 // }
 
+
 const canShowIndicator = ref(false)
 
 const faultDiagnosisDisplay = async(resultsObject: any) => {
@@ -6905,6 +7015,7 @@ const faultDiagnosisDisplay = async(resultsObject: any) => {
 
   console.log('num_has_fault: ', num_has_fault)
   console.log('num_has_no_fault: ', num_has_no_fault)
+  console.log('indicator: ', indicator)
 
   if (indicator != 'none'){
     canShowIndicator.value = true
@@ -6930,6 +7041,7 @@ const faultDiagnosisDisplay = async(resultsObject: any) => {
         var lineChartOption: EChartsOption;
 
         lineChartOption = {
+          animation: false,
           title: {
             text: '连续样本指标变化曲线图'
           },
@@ -7042,6 +7154,9 @@ const faultDiagnosisDisplay = async(resultsObject: any) => {
     }
     
   })
+
+  faultDiagnosisComplementaryFigure.value = 'data:image/png;base64,' + resultsObject.complementary_Base64
+  faultDiagnosisComplementarySummary.value = resultsObject.complementary_summary
 
 
   faultDiagnosisResultsText.value = resultsObject.resultText
@@ -7643,6 +7758,8 @@ const generateResultsToDisplay = async(moduleName: string, display: boolean) => 
         }
       }
       
+    } else if (moduleName == '数据源'){
+      ElMessage.warning("数据源无运行结果")
     } else {
       ElMessage({
         message: '无效的算法模块',
@@ -7657,6 +7774,8 @@ const showResult = (moduleName: string) => {
     resultsViewClear()
     canShowResults.value = true
     generateResultsToDisplay(moduleName, true)
+  }else{
+    ElMessage.warning("无运行结果")
   }
   
 }
@@ -7910,7 +8029,7 @@ function updateStatus(status) {
     case '未建立模型':
       // 默认样式，或者设置为特定类
       break;
-    case '模型建立完成，请点击模型检查':
+    case '请建立模型并点击检查模型':
       indicator.classList.add('error');
       break;
     case '模型建立并已通过模型检查':
@@ -8186,10 +8305,9 @@ ul > li {
   left: 35%;
   padding: 5px 10px;
   border-radius: 5px;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   border: solid 1px rgba(0, 0, 0, 0.2);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  background-color: #cccccc;
+  background-color: #cbd1ceea;
   font-size: 22px;
   /* 初始颜色，如黄色 */
   color: white;
@@ -8199,7 +8317,7 @@ ul > li {
 
 /* 可以为不同的状态添加额外的类 */
 .status-indicator.error {
-  background-color: #dc4e11;
+  background-color: #e0b75f;
   /* 红色表示错误或未通过检查 */
 }
 
@@ -8793,5 +8911,23 @@ import '@fortawesome/fontawesome-free/css/all.css';
 }
 
 //建模区域的配置菜单end
+.control-operator-btn-default-css {
+  width: 61px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-item-first {
+  font-family: 'Microsoft YaHei';
+  font-size: 20px
+}
+
+
+.menu-item-second {
+  font-family: 'Microsoft YaHei';
+  font-size: 18px
+}
 
 </style>

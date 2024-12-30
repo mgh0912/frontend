@@ -62,7 +62,7 @@ export const labelsForAlgorithms = {
     additional_model_four_multiple: '多传感器决策级融合的深度学习故障诊断',
     additional_model_five: '基于单传感器的知识型 1D 时域深度学习故障诊断',
     additional_model_six: '基于单传感器的时域和频域协同注意学习故障诊断',
-    additional_model_seven: '基于单传器的多域深度特征融合故障诊断'
+    additional_model_seven: '基于单传感器的多域深度特征融合故障诊断'
 };
 
 // 算法介绍

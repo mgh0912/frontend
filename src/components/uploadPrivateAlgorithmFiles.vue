@@ -217,12 +217,12 @@
               <!-- 显示校验结果 -->
               <span style="font-size: 20px" v-if="canShowValidationResult">
                 <!-- <a-icon v-if="extraModuleValidationResult === 'success'" type="check-circle" theme="twoTone" twoToneColor="#52c41a" /> -->
-                <span v-if="extraModuleValidationResult === true" style="display: flex;align-items: center">
+                <span v-if="extraModuleValidationResult === true && !uploading" style="display: flex;align-items: center">
                   <CheckCircleOutlined style="color: green" />
                   <span style="font-size: 12px; margin-left: 5px">校验通过，上传成功</span>
                 </span>
 
-                <span v-else style="display: flex;align-items: center">
+                <span v-if="extraModuleValidationResult === false && !uploading" style="display: flex;align-items: center">
                   <CloseCircleOutlined style="color: red" />
                   <span style="font-size: 12px; margin-left: 5px">校验失败</span>
                 </span>
@@ -346,6 +346,7 @@
     :title="templateName + '参考模版'"
     :ok-button-props="{ style: { display: 'none' } }"
     :cancel-button-props="{ style: { display: 'none' } }"
+    style="font-size: 20px; font-family: 'Microsoft YaHei'"
   >
     <el-scrollbar :height="600">
       <div v-if="templateName === '插值处理'">

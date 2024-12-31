@@ -509,13 +509,15 @@
               </my-collapse-item>
               <my-collapse-item name="5" :data="{name:'5'}" item-background="#ebeef4">
                 <template #title>
-                  <div style="width: 100%">
-                    <datasetManagement/>
+                  <div style="padding: 10px;">
+              
+                    <div>
+                      <datasetManagement/>
+                    </div>
                   </div>
                 </template>
               </my-collapse-item>
 
-              <!-- 组件代码修改 -->
               <my-collapse-item v-if="userRole === 'superuser'" @click="openCodeEditPanel" name="6" :data="{name:'6'}" item-background="#ebeef4">
                 <template #title>
                   <div style="padding: 10px;">
@@ -528,9 +530,8 @@
                    </a-modal>
                  </div>
                 </template>
+                
               </my-collapse-item>
-
-              <!-- 模型管理 -->
               <my-collapse-item v-if="userRole === 'superuser'" name="7" :data="{name:'7'}" item-background="#ebeef4">
                 <template #title>
                   <div style="padding: 10px;">
@@ -3405,7 +3406,7 @@ const getComponentTrees = async() => {
   });
 };
 
-//保存模型，从模型结构树中选择一个类型
+//保存模型
 async function saveModelOfViewFlow() {
   if (!modelHasBeenChecked.value){
     ElMessage.warning("请先点击检查按钮，完成模型检查")

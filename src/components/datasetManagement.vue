@@ -50,7 +50,7 @@
                 align-items: center;
               "
             >
-              <p style="font-size: 22px; font-weight: bold">数据库</p>
+              <p style="font-size: 20px; font-weight: bold">数据库</p>
             </div>
             <div style="height: 1px; background-color: #d3d3d3; margin: 10px 0"></div>
             <div
@@ -144,10 +144,10 @@
                 align-items: center;
               "
             >
-              <p style="font-size: 22px; font-weight: bold">上传数据</p>
+              <p style="font-size: 20px; font-weight: bold">上传数据</p>
             </div>
             <div style="height: 1px; background-color: #d3d3d3; margin: 10px 0"></div>
-            <div style="position: relative; padding: 20px">
+            <div style="position: relative; padding: 20px; font-family: 'Microsoft YaHei'; font-size: 18px">
               <a-space direction="vertical">
                 <a-form
                   :model="dataFileFormState"
@@ -219,7 +219,7 @@
                         <a-button
                           style="
                             width: 180px;
-                            font-size: 16px;
+                            font-size: 15px;
                             background-color: #2082f9;
                             color: white;
                           "
@@ -260,7 +260,7 @@
                       html-type="submit"
                       :disabled="fileList?.length === 0"
                       :loading="uploading"
-                      style="width: 180px"
+                      style="width: 180px; font-size: 15px"
                     >
                       <UploadOutlined />
                       {{ uploading ? "正在上传" : "上传至服务器" }}
@@ -297,7 +297,7 @@
                 align-items: center;
               "
             >
-              <p style="font-size: 22px; font-weight: bold">数据筛选</p>
+              <p style="font-size: 20px; font-weight: bold">数据筛选</p>
             </div>
             <div style="height: 1px; background-color: #d3d3d3; margin: 10px 0"></div>
             <div
@@ -485,7 +485,7 @@
                 align-items: center;
               "
             >
-              <p style="font-size: 22px; font-weight: bold">数据集整合</p>
+              <p style="font-size: 20px; font-weight: bold">数据集整合</p>
             </div>
             <div style="height: 1px; background-color: #d3d3d3; margin: 10px 0"></div>
 
@@ -497,6 +497,8 @@
                 align-items: center;
                 width: 100%;
                 margin-bottom: 20px;
+                font-size: 18px;
+                font-family: 'Microsoft YaHei';
               "
             >
               <div
@@ -506,16 +508,18 @@
                   justify-content: flex-start;
                   align-items: center;
                   width: 62%;
+                  font-size: 18px;
+                  font-family: 'Microsoft YaHei';
                 "
               >
                 <div
                   style="
                     display: flex;
-
                     align-items: center;
-                    font-size: 17px;
                     margin-right: 10px;
                     width: 50%;
+                    font-size: 18px;
+                    font-family: 'Microsoft YaHei';
                   "
                 >
                   选择文件进行整合
@@ -601,7 +605,7 @@
                   width: 100%;
                 "
               >
-                <span style="font-size: 17px; margin-right: 20px; width: 15%"
+                <span style="font-size: 18px; margin-right: 20px; width: 16%"
                   >待整合的数据集</span
                 >
                 <!-- <el-tag v-for="tag in fileToUnify" :key="tag.name" closable :type="tag.type">
@@ -662,7 +666,7 @@
                   style="display: flex; flex-direction: row; align-items: flex-start"
                 >
                   <div tyle="display: flex; flex-direction: row">
-                    <span style="font-size: 16px; text-align: left; margin-right: 20px"
+                    <span style="font-size: 18px; text-align: left; margin-right: 20px"
                       >整合保存为新的数据集：</span
                     >
                     <a-space direction="vertical">
@@ -739,6 +743,14 @@ const dataFileFormState = ref({
   multipleSensors: "single",
   isPublic: "private",
 });
+
+interface dataFileRowData {
+  filename: string;
+  description: string;
+  multipleSensors: string;
+  isPublic: string;
+  file_type: string;
+}
 
 const saveSelectedAttributeFileRules: Record<string, Rule[]> = {
   fileName: [
@@ -864,7 +876,7 @@ const getFileListFromDatabase = async (): Promise<boolean> => {
     const response = await api.get(url);
     if (response.status === 200) {
       let datasetInfo = response.data;
-      fetchedDataFiles.value = datasetInfo.map((item: Object) => item);
+      fetchedDataFiles.value = datasetInfo.map((item: dataFileRowData) => item);
       return true;
     } else {
       ElMessage({

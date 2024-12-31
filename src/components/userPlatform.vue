@@ -357,7 +357,7 @@
                     <my-collapse-item name="1-0-0" :data="{name:'1-0-0'}">
                       <template #title>
                         <div style="padding: 10px 0 10px 20px;">
-                          <span style="font-size: 18px;">增值组件</span>
+                          <span style="font-size: 18px;">新增组件</span>
                         </div>
                       </template>
                       <template #arrow="{ isActive }">
@@ -854,7 +854,7 @@
                                     item-background="#ebeef4">
                     <template #title>
                       <div style="padding: 6px;">
-                        <span style="font-size: 16px; font-family: 'Microsoft YaHei';">特征提取参数配置</span>
+                        <span style="font-size: 18px; font-family: 'Microsoft YaHei';">特征提取参数配置</span>
                       </div>
                     </template>
                     <template #arrow="{ isActive }">
@@ -867,7 +867,7 @@
                         <div style="flex: 1;padding: 10px;width: 100%;">
                           <el-text style="font-size: 15px; ">选择特征<span
                               style="font-size: 12px;">(共{{
-                              Object.keys(modeling_nodeList[parameter_dict[transfer['特征提取']]].nodeInfo.parameters[transfer['特征提取']]).length
+                              Object.keys(modeling_nodeList.value[parameter_dict.value[transfer.value['特征提取']]].nodeInfo.parameters[transfer.value['特征提取']]).length
                             }}个可选特征)</span></el-text>
                         </div>
                         <div style="flex: 1;width: 100%;padding-bottom: 10px;">
@@ -882,7 +882,7 @@
                           </a-select> -->
                           <a-select v-model:value="features" mode="multiple" :max-tag-count="5" placeholder="选择需要提取的特征" style="width: 90%;">
                             <a-select-option
-                              v-for="(value, key) in modeling_nodeList[parameter_dict[transfer['特征提取']]].nodeInfo.parameters[transfer['特征提取']]"
+                              v-for="(value, key) in modeling_nodeList.value[parameter_dict.value[transfer.value['特征提取']]].nodeInfo.parameters[transfer.value['特征提取']]"
                               :key="key"
                               :value="key"
                               style="width: 200px; background-color: white;"
@@ -890,13 +890,6 @@
                               {{ key }}
                             </a-select-option>
                           </a-select>
-<!--                          <a-select-->
-<!--                              v-model:value="value"-->
-<!--                              mode="multiple"-->
-<!--                              style="width: 100%"-->
-<!--                              placeholder="Please select"-->
-<!--                              :options="modeling_nodeList[parameter_dict[transfer['特征提取']]].nodeInfo.parameters[transfer['特征提取']]"-->
-<!--                          ></a-select>-->
                         </div>
                       </div>
                     </div>
@@ -909,7 +902,7 @@
                       item-background="#ebeef4">
                     <template #title>
                       <div style="padding: 6px;">
-                        <span style="font-size: 16px; font-family: 'Microsoft YaHei';">特征选择参数配置</span>
+                        <span style="font-size: 18px; font-family: 'Microsoft YaHei';">特征选择参数配置</span>
                       </div>
                     </template>
                     <template #arrow="{ isActive }">
@@ -976,7 +969,7 @@
                                     item-background="#ebeef4">
                     <template #title>
                       <div style="padding: 6px;">
-                        <span style="font-size: 16px;font-family: 'Microsoft YaHei';">小波变换参数配置</span>
+                        <span style="font-size: 18px;font-family: 'Microsoft YaHei';">小波变换参数配置</span>
                       </div>
                     </template>
                     <template #arrow="{ isActive }">
@@ -1024,7 +1017,7 @@
                       && !containsMenuSettings.includes('1.3')
                       && !containsMenuSettings.includes('1.4')
                       && !containsMenuSettings.includes('1.5')"
-                      style="background-color: white; font-family: 'Microsoft YaHei'; display: flex; flex-direction: column; padding-top: 30px;height: 100%;">
+                      style="background-color: white; font-size: 18px;font-family: 'Microsoft YaHei'; display: flex; flex-direction: column; padding-top: 30px;height: 100%;">
                     暂无可调参数
                   </div>
                 </my-collapse>
@@ -1800,7 +1793,7 @@ const handleResetModel = (modelName: string) => {
 
 let modelLoadedName = ref(''); // 已加载模型的名称
 // 点击子组件publishModel的历史模型表格中使用按钮复现用户历史模型
-const handleLoadModel = (store: any) => {
+const handleLoadModel = async(store: any) => {
   console.log('接受子组件数据',store)
   // modelLoaded.value = store.valmodelName
   //后端传来的数据恢复画布信息
@@ -1814,10 +1807,12 @@ const handleLoadModel = (store: any) => {
     restoreCanvas(objects)
   }, 500);
 
-  handleClear()
+  // handleClear()
   updateStatus('当前模型已保存')
-  modelHasBeenSaved = true
-  modelHasBeenChecked.value = true
+  // modelHasBeenSaved = true
+  // modelHasBeenChecked.value = true
+  // console.log("modelHasBeenSaved: ", modelHasBeenSaved)
+  // console.log("modelHasBeenChecked: ", modelHasBeenChecked.value)
   canStartProcess.value = false
   modelLoaded.value = store.value.modelName
   modelLoadedName.value = store.value.modelName
@@ -3256,7 +3251,7 @@ let order = ref([]);
 const visited = ref(new Set());
 
 // 函数用于递归地构建顺序
-function buildOrder(nodeId) {
+async function buildOrder(nodeId) {
   if (!order.value.length) {
     console.log("添加节点头", nodeId)
     order.value.push(nodeId)
@@ -3314,14 +3309,13 @@ function buildContentJson() {
     console.log('头节点：', filteredKeys);
 // 从第一个节点开始构建顺序
 //   const startNode = filteredKeys; // 假设第一个边的 source 是起始节点
-    console.log('进入构建顺序前',modeling_nodeList.value)
     buildOrder(filteredKeys[0]);
     console.log('构建的顺序：', order); // 输出构建的顺序
     //在这之前
     console.log('进入参数构建前',modeling_nodeList.value)
     jsonClear()
     for (let i = 0; i < modeling_nodeList.value.length; i++) {
-      console.log('开始进入参数构建: ', modeling_nodeList.value[i])
+      console.log('参数构建步骤('+i+'): ', modeling_nodeList.value[i])
       let dict = modeling_nodeList.value[i]
       console.log('保存的dict.use_algorithm: ', dict.nodeInfo.use_algorithm)
       if (!dict.nodeInfo.use_algorithm) {
@@ -3382,7 +3376,7 @@ function buildContentJson() {
       let obj = Object.keys(contentJson.algorithms).find(key => contentJson.algorithms[key] === lettersOnly[i])
       contentJson.schedule.push(obj)
     }
-    console.log('构建的contentJson', contentJson);
+    console.log('buildContentJson 构建的contentJson', contentJson);
   }
   return true
 }
@@ -3709,7 +3703,7 @@ watch(modeling_edgesList, (newVal, oldVal) => {
     parameter_dict.value = {}
     // console.log("监听器添加元素后parameter_dict: ", .value.value)
     console.log("动态修改数据: ",item.use_algorithm)
-    missionComplete.value = false
+    //missionComplete.value = false
     // disabledStateOfControlBtn.value.saveModelOfViewFlowBtn = true
     // disabledStateOfControlBtn.value.runModelOfViewFlowBtn = true
     // if(item.nodeId=='1.2'){
@@ -5997,7 +5991,7 @@ let modelSetup = ref(false)
 // 清除页面中的内容，包括使用的模型、文件和算法介绍等信息
 const handleClear = () => {
   done.value = false
-  nodeList.value = []  // 可视化建模区的节点列表
+  // nodeList.value = []  // 可视化建模区的节点列表
   // features.value = []  // 特征提取选择的特征
   // features.value = ['均值', '方差', '标准差', '峰度', '偏度', '四阶累积量', '六阶累积量', '最大值', '最小值', '中位数', '峰峰值', '整流平均值', '均方根', '方根幅值',
   //   '波形因子', '峰值因子', '脉冲因子', '裕度因子', '重心频率', '均方频率', '均方根频率', '频率方差', '频率标准差', '谱峭度的均值', '谱峭度的标准差', '谱峭度的峰度', '谱峭度的偏度']
@@ -6011,7 +6005,10 @@ const handleClear = () => {
   modelSetup.value = false   // 模型设置完成
   showPlainIntroduction.value = false
   showStatusMessage.value = false
-  modelHasBeenSaved = false  //复用历史模型，不做模型检查
+
+  modelHasBeenSaved = false  //复用历史模型
+  modelHasBeenChecked.value = false  //不做模型检查
+
   toRectifyModel.value = false  // 禁用修改模型
   // canCompleteModeling.value = true
   canCheckModel.value = true
@@ -6394,6 +6391,7 @@ const saveModelConfirm = async (formEl: FormInstance | undefined) => {
           })
           // 刷新模型结构树
           superComponentTree.value.getComponentTrees()
+          superComponentTree.value.fetchModelInfoFromDatabase()
           getComponentTrees();
 
           modelsDrawer.value = true       // 关闭历史模型抽屉
@@ -6423,7 +6421,6 @@ const saveModelConfirm = async (formEl: FormInstance | undefined) => {
       })
     }
   }
-
 }
 
 const show1 = ref(false)
@@ -6776,6 +6773,7 @@ nextTick(() => {
           feature: {
             saveAsImage: {}
           }
+
         },
         xAxis: {
           type: 'category',
@@ -7514,7 +7512,7 @@ const outputConfigVisible = ref(false)
 
 // 打开结果输出配置面板
 const outputConfig = () => {
-  console.log('变量小波：',modeling_nodeList.value[parameter_dict.value[transfer.value['小波变换']]].nodeInfo.parameters['wavelet_trans_denoise'])
+  // console.log('变量小波：',modeling_nodeList.value[parameter_dict.value[transfer.value['小波变换']]].nodeInfo.parameters['wavelet_trans_denoise'])
   if(!missionComplete.value){
     ElMessage({
       message: "无运行结果",
@@ -7882,6 +7880,32 @@ const toggleFullscreen = () => {
 }
 
 
+// 使用计算属性获取当前模型中组件参数
+// const featuresExtractionParamsBinding = computed(() => {
+//   // let obj = modeling_nodeList.value[parameter_dict.value[transfer.value['特征提取']]].nodeInfo.parameters[transfer.value['特征提取']]
+//   // return obj
+//   if (
+//     modeling_nodeList.value[parameter_dict.value[transfer.value['特征提取']]].nodeInfo?.parameters[transfer.value['特征提取']]
+//   ) {
+//     // console.log('featuresExtractionParamsBinding:', modeling_nodeList.value[parameter_dict.value[transfer.value['特征提取']]].nodeInfo.parameters[transfer.value['特征提取']])
+//     return modeling_nodeList.value[parameter_dict.value[transfer.value['特征提取']]].nodeInfo.parameters[transfer.value['特征提取']];
+//   }
+//   return 0;
+//   // if (
+//   //   modeling_nodeList.value &&
+//   //   parameter_dict.value[transfer.value['特征提取']] !== undefined &&
+//   //   modeling_nodeList.value[parameter_dict.value[transfer.value['特征提取']]] &&
+//   //   modeling_nodeList.value[parameter_dict.value[transfer.value['特征提取']]].nodeInfo &&
+//   //   modeling_nodeList.value[parameter_dict.value[transfer.value['特征提取']]].nodeInfo.parameters &&
+//   //   modeling_nodeList.value[parameter_dict.value[transfer.value['特征提取']]].nodeInfo.parameters[transfer.value['特征提取']]
+//   // ) {
+//   //   // console.log('featuresExtractionParamsBinding:', modeling_nodeList.value[parameter_dict.value[transfer.value['特征提取']]].nodeInfo.parameters[transfer.value['特征提取']])
+//   //   return modeling_nodeList.value[parameter_dict.value[transfer.value['特征提取']]].nodeInfo.parameters[transfer.value['特征提取']];
+//   // }
+//   // return 0;
+// });
+
+
 // 复用历史模型，不需要进行模型检查等操作
 let modelHasBeenSaved = false
 const modelLoaded = ref('无')  // 已加载的历史模型
@@ -7890,22 +7914,30 @@ let modelLoadedId = ''
 //恢复画布
 function restoreCanvas(objects) {
 
+  console.log("restoreCanvas objects: ", objects.nodeList)
+
   if (objects.nodeList) {
     fromObject(objects.nodeList)
   }
   handleClear()
   updateStatus('当前模型已保存')
-  modelHasBeenSaved = true
+  // modelHasBeenSaved = true
   canStartProcess.value = false
 
-  console.log('使用的模型信息，并根据此再次构建contentjson',objects)
+  console.log('restoreCanvas 使用的模型信息，并根据此再次构建contentjson',objects)
 
-  console.log('边的信息:', modeling_nodeList.value)
+  console.log('restoreCanvas边的信息:', modeling_nodeList.value)
   buildContentJson()
   // saveModelSetting(false, connection)
-  console.log('objects.connection:', objects.connection)
+  console.log('restoreCanvas objects.connection:', objects.connection)
   contentJson.schedule = objects.connection
   modelSetup.value = true
+
+  // 模型检查通过
+  modelHasBeenSaved = true
+  modelHasBeenChecked.value = true
+  console.log("modelHasBeenSaved: ", modelHasBeenSaved)
+  console.log("modelHasBeenChecked: ", modelHasBeenChecked.value)
 }
 
 // // 点击历史模型表格中使用按钮复现用户历史模型
@@ -8019,7 +8051,7 @@ const statusMessageToShow = ref('')
 
 // 程序运行状态信息
 const statusMessage = {
-  'success': '## 程序已经运行完毕，请点击相应的算法模块查看对应结果！',
+  'success': '## 程序已经运行完毕，点击查看相应算法模块结果',
   'shutdown': '## 程序运行终止，点击清空模型重新建立模型',
   'error': '## 程序运行出错，请检查模型是否正确，或者检查加载的数据是否规范，点击清空模型重新建立模型',
 }
@@ -8390,7 +8422,8 @@ ul > li {
   border: solid 1px rgba(0, 0, 0, 0.2);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   background-color: #cbd1ceea;
-  font-size: 22px;
+  font-family: 'Microsoft YaHei';
+  font-size: 20px;
   /* 初始颜色，如黄色 */
   color: white;
   z-index: 1000;
@@ -9009,7 +9042,7 @@ import '@fortawesome/fontawesome-free/css/all.css';
 
 .menu-item-second {
   font-family: 'Microsoft YaHei';
-  font-size: 18px
+  font-size: 17px
 }
 
 </style>

@@ -9,7 +9,7 @@
       v-model:open="dialogVisible"
       :ok-button-props="{ style: { display: 'none' } }"
       :cancel-button-props="{ style: { display: 'none' } }"
-      title="管理增值服务组件"
+      title="管理新增组件"
       width="800px"
   >
     <div style="display: flex; flex-direction: row; font-family: 'Microsoft YaHei';">

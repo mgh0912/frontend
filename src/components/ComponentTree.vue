@@ -55,9 +55,32 @@
                 <el-icon @click="appendNodeToTree(data)" :style="{ color: '#67c23a' }" v-if="data.disabled === true">
                   <Plus />
                 </el-icon>
-                <el-icon @click="removeNodeOfTree(node, data)" :style="{ color: '#f56c6c' }">
+                <!-- <el-icon @click="removeNodeOfTree(node, data)" :style="{ color: '#f56c6c' }">
                   <Delete />
-                </el-icon>
+                </el-icon> -->
+                <el-popconfirm title="是否确定删除该节点？" @confirm="removeNodeOfTree(node, data)" width="200px"
+                  >
+                    <template #reference>
+                      <el-icon :style="{ color: '#f56c6c' }">
+                        <Delete />
+                      </el-icon>
+                    </template>
+
+                    <template #actions="{ confirm, cancel }">
+                      <el-row>
+                        <el-col :span="12"><el-button size="small" @click="cancel">取消</el-button></el-col>
+                        <el-col :span="12">
+                          <el-button
+                            type="primary"
+                            size="small"
+                            @click="confirm"
+                          >
+                            确定
+                          </el-button>
+                        </el-col>
+                      </el-row>  
+                    </template> 
+                </el-popconfirm>
                 <el-icon @click="editOfTree(node, data)" :style="{ color: '#409eff' }">
                   <Edit />
                 </el-icon>
@@ -66,9 +89,32 @@
                   <el-icon  class="model-icon" @click="modelClick(data)">
                     <i class="fa-solid fa-square-binary"></i>
                  </el-icon>
-                 <el-icon v-if="props.userRole=='superuser'" @click="deleteModelConfirm(node, data)" :style="{ color: '#f56c6c' }">
+                 <el-popconfirm title="是否确定删除该模型？" @confirm="deleteModelConfirm(node, data)" width="200px"
+                  >
+                    <template #reference>
+                      <el-icon v-if="props.userRole=='superuser'" :style="{ color: '#f56c6c' }">
+                        <Delete />
+                      </el-icon>
+                    </template>
+
+                    <template #actions="{ confirm, cancel }">
+                      <el-row>
+                        <el-col :span="12"><el-button size="small" @click="cancel">取消</el-button></el-col>
+                        <el-col :span="12">
+                          <el-button
+                            type="primary"
+                            size="small"
+                            @click="confirm"
+                          >
+                            确定
+                          </el-button>
+                        </el-col>
+                      </el-row>  
+                    </template> 
+                </el-popconfirm>
+                 <!-- <el-icon v-if="props.userRole=='superuser'" @click="deleteModelConfirm(node, data)" :style="{ color: '#f56c6c' }">
                   <Delete />
-                </el-icon>
+                </el-icon> -->
               </div>
             </span>
           </template>
@@ -141,7 +187,7 @@ const store = ref(
     {
       modelId:null,
       modelName:'',
-      modelInfo:{}
+      modelInfo:{},
     }
 )
 const router = useRouter();
@@ -152,6 +198,7 @@ const modelClick =(data) => {
   store.value.modelId = data.modelId;
   store.value.modelName = data.label;
   store.value.modelInfo = fetchedModelsInfo.value.filter(item => item.id === store.value.modelId);
+  console.log("store.value.modelInfo: ", store.value.modelInfo)
   emit("loadModel", store);
 
 }
@@ -377,6 +424,7 @@ const getComponentTrees = () => {
 // 暴露给父组件的方法
 defineExpose({
   getComponentTrees,
+  fetchModelInfoFromDatabase
 });
 
 // const nameOfNewTree = ref("");

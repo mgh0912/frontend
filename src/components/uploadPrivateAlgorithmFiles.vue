@@ -6,7 +6,7 @@
   <!-- 上传增值服务组件的操作面板 -->
   <a-modal
     v-model:open="dialogVisible"
-    title="上传增值服务组件"
+    title="上传组件"
     cancelText="取消"
     :ok-button-props="{ style: { display: 'none' } }"
     :cancel-button-props="{ style: { display: 'none' } }"
@@ -144,7 +144,7 @@
             autocomplete="off"
           >
             <a-form-item
-              label="增值组件名称"
+              label="新增组件名称"
               name="algorithmName"
               :rules="[{ required: true, message: '请输入增值组件算法名称!' },
               { min: 3, max: 50, message: '长度应在3到50个字符之间!', trigger: 'blur' },
@@ -152,13 +152,13 @@
             >
               <a-input
                 v-model:value="extraAlgorithmFileFormState.algorithmName"
-                placeholder="请输入增值组件名称"
+                placeholder="请输入组件名称"
               />
               <p style="color: #999; font-size: 12px;">只能包含中英文、数字和下划线，长度不超过50个字符。</p>
             </a-form-item>
 
             <a-form-item
-              label="增值组件描述"
+              label="新增组件描述"
               name="statement"
               :rules="[{ required: true, message: '请输入增值组件描述' },
               { min: 1, max: 200, message: '长度应在1到200个字符之间!', trigger: 'blur' }]"
@@ -211,7 +211,7 @@
                 class="upload-button"
                 style="margin-left: 10px"
               >
-                {{ uploading ? "正在进行完整性校验" : "上传增值组件" }}
+                {{ uploading ? "正在进行完整性校验" : "上传组件" }}
               </a-button>
 
               <!-- 显示校验结果 -->
